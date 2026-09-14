@@ -54,7 +54,8 @@ object PulseTableSocCpuSim extends App {
   val elfFile  = new File(sys.env.getOrElse("RISCQ_ELF", "src/riscq/soc/sim/sw/pulse_sched.elf"))
   require(elfFile.exists(), s"missing ${elfFile.getPath} — rebuild it per the header of sw/pulse_sched.S")
 
-  SimConfig.addSimulatorFlag("-Wno-MULTIDRIVEN") // the clock-crossing Bram blackbox arrays are written from clka+clkb
+  SimConfig.withFstWave                        // dump a .fst waveform (DAC/gate/time signals) for GTKWave
+    .addSimulatorFlag("-Wno-MULTIDRIVEN") // the clock-crossing Bram blackbox arrays are written from clka+clkb
     .addSimulatorFlag("--x-initial 0")           // 0-init pre-reset X state (the host→dsp CDC FIFO, X until the first
                                                  // host write) so it can't trip a spurious Tilelink decoder-miss —
                                                  // mirrors PulseTableSocSim; on hardware this state powers up defined.

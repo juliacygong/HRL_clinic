@@ -1,0 +1,10 @@
+[dumpfile] "/home/gabe/HRL_clinic/risc-q/simWorkspace/PulseTableSoc/pulseTableSocCpu/wave.fst"
+[timestart] 0
+[sst_width] 350
+[signals_width] 320
+[treeopen] TOP.
+[treeopen] TOP.PulseTableSoc.
+TOP.PulseTableSoc.riscqArea_time[31:0]
+TOP.PulseTableSoc.riscqArea_riscqCores_0_posted_gateChannel.buf_1.startTime[31:0]
+TOP.PulseTableSoc.riscqArea_riscqCores_0_posted_gateChannel_io_pulse_valid
+TOP.io_dac_8_payload[255:0]
