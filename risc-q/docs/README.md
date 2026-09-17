@@ -38,6 +38,7 @@ The single-issue, in-order, pipelined RV32I core (optional Zmmul multiply-only e
 | [CsrPlugin](riscv/CsrPlugin.md) | Minimal machine-mode Zicsr + trap layer |
 | [RiscqProbe](riscv/RiscqProbe.md) | Sim verification harness (RVLS lock-step + Konata) |
 | [vs RISC-Q](riscv/RISC-Q-COMPARISON.md) | Architecture comparison against the RISC-Q reference core |
+| [Vivado import](riscv/RiscqVivadoImport.md) | Generate standalone core Verilog and open it in Vivado |
 
 ## DSP signal modules — `riscq.dsp`, `riscq.dsp.pulse`
 
