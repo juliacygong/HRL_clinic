@@ -33,6 +33,9 @@ module axis_dyn_readout_v1
 // Number of parallel dds blocks.
 localparam [15:0] N_DDS = 8;
 
+// Emulator flag
+parameter EMULATOR = 0;
+
 /*********/
 /* Ports */
 /*********/
@@ -70,7 +73,11 @@ assign fifo_wr_en   = s0_axis_tvalid;
 assign fifo_din     = s0_axis_tdata;
 
 // Readout Top.
-readout_top readout_top_i
+readout_top 
+	#(
+		.EMULATOR       (EMULATOR)
+	)
+	readout_top_i
 	(
 		// Reset and clock (s0_axis, s1_axis, m0_axis, m1_axis).
     	.aresetn		(aresetn		),

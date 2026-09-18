@@ -4,7 +4,10 @@ module axis_cdcsync_v1
 		parameter N = 2	,
 
 		// Number of data bits.
-		parameter B = 8
+		parameter B = 8 ,
+
+		// being used in emulation?
+		parameter EMULATOR = 0
 	)
 	(
 		// S_AXIS for input data.
@@ -153,7 +156,10 @@ cdcsync
 		.N(N),
 
 		// Number of data bits.
-		.B(B)
+		.B(B),
+
+		// being used in emulation?
+		.EMULATOR(EMULATOR)
 	)
 	cdcsync_i
 	(

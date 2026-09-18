@@ -40,7 +40,8 @@ module axis_qick_processor # (
    parameter OUT_DPORT_QTY  =  1 , // Number of Output Data Ports
    parameter OUT_DPORT_DW   =  4 , // BitSize of Output Data Ports
    parameter OUT_WPORT_QTY  =  1 ,  // Number of Output Wave Ports
-   parameter CALL_DEPTH     =  255 // Nested Functions
+   parameter CALL_DEPTH     =  255, // Nested Functions
+   parameter EMULATOR       =  0
 
 )(
 // Core, Time and AXI CLK & RST.
@@ -329,38 +330,38 @@ assign s_axi_rvalid  = IF_s_axireg.axi_rvalid ;
 ///// DATA IN PORTS /////
 ///////////////////////////////////////////////////////////////////////////////
 always_comb begin
-   port_tdata_si[0]   <= s0_axis_tdata ;
-   port_tdata_si[1]   <= s1_axis_tdata ;
-   port_tdata_si[2]   <= s2_axis_tdata ;
-   port_tdata_si[3]   <= s3_axis_tdata ;
-   port_tdata_si[4]   <= s4_axis_tdata ;
-   port_tdata_si[5]   <= s5_axis_tdata ;
-   port_tdata_si[6]   <= s6_axis_tdata ;
-   port_tdata_si[7]   <= s7_axis_tdata ;
-   port_tdata_si[8]   <= s8_axis_tdata ;
-   port_tdata_si[9]   <= s9_axis_tdata ;
-   port_tdata_si[10]  <= s10_axis_tdata ;
-   port_tdata_si[11]  <= s11_axis_tdata ;
-   port_tdata_si[12]  <= s12_axis_tdata ;
-   port_tdata_si[13]  <= s13_axis_tdata ;
-   port_tdata_si[14]  <= s14_axis_tdata ;
-   port_tdata_si[15]  <= s15_axis_tdata ;
-   port_tvalid_si[0]  <= s0_axis_tvalid ;
-   port_tvalid_si[1]  <= s1_axis_tvalid ;
-   port_tvalid_si[2]  <= s2_axis_tvalid ;
-   port_tvalid_si[3]  <= s3_axis_tvalid ;
-   port_tvalid_si[4]  <= s4_axis_tvalid ;
-   port_tvalid_si[5]  <= s5_axis_tvalid ;
-   port_tvalid_si[6]  <= s6_axis_tvalid ;
-   port_tvalid_si[7]  <= s7_axis_tvalid ;
-   port_tvalid_si[8]  <= s8_axis_tvalid ;
-   port_tvalid_si[9]  <= s9_axis_tvalid ;
-   port_tvalid_si[10] <= s10_axis_tvalid ;
-   port_tvalid_si[11] <= s11_axis_tvalid ;
-   port_tvalid_si[12] <= s12_axis_tvalid ;
-   port_tvalid_si[13] <= s13_axis_tvalid ;
-   port_tvalid_si[14] <= s14_axis_tvalid ;
-   port_tvalid_si[15] <= s15_axis_tvalid ;
+   port_tdata_si[0]   = s0_axis_tdata ;
+   port_tdata_si[1]   = s1_axis_tdata ;
+   port_tdata_si[2]   = s2_axis_tdata ;
+   port_tdata_si[3]   = s3_axis_tdata ;
+   port_tdata_si[4]   = s4_axis_tdata ;
+   port_tdata_si[5]   = s5_axis_tdata ;
+   port_tdata_si[6]   = s6_axis_tdata ;
+   port_tdata_si[7]   = s7_axis_tdata ;
+   port_tdata_si[8]   = s8_axis_tdata ;
+   port_tdata_si[9]   = s9_axis_tdata ;
+   port_tdata_si[10]  = s10_axis_tdata ;
+   port_tdata_si[11]  = s11_axis_tdata ;
+   port_tdata_si[12]  = s12_axis_tdata ;
+   port_tdata_si[13]  = s13_axis_tdata ;
+   port_tdata_si[14]  = s14_axis_tdata ;
+   port_tdata_si[15]  = s15_axis_tdata ;
+   port_tvalid_si[0]  = s0_axis_tvalid ;
+   port_tvalid_si[1]  = s1_axis_tvalid ;
+   port_tvalid_si[2]  = s2_axis_tvalid ;
+   port_tvalid_si[3]  = s3_axis_tvalid ;
+   port_tvalid_si[4]  = s4_axis_tvalid ;
+   port_tvalid_si[5]  = s5_axis_tvalid ;
+   port_tvalid_si[6]  = s6_axis_tvalid ;
+   port_tvalid_si[7]  = s7_axis_tvalid ;
+   port_tvalid_si[8]  = s8_axis_tvalid ;
+   port_tvalid_si[9]  = s9_axis_tvalid ;
+   port_tvalid_si[10] = s10_axis_tvalid ;
+   port_tvalid_si[11] = s11_axis_tvalid ;
+   port_tvalid_si[12] = s12_axis_tvalid ;
+   port_tvalid_si[13] = s13_axis_tvalid ;
+   port_tvalid_si[14] = s14_axis_tvalid ;
+   port_tvalid_si[15] = s15_axis_tvalid ;
 end
 
 
@@ -388,11 +389,12 @@ always_ff @(posedge c_clk_i)
    end
 
 // The C_TPROC_CTRL is only ONE clock.
+wire proc_start_t01, proc_stop_t01;
 assign proc_start_t01   = proc_start_r & ~proc_start_r2 ;
 assign proc_stop_t01    = proc_stop_r  & ~proc_stop_r2 ;
 
 
-qick_processor# (
+qick_processor #(
    .DEBUG          ( DEBUG          ),
    .DUAL_CORE      ( DUAL_CORE      ),
    .LFSR           ( LFSR           ),
@@ -408,7 +410,8 @@ qick_processor# (
    .OUT_TRIG_QTY   ( OUT_TRIG_QTY   ),
    .OUT_DPORT_QTY  ( OUT_DPORT_QTY  ),
    .OUT_DPORT_DW   ( OUT_DPORT_DW   ),
-   .OUT_WPORT_QTY  ( OUT_WPORT_QTY  )
+   .OUT_WPORT_QTY  ( OUT_WPORT_QTY  ),
+   .EMULATOR       ( EMULATOR       )
 ) QPROC (
    .t_clk_i             ( t_clk_i               ) ,
    .t_rst_ni            ( t_resetn              ) ,

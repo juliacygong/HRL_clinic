@@ -24,8 +24,11 @@ IPs used in the design of the qick_processor
 
 */
 //////////////////////////////////////////////////////////////////////////////
-
 `define USE_XPM_MACROS
+
+`ifdef VERILATOR
+   `undef USE_XPM_MACROS
+`endif
 
 ///////////////////////////////////////////////////////////////////////////////
 /// SYNC - Clock Domain Data Syncronization
@@ -134,6 +137,7 @@ module LIFO # (
 wire [2:0]        ptr_p1, ptr_m1 ;
 reg  [2:0]        ptr            ;
 reg  [WIDTH-1:0]  stack [DEPTH]  ;
+wire              empty_o        ;
 
 assign ptr_p1 = ptr + 1'b1;
 assign ptr_m1 = ptr - 1'b1;
@@ -675,9 +679,10 @@ endmodule
 
 `else
 
-///////////////////////////////////////////////////////////////////////////////
+`ifndef VERILATOR
+// /////////////////////////////////////////////////////////////////////////////
 // FIFO DUAL CLOCK
-///////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 module BRAM_FIFO_DC_2 # (
    parameter FIFO_DW = 16 , 
    parameter FIFO_AW = 8 
@@ -805,6 +810,179 @@ bram_dual_port_dc  # (
    
 endmodule
 
+`else
+
+// CUSTOM FWFT FIFO DESIGNED TO MATCH XPM BEHAVIOR
+module BRAM_FIFO_DC_2 # (
+   parameter FIFO_DW = 16,
+   parameter FIFO_AW = 8
+) (
+   input  wire                   wr_clk_i,
+   input  wire                   wr_rst_ni,
+   input  wire                   wr_en_i,
+   input  wire                   push_i,
+   input  wire [FIFO_DW-1:0]     data_i,
+
+   input  wire                   rd_clk_i,
+   input  wire                   rd_rst_ni,
+   input  wire                   rd_en_i,
+   input  wire                   pop_i,
+
+   output wire [FIFO_DW-1:0]     data_o,
+   input  wire                   flush_i,
+   output wire                   async_empty_o,
+   output wire                   async_full_o
+);
+
+   wire [FIFO_AW-1:0] wr_gptr, wr_gptr_p1;
+   wire [FIFO_AW-1:0] rd_gptr, rd_gptr_p1;
+   wire [FIFO_AW-1:0] wr_bptr, wr_bptr_p1;
+   wire [FIFO_AW-1:0] rd_bptr, rd_bptr_p1;
+
+   wire clr_wr, clr_rd;
+   wire busy;
+
+   (* ASYNC_REG = "TRUE" *) reg [FIFO_AW-1:0] wr_gptr_cdc, wr_gptr_r;
+   (* ASYNC_REG = "TRUE" *) reg [FIFO_AW-1:0] rd_gptr_cdc, rd_gptr_r;
+
+   always_ff @(posedge rd_clk_i) begin
+      wr_gptr_cdc <= wr_gptr;
+      wr_gptr_r   <= wr_gptr_cdc;
+   end
+
+   always_ff @(posedge wr_clk_i) begin
+      rd_gptr_cdc <= rd_gptr;
+      rd_gptr_r   <= rd_gptr_cdc;
+   end
+   reg clr_fifo_req, clr_fifo_ack;
+
+   always_ff @(posedge wr_clk_i or negedge wr_rst_ni) begin
+      if (!wr_rst_ni) begin
+         clr_fifo_req <= 1'b0;
+         clr_fifo_ack <= 1'b0;
+      end else begin
+         if (flush_i)
+            clr_fifo_req <= 1'b1;
+         else if (clr_fifo_ack)
+            clr_fifo_req <= 1'b0;
+
+         if (clr_rd & clr_wr)
+            clr_fifo_ack <= 1'b1;
+         else if (clr_fifo_ack && !clr_rd && !clr_wr)
+            clr_fifo_ack <= 1'b0;
+      end
+   end
+
+   assign busy = clr_fifo_req | clr_fifo_ack;
+
+   wire async_full;
+   assign async_full = (rd_gptr_r == wr_gptr_p1);
+
+   wire do_push;
+   assign do_push = wr_en_i & push_i & !async_full & !busy;
+
+   assign async_full_o = async_full | busy;
+
+   wire [FIFO_DW-1:0] mem_dt;
+
+   reg  [FIFO_DW-1:0] data_o_reg;
+   reg                out_valid;
+   reg                rd_issue_pending;
+
+   wire ptrs_equal_now;
+   assign ptrs_equal_now = (rd_gptr == wr_gptr_r);
+   assign async_empty_o = (!out_valid) | busy;
+   assign data_o = out_valid ? data_o_reg : {FIFO_DW{1'b0}};
+   wire do_pop_visible;
+   assign do_pop_visible = rd_en_i & pop_i & out_valid & !busy;
+   reg issue_read;
+   always_comb begin
+      issue_read = 1'b0;
+      if (!busy) begin
+         if (!out_valid && !rd_issue_pending && !ptrs_equal_now)
+            issue_read = 1'b1;
+         else if (do_pop_visible && !rd_issue_pending && !ptrs_equal_now)
+            issue_read = 1'b1;
+      end
+   end
+   wire do_rd_ptr_advance;
+   assign do_rd_ptr_advance = issue_read;
+   always_ff @(posedge rd_clk_i or negedge rd_rst_ni) begin
+      if (!rd_rst_ni) begin
+         data_o_reg        <= '0;
+         out_valid         <= 1'b0;
+         rd_issue_pending  <= 1'b0;
+      end else if (clr_fifo_req || clr_rd) begin
+         data_o_reg        <= '0;
+         out_valid         <= 1'b0;
+         rd_issue_pending  <= 1'b0;
+      end else begin
+         if (do_pop_visible)
+            out_valid <= 1'b0;
+
+         if (rd_issue_pending) begin
+            data_o_reg       <= mem_dt;
+            out_valid        <= 1'b1;
+            rd_issue_pending <= 1'b0;
+         end
+
+         // Launch next BRAM read
+         if (issue_read)
+            rd_issue_pending <= 1'b1;
+      end
+   end
+   
+   gcc #(
+      .DW(FIFO_AW)
+   ) gcc_wr_ptr (
+      .clk_i           (wr_clk_i),
+      .rst_ni          (wr_rst_ni),
+      .async_clear_i   (clr_fifo_req),
+      .clear_o         (clr_wr),
+      .cnt_en_i        (do_push),
+      .count_bin_o     (wr_bptr),
+      .count_gray_o    (wr_gptr),
+      .count_bin_p1_o  (wr_bptr_p1),
+      .count_gray_p1_o (wr_gptr_p1)
+   );
+
+   gcc #(
+      .DW(FIFO_AW)
+   ) gcc_rd_ptr (
+      .clk_i           (rd_clk_i),
+      .rst_ni          (rd_rst_ni),
+      .async_clear_i   (clr_fifo_req),
+      .clear_o         (clr_rd),
+      .cnt_en_i        (do_rd_ptr_advance),
+      .count_bin_o     (rd_bptr),
+      .count_gray_o    (rd_gptr),
+      .count_bin_p1_o  (rd_bptr_p1),
+      .count_gray_p1_o (rd_gptr_p1)
+   );
+
+   bram_dual_port_dc #(
+      .MEM_AW  (FIFO_AW),
+      .MEM_DW  (FIFO_DW),
+      .RAM_OUT ("NO_REGISTERED")
+   ) fifo_mem (
+      .clk_a_i   (wr_clk_i),
+      .en_a_i    (wr_en_i),
+      .we_a_i    (do_push),
+      .addr_a_i  (wr_bptr),
+      .dt_a_i    (data_i),
+      .dt_a_o    (),
+
+      .clk_b_i   (rd_clk_i),
+      .en_b_i    (issue_read | rd_issue_pending),
+      .we_b_i    (1'b0),
+      .addr_b_i  (rd_bptr),
+      .dt_b_i    ('0),
+      .dt_b_o    (mem_dt)
+   );
+
+endmodule
+`endif 
+
 `endif
 
 
@@ -897,6 +1075,8 @@ module arith (
    output wire                ready_o        ,
    output wire signed [63:0]  arith_result_o );
 
+parameter EMULATOR = 0;
+
 // DSP OUTPUTS
 wire [45:0] arith_result ;
 // DSP INPUTS
@@ -940,16 +1120,32 @@ always_ff @ (posedge clk_i, negedge rst_ni) begin
    end
 end
 
+generate
+if (!EMULATOR) begin : gen_dsp_macro_ip
 
-dsp_macro_0 ARITH_DSP (
-  .CLK  ( clk_i        ),  // input wire CLK
-  .SEL  ( ALU_OP       ),  // input wire [3 : 0] SEL
-  .A    ( A_dt[26:0]   ),  // input wire [26 : 0] A
-  .B    ( B_dt[17:0]   ),  // input wire [17 : 0] B
-  .C    ( C_dt[31:0]   ),  // input wire [31 : 0] C
-  .D    ( D_dt[26:0]   ),  // input wire [26 : 0] D
-  .P    ( arith_result )   // output wire [45 : 0] P
-);
+   dsp_macro_0 ARITH_DSP (
+   .CLK  ( clk_i        ),  // input wire CLK
+   .SEL  ( ALU_OP       ),  // input wire [3 : 0] SEL
+   .A    ( A_dt[26:0]   ),  // input wire [26 : 0] A
+   .B    ( B_dt[17:0]   ),  // input wire [17 : 0] B
+   .C    ( C_dt[31:0]   ),  // input wire [31 : 0] C
+   .D    ( D_dt[26:0]   ),  // input wire [26 : 0] D
+   .P    ( arith_result )   // output wire [45 : 0] P
+   );
+end else begin: gen_dsp_macro_sv
+
+   dsp_macro ARITH_DSP (
+   .CLK  ( clk_i        ),  // input wire CLK
+   .SEL  ( ALU_OP       ),  // input wire [3 : 0] SEL
+   .A    ( A_dt[26:0]   ),  // input wire [26 : 0] A
+   .B    ( B_dt[17:0]   ),  // input wire [17 : 0] B
+   .C    ( C_dt[31:0]   ),  // input wire [31 : 0] C
+   .D    ( D_dt[26:0]   ),  // input wire [26 : 0] D
+   .P    ( arith_result )   // output wire [45 : 0] P
+   );
+
+end
+endgenerate
 
 //signed extension of 
 assign arith_result_o  = { {18{arith_result[45]}}, arith_result };
@@ -986,6 +1182,7 @@ reg [2*DW-1 :0] sub_temp  ;
 reg [DW-1   :0] r_temp_nxt  ;
 
 wire [31:0] ind_bit_m1;
+wire div_start, div_end;
 
 
 assign ind_bit_m1 = ind_bit - 1'b1;
@@ -1127,6 +1324,9 @@ reg a_pulse_req;
 (* ASYNC_REG = "TRUE" *) reg b_pulse_req ;
 reg pulse_b_req_r;
 reg b_pulse_ack;
+
+// Pulse output signals
+wire pulse_a, pulse_b;
 
 /// REQ Time from C to T
 ///////////////////////////////////////////////////////////////////////////////

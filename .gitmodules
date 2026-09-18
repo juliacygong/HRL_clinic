@@ -1,0 +1,20 @@
+[submodule "emulator/submodules/pulp_platform/common_verification"]
+	path = emulator/submodules/pulp_platform/common_verification
+	url = https://github.com/pulp-platform/common_verification.git
+[submodule "emulator/submodules/pulp_platform/axi"]
+	path = emulator/submodules/pulp_platform/axi
+	url = https://github.com/pulp-platform/axi.git
+[submodule "emulator/submodules/pulp_platform/common_cells"]
+	path = emulator/submodules/pulp_platform/common_cells
+	url = https://github.com/pulp-platform/common_cells.git
+[submodule "emulator/submodules/verilator"]
+	path = emulator/submodules/verilator
+	url = https://github.com/verilator/verilator.git
+[submodule "risc-q/ext/SpinalHDL"]
+	path = risc-q/ext/SpinalHDL
+	url = https://github.com/SpinalHDL/SpinalHDL
+	branch = v1.14.2
+[submodule "risc-q/ext/rvls"]
+	path = risc-q/ext/rvls
+	url = https://github.com/JunyiLiu1994/rvls.git
+	branch = riscq-machine-only-csr-stubs

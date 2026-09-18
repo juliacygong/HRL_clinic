@@ -30,6 +30,9 @@ module down_conversion_fir (
 // Number of parallel dds blocks.
 localparam [15:0] N_DDS = 8;
 
+// Emulator parameter
+parameter EMULATOR = 0;
+
 /*********/
 /* Ports */
 /*********/
@@ -62,7 +65,8 @@ input		[87:0]			fifo_dout_i;
 // Down-conversion block (product with fast DDS).
 down_conversion 
 	#(
-		.N_DDS	(N_DDS)
+		.N_DDS	(N_DDS),
+		.EMULATOR(EMULATOR)
 	)
 	down_conversion_i
 	(
@@ -87,16 +91,40 @@ down_conversion
 	);
 
 // FIR: 8x decimation, multi-rate implementation, I/Q (2 channels).
-fir_compiler_0 
-	fir_i
-	(
-  		.aclk				(clk				),
-  		.s_axis_data_tvalid	(1'b1				),
-  		.s_axis_data_tready	(					),
-  		.s_axis_data_tdata	(m0_axis_tdata_o	),
-  		.m_axis_data_tvalid	(m1_axis_tvalid_o	),
-  		.m_axis_data_tdata	(m1_axis_tdata_o	)
-	);
+
+generate 
+	if (!EMULATOR) begin : gen_fir_synth
+		fir_compiler_0 
+			fir_i
+			(
+				.aclk				(clk				),
+				.s_axis_data_tvalid	(1'b1				),
+				.s_axis_data_tready	(					),
+				.s_axis_data_tdata	(m0_axis_tdata_o	), 
+				.m_axis_data_tvalid	(m1_axis_tvalid_o	),
+				.m_axis_data_tdata	(m1_axis_tdata_o	)
+			);
+	end else begin : gen_fir_emu
+		fir 
+			fir_emu
+			(
+				.clk				(clk				),
+				.nrst				(1'b1				),	
+				.s_tvalid			(1'b1				),
+				.s_tready			(					),
+				.s_tdata			(m0_axis_tdata_o	),
+				.m_tvalid			(m1_axis_tvalid_o	),
+				.m_tdata			(m1_axis_tdata_o	)
+			);
+	end
+endgenerate
+
+`ifdef SIM_DEBUG
+// debugging signals
+wire signed [15:0] fir_l_dbg, fir_h_dbg;
+assign fir_l_dbg = m1_axis_tdata_o[15:0];
+assign fir_h_dbg = m1_axis_tdata_o[31:16];
+`endif
 
 endmodule
 

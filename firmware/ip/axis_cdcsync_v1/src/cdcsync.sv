@@ -4,7 +4,10 @@ module cdcsync
 		parameter N = 2	,
 
 		// Number of data bits.
-		parameter B = 8
+		parameter B = 8,
+
+		// being used in emulation?
+		parameter EMULATOR = 0
 	)
 	(
 		// S_AXIS for input data.
@@ -162,6 +165,7 @@ wire	[15:0]		dout_valid_v	;
 wire	[15:0]		dout_ready_v	;
 
 wire 				fifo_wr_en		;
+wire 				fifo_rd_en		;
 wire	[BT-1:0]	fifo_din		;
 wire	[BT-1:0]	fifo_dout		;
 wire				fifo_full		;
@@ -306,34 +310,67 @@ generate
 endgenerate
 
 // Fifo.
-fifo_dc_axi_xpm
-    #(
-        // Data width.
-        .B(BT),
-        
-        // Fifo depth.
-        .N(16)
-    )
-    fifo_i
-    ( 
-        .wr_rstn	(s_axis_aresetn	),
-        .wr_clk 	(s_axis_aclk	),
+generate
+if (!EMULATOR) begin : gen_fifo_dc_xmp
+	fifo_dc_axi_xpm
+		#(
+			// Data width.
+			.B(BT),
+			
+			// Fifo depth.
+			.N(16)
+		)
+		fifo_i
+		( 
+			.wr_rstn	(s_axis_aresetn	),
+			.wr_clk 	(s_axis_aclk	),
 
-        .rd_rstn	(m_axis_aresetn	),
-        .rd_clk 	(m_axis_aclk	),
-        
-        // Write I/F.
-        .wr_en  	(fifo_wr_en		),
-        .din     	(fifo_din		),
-        
-        // Read I/F.
-        .rd_en  	(fifo_rd_en		),
-        .dout   	(fifo_dout		),
-        
-        // Flags.
-        .full    	(fifo_full		),
-        .empty   	(fifo_empty		)
-    );
+			.rd_rstn	(m_axis_aresetn	),
+			.rd_clk 	(m_axis_aclk	),
+			
+			// Write I/F.
+			.wr_en  	(fifo_wr_en		),
+			.din     	(fifo_din		),
+			
+			// Read I/F.
+			.rd_en  	(fifo_rd_en		),
+			.dout   	(fifo_dout		),
+			
+			// Flags.
+			.full    	(fifo_full		),
+			.empty   	(fifo_empty		)
+		);
+end else begin : gen_fifo_dc_sv
+	fifo_dc_sv
+		#(
+			// Data width.
+			.B(BT),
+			
+			// Fifo depth.
+			.N(16)
+		)
+		fifo_i
+		( 
+			.wr_rstn	(s_axis_aresetn	),
+			.wr_clk 	(s_axis_aclk	),
+
+			.rd_rstn	(m_axis_aresetn	),
+			.rd_clk 	(m_axis_aclk	),
+			
+			// Write I/F.
+			.wr_en  	(fifo_wr_en		),
+			.din     	(fifo_din		),
+			
+			// Read I/F.
+			.rd_en  	(fifo_rd_en		),
+			.dout   	(fifo_dout		),
+			
+			// Flags.
+			.full    	(fifo_full		),
+			.empty   	(fifo_empty		)
+		);
+end
+endgenerate
 
 // Or together all slave valid inputs.
 assign fifo_wr_en	= |din_valid_v	;
