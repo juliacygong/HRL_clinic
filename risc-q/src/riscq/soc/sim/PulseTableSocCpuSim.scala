@@ -63,6 +63,10 @@ object PulseTableSocCpuSim extends App {
       dut.riscqArea.time.simPublic()
       dut.riscqArea.riscqCores(0).startTime.simPublic()
       dut.riscqArea.riscqCores(0).gatePulse.valid.simPublic()
+      val rfCmd = dut.riscqArea.riscqCores(0).riscvSoc.cmd
+      rfCmd.valid.simPublic()
+      rfCmd.payload.address.simPublic()
+      rfCmd.payload.data.simPublic()
       dut
     }.doSim("pulseTableSocCpu", seed = 42) { dut =>
     val hostCd = dut.clockDomain
@@ -75,7 +79,28 @@ object PulseTableSocCpuSim extends App {
 
     hostCd.forkStimulus(10)
     dspCd.forkStimulus(10)
+    val rfCmd = dut.riscqArea.riscqCores(0).riscvSoc.cmd
 
+    var ctrlSeq = 0
+
+    println("[RFCMD LOGGER] armed")
+
+    fork {
+      while (true) {
+        dspCd.waitFallingEdge()
+
+        if (rfCmd.valid.toBoolean) {
+          println(
+            f"[RFCMD] seq=$ctrlSeq%d " +
+            f"time=${dut.riscqArea.time.toBigInt}%d " +
+            f"addr=0x${rfCmd.payload.address.toBigInt}%05x " +
+            f"data=0x${rfCmd.payload.data.toBigInt}%08x"
+          )
+
+          ctrlSeq += 1
+        }
+      }
+    }
     val image = SparseMemory(seed = 0)
     new Elf(elfFile, 32).load(image, 0)
 
