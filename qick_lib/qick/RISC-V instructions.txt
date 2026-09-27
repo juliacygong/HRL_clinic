@@ -1,0 +1,74 @@
+#RISC-V Assembly Instructions
+
+# condj p, $ra op $rb, @label 
+# op ∈ {<, <=, >, >=, ==, !=}
+< - blt ra, rb, label
+≤ - bge rb, ra, label
+> - blt rb, ra, label
+≥ - bge ra, rb, label
+== - beq ra, rb, label
+≠ - bne ra, rb, label
+
+
+# loopnz p, $r, @label 
+bne x0, r1, label
+addi r1, r1, -1
+
+# math p, $ra, $rb op $rc
+add ra, rb, rc #ra = rb + rc
+sub ra, rb, rc #ra = rb-rc
+mul ra, rb, rc # ra = rb*rc
+
+# bitw p, $ra, $rb op $rc
+# op ∈ {&, |, ^, <<, >>, ~}
+& - and ra, rb, rc
+| - or ra, rb, rc
+^ - xor ra, rb, rc
+<< - sll ra, rb, rc
+>> - srl ra, rb, rc
+~ - xori ra, rb, -1
+
+
+# set ch, p, $ra,$rb,$rc,$rd,$re, $rt
+sw   r1, 0x4(chbase)      # r1 = freq
+sw   r2, 0x10(chbase)     # r2 = phase 
+sw   r3, 0x14(chbase)     # r3 = amp     
+sw   r4, 0x18(chbase)     # r4 = env     
+sw   r5, 0x1c(chbase)     # r5 = dur  
+sw   r6, 0x4100(chbase)   # r6 = startTime
+sw   r7, 0x0(chbase)      # r7 = idx
+
+#setb ch, p, $ra,$rb,$rc,$rd,$re, $rt
+sw   r1, 0x4(chbase)      # r1 = freq
+sw   r2, 0x10(chbase)     # r2 = phase 
+sw   r3, 0x14(chbase)     # r3 = amp     
+sw   r4, 0x18(chbase)     # r4 = env     
+sw   r5, 0x1c(chbase)     # r5 = dur  
+sw   r6, 0x4100(chbase)   # r6 = startTime
+sw   r7, 0x0(chbase)      # r7 = idx
+
+# wait ch, p, $r
+sw r, addr(ctrl_base)
+lw x0, addr+8(ctrl_base)
+
+# memr p, $ra, $rb
+slli t0, rb, 2
+lw ra, 0(t0)
+
+# memw p, $ra, $rb
+slli t0, rb, 2
+sw ra, 0(t0)
+
+# read ch, p, upper|lower $r
+lw r, 4(ch) - lower
+lw r, 8(ch) - higher
+
+
+
+
+
+
+
+
+
+
