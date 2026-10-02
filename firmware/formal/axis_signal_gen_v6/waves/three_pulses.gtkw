@@ -1,0 +1,56 @@
+[*] GTKWave view of a SymbiYosys cover trace: 3 commands queued back-to-back.
+[dumpfile] "../par_timing_cov/engine_0/trace3.vcd"
+[size] 1700 950
+[signals_width] 360
+[sst_width] 260
+@200
+-1) Clock and reset (the harness drives these)
+@28
+sg_v6_formal.clk
+@24
+sg_v6_formal.cyc
+@28
+sg_v6_formal.rstn
+@200
+-
+-2) Command input s1_axis (solver-chosen stimulus)
+@28
+sg_v6_formal.s1_tvalid
+sg_v6_formal.s1_tready
+sg_v6_formal.hs
+@24
+sg_v6_formal.f_nsamp
+sg_v6_formal.n_acc
+@200
+-
+-3) Inside DUT: XPM FIFO (command queue)
+@28
+sg_v6_formal.dut.fifo_i.wr_en
+sg_v6_formal.dut.fifo_i.empty
+sg_v6_formal.dut.fifo_i.full
+sg_v6_formal.dut.fifo_i.rd_en
+@200
+-
+-4) Inside DUT: ctrl_sg_v6 (pops a command, counts nsamp)
+@24
+sg_v6_formal.dut.signal_gen_i.ctrl_i.state
+@28
+sg_v6_formal.dut.signal_gen_i.ctrl_i.load_r
+@24
+sg_v6_formal.dut.signal_gen_i.ctrl_i.cnt_nsamp_r
+@28
+sg_v6_formal.dut.signal_gen_i.ctrl_i.en_reg
+sg_v6_formal.dut.signal_gen_i.ctrl_i.en_reg_r8
+@200
+-
+-5) Inside DUT: signal_gen output pipeline
+@28
+sg_v6_formal.dut.signal_gen_i.en_la
+sg_v6_formal.dut.signal_gen_i.en_la_r
+@200
+-
+-6) Output m_axis (what the DAC sees)
+@28
+sg_v6_formal.m_tvalid
+[pattern_trace] 1
+[pattern_trace] 0
