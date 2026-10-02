@@ -1,0 +1,68 @@
+# SymbiYosys checks for axis_signal_gen_v6 command timing (no tProc). See ../README.md.
+#
+# timing      start time + pulse length via tvalid, 16 lanes (GEN_DDS=FALSE)
+# timing_cov  cover traces: idle start / back-to-back / gap / 3 queued pulses
+# timing_dds  same tvalid timing with GEN_DDS=TRUE (DDS IP stubbed)
+# order       ordering + sample alignment: exact output samples, 2 lanes, gain tags
+# accept      tready never drops before 19 commands are queued
+# accept_cov  queue fills at exactly 19 commands, and tready recovers
+# reset_drop  commands sent right after reset (expected to FAIL: shows the drop window)
+# short_nsamp nsamp = 0 or 1 allowed (expected to FAIL: shows the pulse overrun)
+
+[tasks]
+timing
+timing_cov
+timing_dds
+order
+accept
+accept_cov
+reset_drop
+short_nsamp
+
+[options]
+timing:      mode bmc
+timing:      depth 80
+timing_cov:  mode cover
+timing_cov:  depth 80
+timing_dds:  mode bmc
+timing_dds:  depth 80
+order:       mode bmc
+order:       depth 80
+accept:      mode bmc
+accept:      depth 60
+accept_cov:  mode cover
+accept_cov:  depth 40
+reset_drop:  mode bmc
+reset_drop:  depth 50
+short_nsamp: mode bmc
+short_nsamp: depth 50
+
+[engines]
+smtbmc yices
+
+[script]
+plugin -i slang
+timing:      read_slang --ignore-timing                                --top sg_v6_formal -f files.f
+timing_cov:  read_slang --ignore-timing                                --top sg_v6_formal -f files.f
+timing_dds:  read_slang --ignore-timing -D USE_DDS                     --top sg_v6_formal -f files.f
+order:       read_slang --ignore-timing -D CHECK_DATA -G N_DDS=2       --top sg_v6_formal -f files.f
+accept:      read_slang --ignore-timing -D ACCEPT -G NMAX=65535        --top sg_v6_formal -f files.f
+accept_cov:  read_slang --ignore-timing -D ACCEPT -G NMAX=65535        --top sg_v6_formal -f files.f
+reset_drop:  read_slang --ignore-timing -G RST_QUIET=0 -G K=1          --top sg_v6_formal -f files.f
+short_nsamp: read_slang --ignore-timing -G NMIN=0 -G NMAX=3 -G K=1     --top sg_v6_formal -f files.f
+prep -top sg_v6_formal
+# Stub outputs are undriven on purpose: make them unconstrained every cycle.
+setundef -undriven -anyseq
+
+[files]
+files.f
+xpm_cdc.sv    C:/AMDDesignTools/2026.1/data/ip/xpm/xpm_cdc/hdl/xpm_cdc.sv
+xpm_memory.sv C:/AMDDesignTools/2026.1/data/ip/xpm/xpm_memory/hdl/xpm_memory.sv
+xpm_fifo.sv   C:/AMDDesignTools/2026.1/data/ip/xpm/xpm_fifo/hdl/xpm_fifo.sv
+../../hdl/fifo_xpm.sv
+../../ip/axis_signal_gen_v6/src/latency_reg.v
+../../ip/axis_signal_gen_v6/src/ctrl_sg_v6.sv
+../../ip/axis_signal_gen_v6/src/signal_gen.v
+../../ip/axis_signal_gen_v6/src/signal_gen_top.v
+models/formal_stubs.sv
+sg_v6_formal.sv

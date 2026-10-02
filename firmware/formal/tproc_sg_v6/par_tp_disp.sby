@@ -1,0 +1,37 @@
+# Generated from tp_sg.sby (sby --dumpcfg tp_sg.sby tp_disp). Edit tp_sg.sby, then regenerate.
+
+[options]
+mode bmc
+depth 75
+skip 40
+
+[engines]
+smtbmc yices
+
+[script]
+plugin -i slang
+read_slang --ignore-timing --single-unit --allow-use-before-declare -D DISP_AXIS            --top tp_sg_formal -f files.f
+prep -top tp_sg_formal
+# Stub outputs are undriven on purpose: make them unconstrained every cycle.
+setundef -undriven -anyseq
+# Flip-flops without an init value power up at 0, as FPGA registers do (INIT default).
+setundef -init -zero
+
+[files]
+files.f
+xpm_cdc.sv    C:/AMDDesignTools/2026.1/data/ip/xpm/xpm_cdc/hdl/xpm_cdc.sv
+xpm_memory.sv C:/AMDDesignTools/2026.1/data/ip/xpm/xpm_memory/hdl/xpm_memory.sv
+xpm_fifo.sv   C:/AMDDesignTools/2026.1/data/ip/xpm/xpm_fifo/hdl/xpm_fifo.sv
+../../hdl/fifo_xpm.sv
+../../hdl/fifo_dc_axi_xpm.sv
+../../ip/axis_signal_gen_v6/src/latency_reg.v
+../../ip/axis_signal_gen_v6/src/ctrl_sg_v6.sv
+../../ip/axis_signal_gen_v6/src/signal_gen.v
+../../ip/axis_signal_gen_v6/src/signal_gen_top.v
+../axis_signal_gen_v6/models/formal_stubs.sv
+../../ip/qick_processor/src/_qproc_defines.svh
+../../ip/qick_processor/src/_qproc_ips.sv
+models/qproc_dispatcher_formal.sv
+../../ip/axis_cdcsync_v1/src/cdcsync.sv
+../../ip/qick_sg_translator/src/sg_translator.v
+tp_sg_formal.sv

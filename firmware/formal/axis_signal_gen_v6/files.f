@@ -1,0 +1,10 @@
+xpm_cdc.sv
+xpm_memory.sv
+xpm_fifo.sv
+fifo_xpm.sv
+latency_reg.v
+ctrl_sg_v6.sv
+signal_gen.v
+signal_gen_top.v
+formal_stubs.sv
+sg_v6_formal.sv
