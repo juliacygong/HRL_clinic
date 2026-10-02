@@ -1,0 +1,5 @@
+time_ps,domain,cyc,kind
+172500.000,c_clk,1,some_fifo_full_rise
+207500.000,c_clk,8,some_fifo_full_fall
+2587500.000,c_clk,484,some_fifo_full_rise
+2622500.000,c_clk,491,some_fifo_full_fall

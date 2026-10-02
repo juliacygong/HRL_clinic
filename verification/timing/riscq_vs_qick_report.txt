@@ -1,0 +1,128 @@
+NATIVE RISC-Q vs QICK TIMING CONTRACT: RULE-BY-RULE REPORT
+==========================================================
+Date      : 2026-09-27
+Reference : QICK (tProcV2 -> SGv6), verification/timing/timing_contract.txt + tables/contract.csv
+Subject   : native RISC-Q, local ~/projects/HRL_clinic/risc-q (refactor subtree), PulseTableSoc,
+            core 0 gate channel (ch0) and readout-drive channel (ch1), CPU-in-the-loop
+Harness   : risc-q/src/riscq/soc/sim/TimingSocCpuSim.scala (RISCQ_MODE driver|powerup, RISCQ_ABORT)
+Programs  : verification/timing/gen_riscq_programs.py -> riscq_programs/ (17 probes, literal
+            tProc-style translation of the QICK test manifests; 1 batch = 1 sg_clk = 16 samples,
+            QICK us -> batches at 599.04 MHz)
+Runs      : verification/timing/riscq_runs/<probe>/ (riscq_timing_summary_ch0.txt, riscq_probe_report.csv)
+Direction : QICK is the reference. Each rule states what QICK does, what native RISC-Q does in
+            QICK terms, and whether a tProc -> RISC-Q conversion must handle the difference.
+Verdicts  : MATCH | DIFFERS (adapter must bridge) | RISK (silent wrong output) | NO QICK EQUIVALENT
+Units     : RISC-Q values in dsp cycles / batches (sim clock arbitrary; no ns claims).
+
+
+SUMMARY
+-------
+MATCH             R10 cross-channel alignment, freq/pulse pairing when each pulse writes its freq
+DIFFERS           R1-R3 time reference (+~32 batches), R7 throughput, acceptance latency
+RISK              R5 overlap/busy, R6 out-of-order due, R8 late command, R9 capacity,
+                  R11 reset/rerun and power-up
+Design guidance   back-to-back via startTime auto-advance is safe; explicit per-pulse startTime
+                  from rounded QICK times is not (P3)
+
+
+R1-R3  TIME REFERENCE                                                            DIFFERS
+  QICK   releases at due + 4 t_clk; SGv6 starts 37.7-39.3 ns after due; output enable 9 sg_clk
+         later -> output starts ~31.6-32.6 sg_clk after due (EMU values).
+  RISC-Q parameters pop early by per-queue leads (amp -34, phase -35, freqC -36, freqP -52,
+         addr -11, dur -2 cycles); output valid rises exactly at due (0) in the channel's time
+         base, zero jitter (single clock). P1_T1/T2/T3a/T3c: all pulses 0 offset, duration = dur.
+  Conversion: to reproduce QICK's output time, RISC-Q startTime = QICK due + ~32 batches (+-1),
+         or the adapter must define which convention is golden. An adapter that passes QICK due
+         straight through makes every pulse ~32 batches early relative to QICK.
+
+R4  OUTPUT PIPELINE / DURATION                                                   MATCH (isolated)
+  Isolated pulse: RISC-Q output lasts exactly dur batches (60/60), QICK exactly nsamp sg_clk.
+  Differs only when pulses interact (see R5).
+
+R5  BUSY GENERATOR / OVERLAP                                                     RISK
+  QICK   a command arriving while SGv6 plays waits and starts at the previous end (gapless chain);
+         nothing is lost.
+  RISC-Q a new dur pop reloads the duration counter: the earlier pulse is cut short, output valid
+         stays high, the waveform switches to the new pulse's parameters. No flag.
+         P2_T5 overlap: pulse 0 plays 29/60 batches.
+         P3_T4 back-to-back with explicit rounded times: pulse 0 plays 59/60 (0.6 us -> 359 batches
+               vs 0.1 us pulse = 60 batches).
+         P3_auto back-to-back with startTime auto-advance: 60/60, pulse 1 at +60 (like QICK).
+         P6_same5 five pulses same due: pulses 0-3 play 2/12 each, only the last plays fully
+               (QICK plays all five back to back).
+  Conversion: any tProc program that relies on SGv6 queuing (overlapping or rounded-adjacent
+         pulses) produces a different waveform on RISC-Q unless the adapter serializes pulses
+         (e.g. startTime = max(due, previous end)) or uses auto-advance.
+
+R6  ORDERING (issue order != due order)                                          RISK
+  Both release per channel in issue order (head-of-line blocking). Consequence differs:
+  QICK   T6: the earlier-due pulse plays after the later one, both complete (638 ns late).
+  RISC-Q P4_T6: the later-due pulse (written first) starts on time and is cut to 2/60 batches;
+         the earlier-due pulse then plays 301 batches late in full. P4_freq identical.
+  freq pairing: correct in P4_freq (distinct freq per pulse, freq written with each pulse).
+
+R7  SAME-PORT THROUGHPUT                                                         DIFFERS
+  QICK   one release per 4 t_clk per port (EMU value).
+  RISC-Q one pop per 2 cycles per queue (TimedQueue blank): P6_same5 releases at +0, +2, +4, +6, +8.
+
+R8  LATE COMMAND (due already passed at issue)                                   RISK
+  QICK   T8: released immediately (20.4 ns after issue), plays intact.
+  RISC-Q P5_T8: released immediately (+207 batches late) but amp/phase/addr/dur pop in the same
+         cycle, so their leads collapse: at output start the amp/phase in effect are still the
+         PREVIOUS pulse's (amp 3277 instead of 6553) for ~32 batches, env address for ~9.
+         freq pops 35 cycles earlier than the rest (it was pushed at the freq write).
+  Conversion: late commands silently play a corrupted head. The adapter must guarantee the
+         software lead (>= leadTime + 3 = ~55 batches before startTime) or detect lateness.
+
+R9  ACCEPTANCE / CAPACITY                                                         RISK (capacity), DIFFERS (latency)
+  QICK   accepted 1 c_clk after issue; 256 commands per port; when full the core stalls,
+         nothing dropped (T9a).
+  RISC-Q store -> fire decoded 4 cycles (linkPipe), -> queue push 2 cycles; no backpressure to the
+         CPU (posted writes, Flow push). Effective capacity 5 pending pulses per queue
+         (queueDepth 4 + registered head): P6_n4, P6_n5 fine; P6_n8: pulses 5-7 silently
+         dropped in all six queues, CPU never stalled, no flag.
+  Conversion: a tProc program that schedules > 5 pulses ahead on one channel loses pulses on
+         RISC-Q. The adapter must throttle to the queue depth or the queue must backpressure.
+
+R10 CROSS-CHANNEL ALIGNMENT                                                      MATCH
+  QICK   T10: SG0/SG1 equal due -> same sg_clk cycle at every layer.
+  RISC-Q P7_T10: gate ch0 and readout-drive ch1 equal startTime -> output rise skew 0 cycles.
+
+R11 INTEGRITY / RESET                                                            RISK
+  QICK   dispatcher FIFOs are flushed on core reset (flush_i(core_rst)); no abort test run.
+         Integrity fails only under SG backpressure (F1/F2).
+  RISC-Q P8_T2 (driver flow, reset re-asserted 300 cycles after release, rerun without reload):
+         the aborted run's 2 queued pulses still play, interleaved with the rerun's 2 -> 4 pulses
+         for 2 planned. riscqReset does not reach the channels (built in dspCd).
+         P9_T1 (power-up, no host hold during load): 2 stray output pulses and 8 dropped queue
+         pushes before the host's reset; riscqResetHostCd has no init value although run.py
+         documents "Powers up asserted" (PulseTableSoc.scala:283-290).
+  Conversion: "reset = clean slate" does not hold on RISC-Q. Testbenches and the adapter must
+         drain/flush the channels explicitly or wait out every scheduled pulse before rerunning.
+
+
+OTHER OBSERVATIONS
+------------------
+* Committed risc-q/src/riscq/soc/sim/sw/pulse_sched.elf does not match pulse_sched.S
+  (80 vs 20 words); the probes are rebuilt from source with riscv64-unknown-elf-gcc.
+* First Mill build in this tree took 39 min (SpinalHDL compile); cached runs take ~7-30 s.
+  "Worker wire broken" -> ~/projects/RISC-Q/mill shutdown.
+* Analysis note: pairing is computed from per-queue push/pop logs (ev_queue_push/pop.csv) as the
+  value in effect at output start; an earlier "last popped value" method gave false mismatches
+  when pulses are closer than the amp lead (34 cycles).
+
+
+PROBE INDEX
+-----------
+P1_T1 T2 T3a T3c  time reference                    MATCH R4 / DIFFERS R1-R3
+P2_T5             overlap                            RISK R5 (29/60)
+P3_T4             back-to-back, explicit times       RISK R5 (59/60)
+P3_auto           back-to-back, auto-advance         OK (+1 vs planned = QICK-like chain)
+P4_T6, P4_freq    issue order != due order           RISK R6 (2/60, then +301 late)
+P5_T8             late command                       RISK R8 (stale params ~32 batches)
+P6_n4, P6_n5      4 / 5 pending                      OK
+P6_n8             8 pending                          RISK R9 (3 silently dropped)
+P6_same5          5 same-due                         RISK R5/R7 (4 of 5 cut to 2/12)
+P7_T10            cross-channel                      MATCH R10
+P8_T2             abort + rerun                      RISK R11 (4 pulses for 2)
+P9_T1             power-up window                    RISK R11 (2 stray pulses, 8 drops)

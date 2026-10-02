@@ -1,0 +1,31 @@
+RISC-Q timing summary: riscq_runs/P9_T1  channel 0 (gate)
+elf=/home/amigoyith/projects/HRL_clinic/verification/timing/riscq_programs/P9_T1/prog.elf  mode=powerup  abort=none  window starts at cyc 28264
+post-release counts: E0i 1, E0 1, E1 1, E2 1, output bursts 1
+
+INTEGRITY
+  PASS: every fire reached E0, E1, E2
+
+ACCEPTANCE
+  store -> fire decoded E0-E0i [cyc]     : 4
+  fire -> queue push E1-E0 [cyc]         : 2
+  lead at timeline (due - ch_time) [cyc] : 833
+
+START
+  dur pop - due [cyc]                    : -2
+  per-queue pop lead vs due              : amp-34 phase-35 freqC-36 freqP-52 addr-11 dur-2
+  output rise - due [cyc]                : 0
+  output duration vs dur                 : 60 vs 60
+  store -> output rise [cyc]             : 839
+
+BEFORE WINDOW (power-up / load traffic; channels are not reset by riscqReset)
+  RfCmds 40, fires 2, output pulses 2
+
+QUEUE PUSH DROPS (push.valid && !push.ready; queue depth 4, no backpressure to the CPU)
+  pre-release ch0_freqCQ_push_dropped: 4
+  pre-release ch0_freqPQ_push_dropped: 4
+
+PROBE CHECKS (planned pulses from manifest.json)
+  ch0: planned 1, pushed 1, dur-queue drops 0, released 1, output bursts 1
+
+ATTENTION
+  - 2 output pulse(s) BEFORE the analysis window (power-up / load traffic)

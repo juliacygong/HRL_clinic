@@ -1,0 +1,14 @@
+key,value
+elf,/home/amigoyith/projects/HRL_clinic/verification/timing/riscq_programs/P4_T6/prog.elf
+clock,dspCd period 10 sim units (arbitrary); time = batch counter, 1 per dsp cycle
+mode,driver
+abort,none
+host_assert_before_load_cyc,51
+host_release_write_cyc,28173
+window_start_cyc,28185
+release_0_cyc,1
+release_1_cyc,28185
+final_release_cyc,28185
+final_release_time,28184
+log_end_cyc,31186
+post_cycles,3000

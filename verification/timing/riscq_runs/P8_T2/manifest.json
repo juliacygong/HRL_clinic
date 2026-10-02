@@ -1,0 +1,34 @@
+{
+  "probe": "P8_T2",
+  "why": "rerun after abort: pulses scheduled far ahead, reset re-asserted before they play",
+  "qick_test": "T2",
+  "qick_desc": "two pulses, idle gap 0.5 us",
+  "base_offset_batches": 2396,
+  "batch_mhz": 599.04,
+  "waits_batches": {},
+  "text_bytes": 252,
+  "pulses": [
+    {
+      "k": 0,
+      "ch": 0,
+      "slot": 0,
+      "qick_t_us": 0.5,
+      "start_offset": 300,
+      "dur": 60,
+      "amp": 3277,
+      "freq16": 1800,
+      "explicit_start": true
+    },
+    {
+      "k": 1,
+      "ch": 0,
+      "slot": 1,
+      "qick_t_us": 1.0,
+      "start_offset": 599,
+      "dur": 60,
+      "amp": 6553,
+      "freq16": 1800,
+      "explicit_start": true
+    }
+  ]
+}

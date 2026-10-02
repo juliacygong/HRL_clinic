@@ -1,0 +1,13 @@
+key,value
+elf,/home/amigoyith/projects/HRL_clinic/verification/timing/riscq_programs/P9_T1/prog.elf
+clock,dspCd period 10 sim units (arbitrary); time = batch counter, 1 per dsp cycle
+mode,powerup
+abort,none
+host_release_write_cyc,28252
+window_start_cyc,28264
+release_0_cyc,1
+release_1_cyc,28264
+final_release_cyc,28264
+final_release_time,28263
+log_end_cyc,31265
+post_cycles,3000

@@ -1,0 +1,34 @@
+RISC-Q timing summary: riscq_runs/P6_same5  channel 0 (gate)
+elf=/home/amigoyith/projects/HRL_clinic/verification/timing/riscq_programs/P6_same5/prog.elf  mode=driver  abort=none  window starts at cyc 28185
+post-release counts: E0i 5, E0 5, E1 5, E2 5, output bursts 1
+
+INTEGRITY
+  PASS: every fire reached E0, E1, E2
+
+ACCEPTANCE
+  store -> fire decoded E0-E0i [cyc]     : 4
+  fire -> queue push E1-E0 [cyc]         : 2
+  lead at timeline (due - ch_time) [cyc] : 637..833
+
+START
+  dur pop - due [cyc]                    : -2..6
+  per-queue pop lead vs due              : amp-26 phase-27 freqC-28 freqP-44 addr-3 dur-2
+  output rise - due [cyc]                : n/a
+  output duration vs dur                 : n/a vs 12
+  store -> output rise [cyc]             : n/a
+
+BEFORE WINDOW (power-up / load traffic; channels are not reset by riscqReset)
+  RfCmds 0, fires 0, output pulses 0
+
+QUEUE PUSH DROPS (push.valid && !push.ready; queue depth 4, no backpressure to the CPU)
+  none
+
+PROBE CHECKS (planned pulses from manifest.json)
+  ch0: planned 5, pushed 5, dur-queue drops 0, released 5, output bursts 1
+
+ATTENTION
+  - ch0 pulse 0 (occ 0): TRUNCATED to 2/12
+  - ch0 pulse 1 (occ 0): LATE release (+2 cyc); TRUNCATED to 2/12
+  - ch0 pulse 2 (occ 0): LATE release (+4 cyc); TRUNCATED to 2/12
+  - ch0 pulse 3 (occ 0): LATE release (+6 cyc); TRUNCATED to 2/12
+  - ch0 pulse 4 (occ 0): LATE release (+8 cyc)

@@ -1,0 +1,136 @@
+QICK CONTROLLER TIMING CONTRACT (tProcV2 -> SGv6), REFERENCE FOR THE RISC-Q ADAPTER
+==================================================================================
+Status : measured reference, 2026-09-27. Machine-checkable version: tables/contract.csv
+Source : local ~/projects/HRL_clinic @ 79e8d24a + uncommitted timing monitors
+         (emulator/testbench/timing_monitors.svh, 1 include line in QICKEmu_harness.sv)
+DUT    : qick_dut.sv with EMULATOR=1, Verilator 5.042 (VERILATOR_ROOT=~/projects/qick/emulator/submodules/verilator)
+Data   : verification/timing/runs/ (15 runs: test_sim, T1-T10, T7 at 4 start delays; T9b = failure evidence)
+Label  : "QICKEmu reference", NOT hardware. See section 5 for which numbers are architectural.
+
+
+1. WHAT THIS CONTRACT IS FOR
+----------------------------
+The controller team is building an adapter so RISC-Q can replace tProcV2. Equivalence is judged on
+externally observable behavior at the pulse path into signal generator SGv6, not on tProc internals.
+This file states, per rule: what tProcV2 does, the measured value, the tolerance, and how to check an
+adapter with the same monitors.
+
+Two possible adapter boundaries (pick one; the rules say which boundary they apply to):
+  B1 = E2  adapter replaces tProc upstream of the SG CDC and drives the 168-bit tProc wave format on
+           tproc_sg{N}cdc_axis_{tdata[167:0],tvalid,tready} in the t_clk domain (430 MHz in harness).
+           Everything from axis_cdcsync_v1 onward stays the QICK reference.
+  B2 = E3  adapter drives SGv6 s1_axis directly: sgt{N}_sg{N}_axis_{tdata[159:0],tvalid,tready}, sg_clk
+           (599.04 MHz, 16 samples/clk).
+Observable end point for both: E4 (SGv6 load_int) and E5 (en_o), sg_clk.
+
+
+2. DEFINITIONS
+--------------
+due (T)      absolute due time of a command in t_clk ticks: sext(p_time) + c_time_ref (qproc_dispatcher.sv).
+             For RISC-Q the equivalent is the scheduled start time mapped onto the same time base.
+t_clk        2.324 ns (harness)    sg_clk 1.669344 ns    c_clk 5.000 ns
+head release command released when it reaches the head of its port FIFO after its due time
+             (not waiting behind another command).
+idle SGv6    SGv6 not playing a previous pulse when the command arrives.
+Events       E0i issue, E0 accept, E1 on timeline, E2 release (B1), E3 SGv6 accept (B2),
+             E4 SGv6 start, E5 output enable. Exact signals: timing_reference.txt section 3.
+
+
+3. RULES
+--------
+Scope: ARCH = decided by shared RTL (expected on hardware);  EMU = value set by emulator models.
+
+R1  Release time (B1)                                                            ARCH
+    A head release appears at E2 when t_time_abs = T + 4, exactly (strict time_abs > T, registered
+    compare, registered tvalid). Measured: +4 t_clk in all 322 on-time head releases, 0 spread over
+    four start delays. Tolerance: 0 t_clk.
+
+R2  Due -> SGv6 accept (B2)                                                      EMU
+    E3 - T = 36.02 .. 37.67 ns (21.6 .. 22.6 sg_clk). Tolerance: that band (1 sg_clk wide; the
+    t_clk->sg_clk phase decides where in the band).
+
+R3  Due -> start, end-to-end (B1 and B2)                                         EMU
+    Idle SGv6: E4 - T = 37.69 .. 39.34 ns, spread 0.99 sg_clk. E4 - E3 = 1 sg_clk exactly.
+    Tolerance: +/- 1 sg_clk around the band. This is the number to match if the adapter does not
+    reproduce E2/E3 timing exactly but must start pulses where QICK does.
+
+R4  Output pipeline and duration                                                 ARCH
+    E5 rise - E4 = 9 sg_clk exactly. Output burst length = sum of nsamp of the commands chained into
+    it (nsamp in sg_clk cycles). Tolerance: 0.
+
+R5  Busy SGv6 / chaining                                                         ARCH
+    E4[k] = max(E3[k] + 1 sg_clk, E4[k-1] + nsamp[k-1]). A command that arrives while the previous
+    pulse plays waits in the SGv6 FIFO and starts exactly at its end, gapless (T5: arrived on time,
+    started 88 ns after due). A command arriving exactly at the end also chains gaplessly (T4).
+    No error or flag is raised for a late start.
+
+R6  Ordering                                                                     ARCH
+    Per port, commands are released and played in ISSUE order, never re-sorted by due time: only the
+    FIFO head is compared (T6: pulse due 645 written after pulse due 860 released at 868, played
+    638 ns late). Ordering across E0i, E0, E2, E3, E4 is identical in every passing run.
+
+R7  Same-port throughput                                                          EMU (value) / ARCH (limit exists)
+    Consecutive releases on one port are >= 4 t_clk apart (queued same-due commands: 4 t_clk each).
+
+R8  Late command                                                                  ARCH
+    If T has already passed when the command is issued, it is released immediately: E2 follows
+    issue by 20.4 ns (8.8 t_clk) (T8). No error indication.
+
+R9  Acceptance                                                                    ARCH
+    The controller accepts a command 1 c_clk after issue (E0 - E0i = 1, all runs). Each wave port
+    FIFO holds 256 commands (FIFO_DEPTH=8). When any port FIFO is full the core halts (core_en=0)
+    until space frees; nothing is dropped (T9a: 256 accepted in 3.8 us, core halted 7.11 us until
+    the first release, 45 stall intervals, all 300 commands delivered, release still exactly +4).
+    Unless TPROC_CFG[11] is set (not tested).
+
+R10 Cross-port alignment                                                          ARCH
+    Commands with equal due on SG0 and SG1 are released in the same t_clk cycle and reach E3, E4
+    and E5 in the same sg_clk cycle (T10: skew 0 at every layer). They share one CDC FIFO word.
+
+R11 Integrity                                                                     ARCH
+    Every issued command reaches E2, E3 and E4 exactly once, in order (all runs except T9b).
+    An adapter must hold tdata stable while tvalid && !tready (AXI-Stream) and must never present
+    tvalid to SGv6 while tready is low with changing data: SGv6 writes its FIFO on tvalid alone
+    (signal_gen_top.v fifo_wr_en = s1_axis_tvalid_i).
+
+
+4. VALIDITY LIMIT: NO SG BACKPRESSURE
+-------------------------------------
+The reference is NOT valid when an SGv6 and the shared CDC fill up (more than ~32 commands pending
+for one SG). Test T9b (300 same-due commands) shows:
+  F1  tProc dispatcher changes tdata while tvalid && !tready (qproc_dispatcher.sv:384-400, shared RTL):
+      held command replaced by the next one -> 4 lost, 3 duplicated, 1 all-zero command at E2.
+      Evidence: runs/T9b/d0_trace/f1_dispatcher_skip.{png,csv}
+  F2  Emulator CDC FIFO (fifo_dc_sv + bram_dp_behav, EMULATOR=1 only) re-delivers a stale word after
+      a write lands while SGv6 is stalled -> 52 lost, 4 duplicated at E3.
+      Evidence: runs/T9b/d0_trace/f2_cdc_stale_read.{png,csv}
+Consequence: compare an adapter against this reference only with programs that keep SGv6 from
+backing up (R5 chaining up to the SGv6/CDC depth is fine). F1 is a QICK RTL issue worth reporting
+upstream / checking on hardware; F2 is an emulator-model bug.
+
+
+5. WHICH NUMBERS TRANSFER TO HARDWARE
+-------------------------------------
+ARCH rules (R1, R4, R5, R6, R8, R9, R10, R11, and the existence of the R7 limit) come from RTL shared
+by emulator and hardware builds. EMU values depend on models that differ on hardware:
+  E0->E1  dispatcher FIFO = _qproc_ips.sv `ifdef VERILATOR BRAM_FIFO_DC_2 (hardware: XPM)
+  E2->E3  CDC = fifo_dc_sv with 16-stage write-pointer sync (hardware: fifo_dc_axi_xpm) -> R2, R3
+  E3->E4  SGv6 FIFO = fifo_behav (hardware: fifo_xpm)
+  R7      4 t_clk spacing includes the Verilator FIFO refill cycle
+  time    emulator time adder ignores carry-in on time updates (+dt vs +dt+1); no test used updates
+Clocks are ideal and asynchronous in the harness (t_clk 430.29 MHz vs compiler f_time 430.08 MHz).
+A Vivado/xsim run with EMULATOR=0 would calibrate R2, R3, R7.
+
+
+6. HOW TO CHECK AN ADAPTER
+--------------------------
+1. Instantiate the adapter in the QICKEmu harness at B1 or B2, keep timing_monitors.svh.
+   At B1 the E2/E1 dispatcher-internal columns will not exist; E2 = the adapter's handshake.
+2. Drive the same test intents as T1-T10 (manifest.json in emulator/artifacts/timing/<test>/ gives
+   pulses, due times, nsamp, gains; unique gains are the fingerprints).
+3. Run verification/timing/timing_analyze.py on each run dir (and --cross for T10), and compare with
+   the reference runs in verification/timing/runs/ using tables/contract.csv:
+     integrity PASS (R6, R11); release/accept values within tolerance (R1-R3); R4, R5, R10 exact;
+     R8/R9 behavior (late = immediate, full = stall not drop).
+4. Report deviations per rule ID. A deviation in an EMU value is expected if the adapter replaces
+   modeled blocks; a deviation in an ARCH rule is a functional difference.

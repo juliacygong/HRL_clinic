@@ -1,0 +1,8 @@
+key,value
+elf,src/riscq/soc/sim/sw/pulse_sched.elf
+clock,dspCd period 10 sim units (arbitrary); time = batch counter, 1 per dsp cycle
+host_release_write_cyc,28252
+final_release_cyc,28264
+final_release_time,28263
+log_end_cyc,31265
+post_cycles,3000

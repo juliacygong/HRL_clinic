@@ -1,0 +1,13 @@
+sim_time,cyc,time,rst,kind
+13335,1316,1315,0,ch0_freqCQ_push_dropped
+13335,1316,1315,0,ch0_freqPQ_push_dropped
+14215,1404,1403,0,ch0_freqCQ_push_dropped
+14215,1404,1403,0,ch0_freqPQ_push_dropped
+15095,1492,1491,0,ch0_freqCQ_push_dropped
+15095,1492,1491,0,ch0_freqPQ_push_dropped
+16085,1591,1590,0,ch0_freqCQ_push_dropped
+16085,1591,1590,0,ch0_freqPQ_push_dropped
+17065,1689,1688,0,ch0_freqCQ_push_dropped
+17065,1689,1688,0,ch0_freqPQ_push_dropped
+18135,1796,1795,0,ch0_freqCQ_push_dropped
+18135,1796,1795,0,ch0_freqPQ_push_dropped

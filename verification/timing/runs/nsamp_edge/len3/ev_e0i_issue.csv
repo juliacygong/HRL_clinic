@@ -1,0 +1,2 @@
+seq,time_ps,c_cyc,p_addr,p_time,c_time_ref,c_time_usr,conf,nsamp,gain,addr,phase,freq
+0,2662500.000,499,0,215,430,4294966893,0009,3,0ccc,000000,00000000,02abc2bc

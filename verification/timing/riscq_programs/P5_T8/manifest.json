@@ -1,0 +1,36 @@
+{
+  "probe": "P5_T8",
+  "why": "late command: wait until 1.0 us, then pulse due 0.8 us",
+  "qick_test": "T8",
+  "qick_desc": "late command: core waits until 1.0 us, then issues a pulse due at 0.8 us",
+  "base_offset_batches": 599,
+  "batch_mhz": 599.04,
+  "waits_batches": {
+    "1": 599
+  },
+  "text_bytes": 276,
+  "pulses": [
+    {
+      "k": 0,
+      "ch": 0,
+      "slot": 0,
+      "qick_t_us": 0.5,
+      "start_offset": 300,
+      "dur": 60,
+      "amp": 3277,
+      "freq16": 1800,
+      "explicit_start": true
+    },
+    {
+      "k": 1,
+      "ch": 0,
+      "slot": 1,
+      "qick_t_us": 0.8,
+      "start_offset": 479,
+      "dur": 60,
+      "amp": 6553,
+      "freq16": 1800,
+      "explicit_start": true
+    }
+  ]
+}

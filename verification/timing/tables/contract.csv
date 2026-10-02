@@ -1,0 +1,15 @@
+rule,boundary,name,metric,unit,ref_min,ref_max,tolerance,scope,evidence,how_to_check
+R1,B1,release time,t_time_abs(E2) - due,t_clk,4,4,0,ARCH,all on-time head releases (322),timing_report.csv release_offset_tclk (release_kind=head)
+R2,B2,due -> SGv6 accept,E3 - due,ns,36.018,37.669,band (1 sg_clk),EMU,"T1-T10, T7 sweep",E3 time_ps - due_ps
+R3,"B1,B2",due -> SGv6 start (idle),E4 - due,ns,37.687,39.338,+/-1 sg_clk,EMU,"322 samples, spread 0.99 sg_clk","timing_report.csv due_to_start_ns (head, not chained)"
+R3b,"B1,B2",SGv6 accept -> start (idle),E4 - E3,sg_clk,1,1,0,ARCH,all runs,queue_wait_sgclk (not chained)
+R4,"B1,B2",output pipeline,E5rise - E4,sg_clk,9,9,0,ARCH,all bursts,timing_summary.txt OUTPUT BURSTS
+R4b,"B1,B2",burst length,E5fall - E5rise,sg_clk,sum(nsamp),sum(nsamp),0,ARCH,all bursts,OUTPUT BURSTS OK
+R5,"B1,B2",chaining,"E4[k] - max(E3[k]+1, E4[k-1]+nsamp[k-1])",sg_clk,0,0,0,ARCH,"T4,T5,test_sim",start_spacing_sgclk = prev nsamp when busy
+R6,"B1,B2",ordering,order at E2/E3/E4 vs issue order,-,identical,identical,none,ARCH,all runs; T6 due-order violation by design,integrity PASS
+R7,B1,same-port release spacing,E2[k+1] - E2[k] (queued),t_clk,4,4,>= (EMU value),EMU,"test_sim, T6, T9a/b",release_spacing_tclk (queued)
+R8,B1,late command,E2 - E0i when due passed,ns,20.394,20.394,"behavior: immediate, no flag",ARCH,T8,ev_e0i/ev_e2 time_ps
+R9,B1,acceptance,E0 - E0i,c_clk,1,1,0,ARCH,all runs,accept_cclk
+R9b,B1,full FIFO,"core_en=0 stall, no drop; capacity 256/port",-,stall,stall,behavior,ARCH,"T9a: 7.11 us first stall, 45 intervals, 300/300 delivered",CORE ACCEPTANCE STALL + integrity PASS
+R10,"B1,B2",cross-port skew (equal due),E3/E4/E5 SG1 - SG0,sg_clk,0,0,0,ARCH,T10,timing_analyze.py --cross
+R11,"B1,B2",integrity,each command once at E2/E3/E4; tdata stable while tvalid&&!tready,-,PASS,PASS,none,ARCH,all runs except T9b (F1/F2),integrity PASS; ev_flags.csv no violations

@@ -1,0 +1,927 @@
+macros:
+	WriteReg(dst='s_core_w1', src=0)
+	Delay(t=1.0, auto=True, gens=True, ros=True, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e703b0250>}, t_regs={'t': 430})
+	OpenLoop(n=1, name='reps')
+	Pulse(ch=0, name='p0', t=10.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702783d0>}, t_regs={'t': 4301})
+	Pulse(ch=0, name='p1', t=10.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e70278650>}, t_regs={'t': 4322})
+	Pulse(ch=0, name='p2', t=10.1, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702781d0>}, t_regs={'t': 4344})
+	Pulse(ch=0, name='p3', t=10.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e70278450>}, t_regs={'t': 4365})
+	Pulse(ch=0, name='p4', t=10.2, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702785d0>}, t_regs={'t': 4387})
+	Pulse(ch=0, name='p5', t=10.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702788d0>}, t_regs={'t': 4408})
+	Pulse(ch=0, name='p6', t=10.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e70278ad0>}, t_regs={'t': 4430})
+	Pulse(ch=0, name='p7', t=10.35, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e70278cd0>}, t_regs={'t': 4451})
+	Pulse(ch=0, name='p8', t=10.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e70278ed0>}, t_regs={'t': 4473})
+	Pulse(ch=0, name='p9', t=10.45, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702790d0>}, t_regs={'t': 4494})
+	Pulse(ch=0, name='p10', t=10.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702792d0>}, t_regs={'t': 4516})
+	Pulse(ch=0, name='p11', t=10.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702794d0>}, t_regs={'t': 4537})
+	Pulse(ch=0, name='p12', t=10.6, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702796d0>}, t_regs={'t': 4559})
+	Pulse(ch=0, name='p13', t=10.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702798d0>}, t_regs={'t': 4580})
+	Pulse(ch=0, name='p14', t=10.7, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e70279ad0>}, t_regs={'t': 4602})
+	Pulse(ch=0, name='p15', t=10.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e70279cd0>}, t_regs={'t': 4623})
+	Pulse(ch=0, name='p16', t=10.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e70279ed0>}, t_regs={'t': 4645})
+	Pulse(ch=0, name='p17', t=10.85, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027a0d0>}, t_regs={'t': 4666})
+	Pulse(ch=0, name='p18', t=10.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027a2d0>}, t_regs={'t': 4688})
+	Pulse(ch=0, name='p19', t=10.95, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027a4d0>}, t_regs={'t': 4709})
+	Pulse(ch=0, name='p20', t=11.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027a6d0>}, t_regs={'t': 4731})
+	Pulse(ch=0, name='p21', t=11.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027a8d0>}, t_regs={'t': 4752})
+	Pulse(ch=0, name='p22', t=11.1, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027aad0>}, t_regs={'t': 4774})
+	Pulse(ch=0, name='p23', t=11.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027acd0>}, t_regs={'t': 4795})
+	Pulse(ch=0, name='p24', t=11.2, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027aed0>}, t_regs={'t': 4817})
+	Pulse(ch=0, name='p25', t=11.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027b0d0>}, t_regs={'t': 4838})
+	Pulse(ch=0, name='p26', t=11.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027b2d0>}, t_regs={'t': 4860})
+	Pulse(ch=0, name='p27', t=11.35, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027b4d0>}, t_regs={'t': 4881})
+	Pulse(ch=0, name='p28', t=11.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027b6d0>}, t_regs={'t': 4903})
+	Pulse(ch=0, name='p29', t=11.45, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027b8d0>}, t_regs={'t': 4924})
+	Pulse(ch=0, name='p30', t=11.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027bad0>}, t_regs={'t': 4946})
+	Pulse(ch=0, name='p31', t=11.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b8150>}, t_regs={'t': 4967})
+	Pulse(ch=0, name='p32', t=11.6, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b8350>}, t_regs={'t': 4989})
+	Pulse(ch=0, name='p33', t=11.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b8550>}, t_regs={'t': 5010})
+	Pulse(ch=0, name='p34', t=11.7, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b8750>}, t_regs={'t': 5032})
+	Pulse(ch=0, name='p35', t=11.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b8950>}, t_regs={'t': 5053})
+	Pulse(ch=0, name='p36', t=11.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b8b50>}, t_regs={'t': 5075})
+	Pulse(ch=0, name='p37', t=11.85, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b8d50>}, t_regs={'t': 5096})
+	Pulse(ch=0, name='p38', t=11.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b8f50>}, t_regs={'t': 5118})
+	Pulse(ch=0, name='p39', t=11.95, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b9150>}, t_regs={'t': 5139})
+	Pulse(ch=0, name='p40', t=12.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b9350>}, t_regs={'t': 5161})
+	Pulse(ch=0, name='p41', t=12.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b9550>}, t_regs={'t': 5182})
+	Pulse(ch=0, name='p42', t=12.1, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b9750>}, t_regs={'t': 5204})
+	Pulse(ch=0, name='p43', t=12.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b9950>}, t_regs={'t': 5225})
+	Pulse(ch=0, name='p44', t=12.2, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b9b50>}, t_regs={'t': 5247})
+	Pulse(ch=0, name='p45', t=12.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b9d50>}, t_regs={'t': 5268})
+	Pulse(ch=0, name='p46', t=12.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702b9f50>}, t_regs={'t': 5290})
+	Pulse(ch=0, name='p47', t=12.35, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ba150>}, t_regs={'t': 5311})
+	Pulse(ch=0, name='p48', t=12.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ba350>}, t_regs={'t': 5333})
+	Pulse(ch=0, name='p49', t=12.45, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ba550>}, t_regs={'t': 5354})
+	Pulse(ch=0, name='p50', t=12.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ba750>}, t_regs={'t': 5376})
+	Pulse(ch=0, name='p51', t=12.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ba950>}, t_regs={'t': 5398})
+	Pulse(ch=0, name='p52', t=12.6, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bab50>}, t_regs={'t': 5419})
+	Pulse(ch=0, name='p53', t=12.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bad50>}, t_regs={'t': 5441})
+	Pulse(ch=0, name='p54', t=12.7, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702baf50>}, t_regs={'t': 5462})
+	Pulse(ch=0, name='p55', t=12.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bb150>}, t_regs={'t': 5484})
+	Pulse(ch=0, name='p56', t=12.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bb350>}, t_regs={'t': 5505})
+	Pulse(ch=0, name='p57', t=12.85, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bb550>}, t_regs={'t': 5527})
+	Pulse(ch=0, name='p58', t=12.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bb750>}, t_regs={'t': 5548})
+	Pulse(ch=0, name='p59', t=12.95, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bb950>}, t_regs={'t': 5570})
+	Pulse(ch=0, name='p60', t=13.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bbb50>}, t_regs={'t': 5591})
+	Pulse(ch=0, name='p61', t=13.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bbd50>}, t_regs={'t': 5613})
+	Pulse(ch=0, name='p62', t=13.1, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027bed0>}, t_regs={'t': 5634})
+	Pulse(ch=0, name='p63', t=13.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bc1d0>}, t_regs={'t': 5656})
+	Pulse(ch=0, name='p64', t=13.2, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bc3d0>}, t_regs={'t': 5677})
+	Pulse(ch=0, name='p65', t=13.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bc5d0>}, t_regs={'t': 5699})
+	Pulse(ch=0, name='p66', t=13.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bc7d0>}, t_regs={'t': 5720})
+	Pulse(ch=0, name='p67', t=13.35, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bc9d0>}, t_regs={'t': 5742})
+	Pulse(ch=0, name='p68', t=13.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bcbd0>}, t_regs={'t': 5763})
+	Pulse(ch=0, name='p69', t=13.45, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bcdd0>}, t_regs={'t': 5785})
+	Pulse(ch=0, name='p70', t=13.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bcfd0>}, t_regs={'t': 5806})
+	Pulse(ch=0, name='p71', t=13.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bd1d0>}, t_regs={'t': 5828})
+	Pulse(ch=0, name='p72', t=13.6, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bd3d0>}, t_regs={'t': 5849})
+	Pulse(ch=0, name='p73', t=13.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bd5d0>}, t_regs={'t': 5871})
+	Pulse(ch=0, name='p74', t=13.7, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bd7d0>}, t_regs={'t': 5892})
+	Pulse(ch=0, name='p75', t=13.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bd9d0>}, t_regs={'t': 5914})
+	Pulse(ch=0, name='p76', t=13.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bdbd0>}, t_regs={'t': 5935})
+	Pulse(ch=0, name='p77', t=13.85, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bddd0>}, t_regs={'t': 5957})
+	Pulse(ch=0, name='p78', t=13.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bdfd0>}, t_regs={'t': 5978})
+	Pulse(ch=0, name='p79', t=13.95, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702be1d0>}, t_regs={'t': 6000})
+	Pulse(ch=0, name='p80', t=14.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702be3d0>}, t_regs={'t': 6021})
+	Pulse(ch=0, name='p81', t=14.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702be5d0>}, t_regs={'t': 6043})
+	Pulse(ch=0, name='p82', t=14.100000000000001, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702be7d0>}, t_regs={'t': 6064})
+	Pulse(ch=0, name='p83', t=14.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702be9d0>}, t_regs={'t': 6086})
+	Pulse(ch=0, name='p84', t=14.2, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bebd0>}, t_regs={'t': 6107})
+	Pulse(ch=0, name='p85', t=14.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bedd0>}, t_regs={'t': 6129})
+	Pulse(ch=0, name='p86', t=14.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702befd0>}, t_regs={'t': 6150})
+	Pulse(ch=0, name='p87', t=14.350000000000001, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bf1d0>}, t_regs={'t': 6172})
+	Pulse(ch=0, name='p88', t=14.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bf3d0>}, t_regs={'t': 6193})
+	Pulse(ch=0, name='p89', t=14.45, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bf5d0>}, t_regs={'t': 6215})
+	Pulse(ch=0, name='p90', t=14.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bf7d0>}, t_regs={'t': 6236})
+	Pulse(ch=0, name='p91', t=14.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bf9d0>}, t_regs={'t': 6258})
+	Pulse(ch=0, name='p92', t=14.600000000000001, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bfbd0>}, t_regs={'t': 6279})
+	Pulse(ch=0, name='p93', t=14.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bfdd0>}, t_regs={'t': 6301})
+	Pulse(ch=0, name='p94', t=14.7, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bbf50>}, t_regs={'t': 6322})
+	Pulse(ch=0, name='p95', t=14.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c4250>}, t_regs={'t': 6344})
+	Pulse(ch=0, name='p96', t=14.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c4450>}, t_regs={'t': 6365})
+	Pulse(ch=0, name='p97', t=14.850000000000001, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c4650>}, t_regs={'t': 6387})
+	Pulse(ch=0, name='p98', t=14.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c4850>}, t_regs={'t': 6408})
+	Pulse(ch=0, name='p99', t=14.95, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c4a50>}, t_regs={'t': 6430})
+	Pulse(ch=0, name='p100', t=15.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c4c50>}, t_regs={'t': 6451})
+	Pulse(ch=0, name='p101', t=15.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c4e50>}, t_regs={'t': 6473})
+	Pulse(ch=0, name='p102', t=15.100000000000001, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c5050>}, t_regs={'t': 6494})
+	Pulse(ch=0, name='p103', t=15.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c5250>}, t_regs={'t': 6516})
+	Pulse(ch=0, name='p104', t=15.2, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c5450>}, t_regs={'t': 6537})
+	Pulse(ch=0, name='p105', t=15.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c5650>}, t_regs={'t': 6559})
+	Pulse(ch=0, name='p106', t=15.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c5850>}, t_regs={'t': 6580})
+	Pulse(ch=0, name='p107', t=15.350000000000001, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c5a50>}, t_regs={'t': 6602})
+	Pulse(ch=0, name='p108', t=15.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c5c50>}, t_regs={'t': 6623})
+	Pulse(ch=0, name='p109', t=15.45, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c5e50>}, t_regs={'t': 6645})
+	Pulse(ch=0, name='p110', t=15.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c6050>}, t_regs={'t': 6666})
+	Pulse(ch=0, name='p111', t=15.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c6250>}, t_regs={'t': 6688})
+	Pulse(ch=0, name='p112', t=15.600000000000001, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c6450>}, t_regs={'t': 6709})
+	Pulse(ch=0, name='p113', t=15.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c6650>}, t_regs={'t': 6731})
+	Pulse(ch=0, name='p114', t=15.7, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c6850>}, t_regs={'t': 6752})
+	Pulse(ch=0, name='p115', t=15.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c6a50>}, t_regs={'t': 6774})
+	Pulse(ch=0, name='p116', t=15.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c6c50>}, t_regs={'t': 6795})
+	Pulse(ch=0, name='p117', t=15.850000000000001, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c6e50>}, t_regs={'t': 6817})
+	Pulse(ch=0, name='p118', t=15.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c7050>}, t_regs={'t': 6838})
+	Pulse(ch=0, name='p119', t=15.95, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c7250>}, t_regs={'t': 6860})
+	Pulse(ch=0, name='p120', t=16.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c7450>}, t_regs={'t': 6881})
+	Pulse(ch=0, name='p121', t=16.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c7650>}, t_regs={'t': 6903})
+	Pulse(ch=0, name='p122', t=16.1, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c7850>}, t_regs={'t': 6924})
+	Pulse(ch=0, name='p123', t=16.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c7a50>}, t_regs={'t': 6946})
+	Pulse(ch=0, name='p124', t=16.2, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c7c50>}, t_regs={'t': 6967})
+	Pulse(ch=0, name='p125', t=16.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e7027bcd0>}, t_regs={'t': 6989})
+	Pulse(ch=0, name='p126', t=16.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c80d0>}, t_regs={'t': 7010})
+	Pulse(ch=0, name='p127', t=16.35, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c82d0>}, t_regs={'t': 7032})
+	Pulse(ch=0, name='p128', t=16.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c84d0>}, t_regs={'t': 7053})
+	Pulse(ch=0, name='p129', t=16.45, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c86d0>}, t_regs={'t': 7075})
+	Pulse(ch=0, name='p130', t=16.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c88d0>}, t_regs={'t': 7096})
+	Pulse(ch=0, name='p131', t=16.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c8ad0>}, t_regs={'t': 7118})
+	Pulse(ch=0, name='p132', t=16.6, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c8cd0>}, t_regs={'t': 7139})
+	Pulse(ch=0, name='p133', t=16.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c8ed0>}, t_regs={'t': 7161})
+	Pulse(ch=0, name='p134', t=16.7, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c90d0>}, t_regs={'t': 7182})
+	Pulse(ch=0, name='p135', t=16.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c92d0>}, t_regs={'t': 7204})
+	Pulse(ch=0, name='p136', t=16.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c94d0>}, t_regs={'t': 7225})
+	Pulse(ch=0, name='p137', t=16.85, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c96d0>}, t_regs={'t': 7247})
+	Pulse(ch=0, name='p138', t=16.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c98d0>}, t_regs={'t': 7268})
+	Pulse(ch=0, name='p139', t=16.95, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c9ad0>}, t_regs={'t': 7290})
+	Pulse(ch=0, name='p140', t=17.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c9cd0>}, t_regs={'t': 7311})
+	Pulse(ch=0, name='p141', t=17.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c9ed0>}, t_regs={'t': 7333})
+	Pulse(ch=0, name='p142', t=17.1, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ca0d0>}, t_regs={'t': 7354})
+	Pulse(ch=0, name='p143', t=17.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ca2d0>}, t_regs={'t': 7376})
+	Pulse(ch=0, name='p144', t=17.2, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ca4d0>}, t_regs={'t': 7397})
+	Pulse(ch=0, name='p145', t=17.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ca6d0>}, t_regs={'t': 7419})
+	Pulse(ch=0, name='p146', t=17.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ca8d0>}, t_regs={'t': 7440})
+	Pulse(ch=0, name='p147', t=17.35, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702caad0>}, t_regs={'t': 7462})
+	Pulse(ch=0, name='p148', t=17.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cacd0>}, t_regs={'t': 7483})
+	Pulse(ch=0, name='p149', t=17.45, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702caed0>}, t_regs={'t': 7505})
+	Pulse(ch=0, name='p150', t=17.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cb0d0>}, t_regs={'t': 7526})
+	Pulse(ch=0, name='p151', t=17.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cb2d0>}, t_regs={'t': 7548})
+	Pulse(ch=0, name='p152', t=17.6, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cb4d0>}, t_regs={'t': 7569})
+	Pulse(ch=0, name='p153', t=17.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cb6d0>}, t_regs={'t': 7591})
+	Pulse(ch=0, name='p154', t=17.7, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cb8d0>}, t_regs={'t': 7612})
+	Pulse(ch=0, name='p155', t=17.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cbad0>}, t_regs={'t': 7634})
+	Pulse(ch=0, name='p156', t=17.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cbcd0>}, t_regs={'t': 7655})
+	Pulse(ch=0, name='p157', t=17.85, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702c7e50>}, t_regs={'t': 7677})
+	Pulse(ch=0, name='p158', t=17.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cc150>}, t_regs={'t': 7698})
+	Pulse(ch=0, name='p159', t=17.95, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cc350>}, t_regs={'t': 7720})
+	Pulse(ch=0, name='p160', t=18.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cc550>}, t_regs={'t': 7741})
+	Pulse(ch=0, name='p161', t=18.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cc750>}, t_regs={'t': 7763})
+	Pulse(ch=0, name='p162', t=18.1, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cc950>}, t_regs={'t': 7784})
+	Pulse(ch=0, name='p163', t=18.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ccb50>}, t_regs={'t': 7806})
+	Pulse(ch=0, name='p164', t=18.200000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ccd50>}, t_regs={'t': 7827})
+	Pulse(ch=0, name='p165', t=18.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ccf50>}, t_regs={'t': 7849})
+	Pulse(ch=0, name='p166', t=18.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cd150>}, t_regs={'t': 7870})
+	Pulse(ch=0, name='p167', t=18.35, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cd350>}, t_regs={'t': 7892})
+	Pulse(ch=0, name='p168', t=18.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cd550>}, t_regs={'t': 7913})
+	Pulse(ch=0, name='p169', t=18.450000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cd750>}, t_regs={'t': 7935})
+	Pulse(ch=0, name='p170', t=18.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cd950>}, t_regs={'t': 7956})
+	Pulse(ch=0, name='p171', t=18.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cdb50>}, t_regs={'t': 7978})
+	Pulse(ch=0, name='p172', t=18.6, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cdd50>}, t_regs={'t': 7999})
+	Pulse(ch=0, name='p173', t=18.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cdf50>}, t_regs={'t': 8021})
+	Pulse(ch=0, name='p174', t=18.700000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ce150>}, t_regs={'t': 8042})
+	Pulse(ch=0, name='p175', t=18.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ce350>}, t_regs={'t': 8064})
+	Pulse(ch=0, name='p176', t=18.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ce550>}, t_regs={'t': 8086})
+	Pulse(ch=0, name='p177', t=18.85, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ce750>}, t_regs={'t': 8107})
+	Pulse(ch=0, name='p178', t=18.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ce950>}, t_regs={'t': 8129})
+	Pulse(ch=0, name='p179', t=18.950000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ceb50>}, t_regs={'t': 8150})
+	Pulse(ch=0, name='p180', t=19.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ced50>}, t_regs={'t': 8172})
+	Pulse(ch=0, name='p181', t=19.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cef50>}, t_regs={'t': 8193})
+	Pulse(ch=0, name='p182', t=19.1, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cf150>}, t_regs={'t': 8215})
+	Pulse(ch=0, name='p183', t=19.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cf350>}, t_regs={'t': 8236})
+	Pulse(ch=0, name='p184', t=19.200000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cf550>}, t_regs={'t': 8258})
+	Pulse(ch=0, name='p185', t=19.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cf750>}, t_regs={'t': 8279})
+	Pulse(ch=0, name='p186', t=19.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cf950>}, t_regs={'t': 8301})
+	Pulse(ch=0, name='p187', t=19.35, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cfb50>}, t_regs={'t': 8322})
+	Pulse(ch=0, name='p188', t=19.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cfd50>}, t_regs={'t': 8344})
+	Pulse(ch=0, name='p189', t=19.450000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cbed0>}, t_regs={'t': 8365})
+	Pulse(ch=0, name='p190', t=19.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d41d0>}, t_regs={'t': 8387})
+	Pulse(ch=0, name='p191', t=19.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d43d0>}, t_regs={'t': 8408})
+	Pulse(ch=0, name='p192', t=19.6, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d45d0>}, t_regs={'t': 8430})
+	Pulse(ch=0, name='p193', t=19.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d47d0>}, t_regs={'t': 8451})
+	Pulse(ch=0, name='p194', t=19.700000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d49d0>}, t_regs={'t': 8473})
+	Pulse(ch=0, name='p195', t=19.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d4bd0>}, t_regs={'t': 8494})
+	Pulse(ch=0, name='p196', t=19.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d4dd0>}, t_regs={'t': 8516})
+	Pulse(ch=0, name='p197', t=19.85, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d4fd0>}, t_regs={'t': 8537})
+	Pulse(ch=0, name='p198', t=19.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d51d0>}, t_regs={'t': 8559})
+	Pulse(ch=0, name='p199', t=19.950000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d53d0>}, t_regs={'t': 8580})
+	Pulse(ch=0, name='p200', t=20.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d55d0>}, t_regs={'t': 8602})
+	Pulse(ch=0, name='p201', t=20.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d57d0>}, t_regs={'t': 8623})
+	Pulse(ch=0, name='p202', t=20.1, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d59d0>}, t_regs={'t': 8645})
+	Pulse(ch=0, name='p203', t=20.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d5bd0>}, t_regs={'t': 8666})
+	Pulse(ch=0, name='p204', t=20.200000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d5dd0>}, t_regs={'t': 8688})
+	Pulse(ch=0, name='p205', t=20.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d5fd0>}, t_regs={'t': 8709})
+	Pulse(ch=0, name='p206', t=20.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d61d0>}, t_regs={'t': 8731})
+	Pulse(ch=0, name='p207', t=20.35, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d63d0>}, t_regs={'t': 8752})
+	Pulse(ch=0, name='p208', t=20.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d65d0>}, t_regs={'t': 8774})
+	Pulse(ch=0, name='p209', t=20.450000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d67d0>}, t_regs={'t': 8795})
+	Pulse(ch=0, name='p210', t=20.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d69d0>}, t_regs={'t': 8817})
+	Pulse(ch=0, name='p211', t=20.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d6bd0>}, t_regs={'t': 8838})
+	Pulse(ch=0, name='p212', t=20.6, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d6dd0>}, t_regs={'t': 8860})
+	Pulse(ch=0, name='p213', t=20.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d6fd0>}, t_regs={'t': 8881})
+	Pulse(ch=0, name='p214', t=20.700000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d71d0>}, t_regs={'t': 8903})
+	Pulse(ch=0, name='p215', t=20.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d73d0>}, t_regs={'t': 8924})
+	Pulse(ch=0, name='p216', t=20.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d75d0>}, t_regs={'t': 8946})
+	Pulse(ch=0, name='p217', t=20.85, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d77d0>}, t_regs={'t': 8967})
+	Pulse(ch=0, name='p218', t=20.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d79d0>}, t_regs={'t': 8989})
+	Pulse(ch=0, name='p219', t=20.950000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d7bd0>}, t_regs={'t': 9010})
+	Pulse(ch=0, name='p220', t=21.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702d7dd0>}, t_regs={'t': 9032})
+	Pulse(ch=0, name='p221', t=21.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702cff50>}, t_regs={'t': 9053})
+	Pulse(ch=0, name='p222', t=21.1, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dc250>}, t_regs={'t': 9075})
+	Pulse(ch=0, name='p223', t=21.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dc450>}, t_regs={'t': 9096})
+	Pulse(ch=0, name='p224', t=21.200000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dc650>}, t_regs={'t': 9118})
+	Pulse(ch=0, name='p225', t=21.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dc850>}, t_regs={'t': 9139})
+	Pulse(ch=0, name='p226', t=21.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dca50>}, t_regs={'t': 9161})
+	Pulse(ch=0, name='p227', t=21.35, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dcc50>}, t_regs={'t': 9182})
+	Pulse(ch=0, name='p228', t=21.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dce50>}, t_regs={'t': 9204})
+	Pulse(ch=0, name='p229', t=21.450000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dd050>}, t_regs={'t': 9225})
+	Pulse(ch=0, name='p230', t=21.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dd250>}, t_regs={'t': 9247})
+	Pulse(ch=0, name='p231', t=21.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dd450>}, t_regs={'t': 9268})
+	Pulse(ch=0, name='p232', t=21.6, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dd650>}, t_regs={'t': 9290})
+	Pulse(ch=0, name='p233', t=21.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dd850>}, t_regs={'t': 9311})
+	Pulse(ch=0, name='p234', t=21.700000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dda50>}, t_regs={'t': 9333})
+	Pulse(ch=0, name='p235', t=21.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702ddc50>}, t_regs={'t': 9354})
+	Pulse(ch=0, name='p236', t=21.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dde50>}, t_regs={'t': 9376})
+	Pulse(ch=0, name='p237', t=21.85, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702de050>}, t_regs={'t': 9397})
+	Pulse(ch=0, name='p238', t=21.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702de250>}, t_regs={'t': 9419})
+	Pulse(ch=0, name='p239', t=21.950000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702de450>}, t_regs={'t': 9440})
+	Pulse(ch=0, name='p240', t=22.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702de650>}, t_regs={'t': 9462})
+	Pulse(ch=0, name='p241', t=22.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702de850>}, t_regs={'t': 9483})
+	Pulse(ch=0, name='p242', t=22.1, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dea50>}, t_regs={'t': 9505})
+	Pulse(ch=0, name='p243', t=22.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dec50>}, t_regs={'t': 9526})
+	Pulse(ch=0, name='p244', t=22.200000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dee50>}, t_regs={'t': 9548})
+	Pulse(ch=0, name='p245', t=22.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702df050>}, t_regs={'t': 9569})
+	Pulse(ch=0, name='p246', t=22.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702df250>}, t_regs={'t': 9591})
+	Pulse(ch=0, name='p247', t=22.35, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702df450>}, t_regs={'t': 9612})
+	Pulse(ch=0, name='p248', t=22.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702df650>}, t_regs={'t': 9634})
+	Pulse(ch=0, name='p249', t=22.450000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702df850>}, t_regs={'t': 9655})
+	Pulse(ch=0, name='p250', t=22.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dfa50>}, t_regs={'t': 9677})
+	Pulse(ch=0, name='p251', t=22.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dfc50>}, t_regs={'t': 9698})
+	Pulse(ch=0, name='p252', t=22.6, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702bff50>}, t_regs={'t': 9720})
+	Pulse(ch=0, name='p253', t=22.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e40d0>}, t_regs={'t': 9741})
+	Pulse(ch=0, name='p254', t=22.700000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e42d0>}, t_regs={'t': 9763})
+	Pulse(ch=0, name='p255', t=22.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e44d0>}, t_regs={'t': 9784})
+	Pulse(ch=0, name='p256', t=22.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e46d0>}, t_regs={'t': 9806})
+	Pulse(ch=0, name='p257', t=22.85, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e48d0>}, t_regs={'t': 9827})
+	Pulse(ch=0, name='p258', t=22.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e4ad0>}, t_regs={'t': 9849})
+	Pulse(ch=0, name='p259', t=22.950000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e4cd0>}, t_regs={'t': 9870})
+	Pulse(ch=0, name='p260', t=23.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e4ed0>}, t_regs={'t': 9892})
+	Pulse(ch=0, name='p261', t=23.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e50d0>}, t_regs={'t': 9913})
+	Pulse(ch=0, name='p262', t=23.1, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e52d0>}, t_regs={'t': 9935})
+	Pulse(ch=0, name='p263', t=23.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e54d0>}, t_regs={'t': 9956})
+	Pulse(ch=0, name='p264', t=23.200000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e56d0>}, t_regs={'t': 9978})
+	Pulse(ch=0, name='p265', t=23.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e58d0>}, t_regs={'t': 9999})
+	Pulse(ch=0, name='p266', t=23.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e5ad0>}, t_regs={'t': 10021})
+	Pulse(ch=0, name='p267', t=23.35, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e5cd0>}, t_regs={'t': 10042})
+	Pulse(ch=0, name='p268', t=23.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e5ed0>}, t_regs={'t': 10064})
+	Pulse(ch=0, name='p269', t=23.450000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e60d0>}, t_regs={'t': 10085})
+	Pulse(ch=0, name='p270', t=23.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e62d0>}, t_regs={'t': 10107})
+	Pulse(ch=0, name='p271', t=23.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e64d0>}, t_regs={'t': 10128})
+	Pulse(ch=0, name='p272', t=23.6, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e66d0>}, t_regs={'t': 10150})
+	Pulse(ch=0, name='p273', t=23.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e68d0>}, t_regs={'t': 10171})
+	Pulse(ch=0, name='p274', t=23.700000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e6ad0>}, t_regs={'t': 10193})
+	Pulse(ch=0, name='p275', t=23.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e6cd0>}, t_regs={'t': 10214})
+	Pulse(ch=0, name='p276', t=23.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e6ed0>}, t_regs={'t': 10236})
+	Pulse(ch=0, name='p277', t=23.85, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e70d0>}, t_regs={'t': 10257})
+	Pulse(ch=0, name='p278', t=23.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e72d0>}, t_regs={'t': 10279})
+	Pulse(ch=0, name='p279', t=23.950000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e74d0>}, t_regs={'t': 10300})
+	Pulse(ch=0, name='p280', t=24.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e76d0>}, t_regs={'t': 10322})
+	Pulse(ch=0, name='p281', t=24.05, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e78d0>}, t_regs={'t': 10343})
+	Pulse(ch=0, name='p282', t=24.1, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e7ad0>}, t_regs={'t': 10365})
+	Pulse(ch=0, name='p283', t=24.15, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e7cd0>}, t_regs={'t': 10386})
+	Pulse(ch=0, name='p284', t=24.200000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702dfe50>}, t_regs={'t': 10408})
+	Pulse(ch=0, name='p285', t=24.25, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e8150>}, t_regs={'t': 10429})
+	Pulse(ch=0, name='p286', t=24.3, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e8350>}, t_regs={'t': 10451})
+	Pulse(ch=0, name='p287', t=24.35, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e8550>}, t_regs={'t': 10472})
+	Pulse(ch=0, name='p288', t=24.4, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e8750>}, t_regs={'t': 10494})
+	Pulse(ch=0, name='p289', t=24.450000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e8950>}, t_regs={'t': 10515})
+	Pulse(ch=0, name='p290', t=24.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e8b50>}, t_regs={'t': 10537})
+	Pulse(ch=0, name='p291', t=24.55, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e8d50>}, t_regs={'t': 10558})
+	Pulse(ch=0, name='p292', t=24.6, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e8f50>}, t_regs={'t': 10580})
+	Pulse(ch=0, name='p293', t=24.65, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e9150>}, t_regs={'t': 10601})
+	Pulse(ch=0, name='p294', t=24.700000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e9350>}, t_regs={'t': 10623})
+	Pulse(ch=0, name='p295', t=24.75, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e9550>}, t_regs={'t': 10644})
+	Pulse(ch=0, name='p296', t=24.8, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e9750>}, t_regs={'t': 10666})
+	Pulse(ch=0, name='p297', t=24.85, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e9950>}, t_regs={'t': 10687})
+	Pulse(ch=0, name='p298', t=24.9, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e9b50>}, t_regs={'t': 10709})
+	Pulse(ch=0, name='p299', t=24.950000000000003, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e9d50>}, t_regs={'t': 10730})
+	Wait(t=0, auto=True, gens=False, ros=True, tag=None, no_warn=True, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e7ed0>}, t_regs={'t': 0})
+	Delay(t=1.0, auto=True, gens=True, ros=True, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x752e702e9f50>}, t_regs={'t': 11169})
+	IncReg(dst='s_core_w1', src=1)
+	CloseLoop()
+	End()
+registers:
+	reps: QickRegisterV2(addr=0, init=None)
+pulses:
+	p0: QickPulse(waveforms=[Waveform(name='p0_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=32, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p1: QickPulse(waveforms=[Waveform(name='p1_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=65, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p2: QickPulse(waveforms=[Waveform(name='p2_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=98, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p3: QickPulse(waveforms=[Waveform(name='p3_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=131, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p4: QickPulse(waveforms=[Waveform(name='p4_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=163, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p5: QickPulse(waveforms=[Waveform(name='p5_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=196, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p6: QickPulse(waveforms=[Waveform(name='p6_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=229, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p7: QickPulse(waveforms=[Waveform(name='p7_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=262, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p8: QickPulse(waveforms=[Waveform(name='p8_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=294, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p9: QickPulse(waveforms=[Waveform(name='p9_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=327, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p10: QickPulse(waveforms=[Waveform(name='p10_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=360, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p11: QickPulse(waveforms=[Waveform(name='p11_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=393, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p12: QickPulse(waveforms=[Waveform(name='p12_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=425, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p13: QickPulse(waveforms=[Waveform(name='p13_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=458, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p14: QickPulse(waveforms=[Waveform(name='p14_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=491, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p15: QickPulse(waveforms=[Waveform(name='p15_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=524, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p16: QickPulse(waveforms=[Waveform(name='p16_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=557, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p17: QickPulse(waveforms=[Waveform(name='p17_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=589, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p18: QickPulse(waveforms=[Waveform(name='p18_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=622, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p19: QickPulse(waveforms=[Waveform(name='p19_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=655, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p20: QickPulse(waveforms=[Waveform(name='p20_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=688, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p21: QickPulse(waveforms=[Waveform(name='p21_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=720, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p22: QickPulse(waveforms=[Waveform(name='p22_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=753, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p23: QickPulse(waveforms=[Waveform(name='p23_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=786, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p24: QickPulse(waveforms=[Waveform(name='p24_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=819, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p25: QickPulse(waveforms=[Waveform(name='p25_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=851, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p26: QickPulse(waveforms=[Waveform(name='p26_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=884, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p27: QickPulse(waveforms=[Waveform(name='p27_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=917, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p28: QickPulse(waveforms=[Waveform(name='p28_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=950, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p29: QickPulse(waveforms=[Waveform(name='p29_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=982, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p30: QickPulse(waveforms=[Waveform(name='p30_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1015, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p31: QickPulse(waveforms=[Waveform(name='p31_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1048, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p32: QickPulse(waveforms=[Waveform(name='p32_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1081, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p33: QickPulse(waveforms=[Waveform(name='p33_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1114, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p34: QickPulse(waveforms=[Waveform(name='p34_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1146, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p35: QickPulse(waveforms=[Waveform(name='p35_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1179, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p36: QickPulse(waveforms=[Waveform(name='p36_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1212, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p37: QickPulse(waveforms=[Waveform(name='p37_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1245, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p38: QickPulse(waveforms=[Waveform(name='p38_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1277, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p39: QickPulse(waveforms=[Waveform(name='p39_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1310, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p40: QickPulse(waveforms=[Waveform(name='p40_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1343, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p41: QickPulse(waveforms=[Waveform(name='p41_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1376, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p42: QickPulse(waveforms=[Waveform(name='p42_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1408, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p43: QickPulse(waveforms=[Waveform(name='p43_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1441, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p44: QickPulse(waveforms=[Waveform(name='p44_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1474, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p45: QickPulse(waveforms=[Waveform(name='p45_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1507, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p46: QickPulse(waveforms=[Waveform(name='p46_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1540, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p47: QickPulse(waveforms=[Waveform(name='p47_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1572, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p48: QickPulse(waveforms=[Waveform(name='p48_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1605, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p49: QickPulse(waveforms=[Waveform(name='p49_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1638, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p50: QickPulse(waveforms=[Waveform(name='p50_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1671, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p51: QickPulse(waveforms=[Waveform(name='p51_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1703, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p52: QickPulse(waveforms=[Waveform(name='p52_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1736, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p53: QickPulse(waveforms=[Waveform(name='p53_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1769, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p54: QickPulse(waveforms=[Waveform(name='p54_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1802, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p55: QickPulse(waveforms=[Waveform(name='p55_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1834, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p56: QickPulse(waveforms=[Waveform(name='p56_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1867, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p57: QickPulse(waveforms=[Waveform(name='p57_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1900, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p58: QickPulse(waveforms=[Waveform(name='p58_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1933, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p59: QickPulse(waveforms=[Waveform(name='p59_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1965, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p60: QickPulse(waveforms=[Waveform(name='p60_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=1998, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p61: QickPulse(waveforms=[Waveform(name='p61_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2031, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p62: QickPulse(waveforms=[Waveform(name='p62_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2064, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p63: QickPulse(waveforms=[Waveform(name='p63_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2097, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p64: QickPulse(waveforms=[Waveform(name='p64_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2129, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p65: QickPulse(waveforms=[Waveform(name='p65_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2162, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p66: QickPulse(waveforms=[Waveform(name='p66_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2195, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p67: QickPulse(waveforms=[Waveform(name='p67_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2228, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p68: QickPulse(waveforms=[Waveform(name='p68_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2260, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p69: QickPulse(waveforms=[Waveform(name='p69_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2293, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p70: QickPulse(waveforms=[Waveform(name='p70_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2326, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p71: QickPulse(waveforms=[Waveform(name='p71_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2359, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p72: QickPulse(waveforms=[Waveform(name='p72_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2391, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p73: QickPulse(waveforms=[Waveform(name='p73_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2424, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p74: QickPulse(waveforms=[Waveform(name='p74_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2457, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p75: QickPulse(waveforms=[Waveform(name='p75_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2490, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p76: QickPulse(waveforms=[Waveform(name='p76_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2522, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p77: QickPulse(waveforms=[Waveform(name='p77_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2555, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p78: QickPulse(waveforms=[Waveform(name='p78_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2588, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p79: QickPulse(waveforms=[Waveform(name='p79_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2621, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p80: QickPulse(waveforms=[Waveform(name='p80_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2654, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p81: QickPulse(waveforms=[Waveform(name='p81_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2686, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p82: QickPulse(waveforms=[Waveform(name='p82_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2719, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p83: QickPulse(waveforms=[Waveform(name='p83_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2752, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p84: QickPulse(waveforms=[Waveform(name='p84_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2785, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p85: QickPulse(waveforms=[Waveform(name='p85_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2817, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p86: QickPulse(waveforms=[Waveform(name='p86_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2850, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p87: QickPulse(waveforms=[Waveform(name='p87_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2883, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p88: QickPulse(waveforms=[Waveform(name='p88_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2916, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p89: QickPulse(waveforms=[Waveform(name='p89_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2948, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p90: QickPulse(waveforms=[Waveform(name='p90_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=2981, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p91: QickPulse(waveforms=[Waveform(name='p91_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3014, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p92: QickPulse(waveforms=[Waveform(name='p92_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3047, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p93: QickPulse(waveforms=[Waveform(name='p93_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3080, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p94: QickPulse(waveforms=[Waveform(name='p94_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3112, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p95: QickPulse(waveforms=[Waveform(name='p95_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3145, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p96: QickPulse(waveforms=[Waveform(name='p96_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3178, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p97: QickPulse(waveforms=[Waveform(name='p97_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3211, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p98: QickPulse(waveforms=[Waveform(name='p98_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3243, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p99: QickPulse(waveforms=[Waveform(name='p99_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3276, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p100: QickPulse(waveforms=[Waveform(name='p100_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3309, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p101: QickPulse(waveforms=[Waveform(name='p101_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3342, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p102: QickPulse(waveforms=[Waveform(name='p102_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3374, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p103: QickPulse(waveforms=[Waveform(name='p103_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3407, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p104: QickPulse(waveforms=[Waveform(name='p104_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3440, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p105: QickPulse(waveforms=[Waveform(name='p105_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3473, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p106: QickPulse(waveforms=[Waveform(name='p106_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3505, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p107: QickPulse(waveforms=[Waveform(name='p107_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3538, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p108: QickPulse(waveforms=[Waveform(name='p108_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3571, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p109: QickPulse(waveforms=[Waveform(name='p109_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3604, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p110: QickPulse(waveforms=[Waveform(name='p110_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3637, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p111: QickPulse(waveforms=[Waveform(name='p111_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3669, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p112: QickPulse(waveforms=[Waveform(name='p112_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3702, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p113: QickPulse(waveforms=[Waveform(name='p113_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3735, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p114: QickPulse(waveforms=[Waveform(name='p114_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3768, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p115: QickPulse(waveforms=[Waveform(name='p115_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3800, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p116: QickPulse(waveforms=[Waveform(name='p116_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3833, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p117: QickPulse(waveforms=[Waveform(name='p117_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3866, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p118: QickPulse(waveforms=[Waveform(name='p118_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3899, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p119: QickPulse(waveforms=[Waveform(name='p119_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3931, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p120: QickPulse(waveforms=[Waveform(name='p120_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3964, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p121: QickPulse(waveforms=[Waveform(name='p121_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3997, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p122: QickPulse(waveforms=[Waveform(name='p122_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4030, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p123: QickPulse(waveforms=[Waveform(name='p123_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4062, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p124: QickPulse(waveforms=[Waveform(name='p124_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4095, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p125: QickPulse(waveforms=[Waveform(name='p125_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4128, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p126: QickPulse(waveforms=[Waveform(name='p126_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4161, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p127: QickPulse(waveforms=[Waveform(name='p127_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4194, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p128: QickPulse(waveforms=[Waveform(name='p128_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4226, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p129: QickPulse(waveforms=[Waveform(name='p129_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4259, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p130: QickPulse(waveforms=[Waveform(name='p130_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4292, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p131: QickPulse(waveforms=[Waveform(name='p131_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4325, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p132: QickPulse(waveforms=[Waveform(name='p132_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4357, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p133: QickPulse(waveforms=[Waveform(name='p133_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4390, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p134: QickPulse(waveforms=[Waveform(name='p134_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4423, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p135: QickPulse(waveforms=[Waveform(name='p135_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4456, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p136: QickPulse(waveforms=[Waveform(name='p136_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4488, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p137: QickPulse(waveforms=[Waveform(name='p137_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4521, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p138: QickPulse(waveforms=[Waveform(name='p138_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4554, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p139: QickPulse(waveforms=[Waveform(name='p139_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4587, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p140: QickPulse(waveforms=[Waveform(name='p140_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4620, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p141: QickPulse(waveforms=[Waveform(name='p141_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4652, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p142: QickPulse(waveforms=[Waveform(name='p142_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4685, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p143: QickPulse(waveforms=[Waveform(name='p143_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4718, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p144: QickPulse(waveforms=[Waveform(name='p144_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4751, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p145: QickPulse(waveforms=[Waveform(name='p145_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4783, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p146: QickPulse(waveforms=[Waveform(name='p146_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4816, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p147: QickPulse(waveforms=[Waveform(name='p147_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4849, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p148: QickPulse(waveforms=[Waveform(name='p148_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4882, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p149: QickPulse(waveforms=[Waveform(name='p149_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4914, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p150: QickPulse(waveforms=[Waveform(name='p150_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4947, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p151: QickPulse(waveforms=[Waveform(name='p151_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=4980, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p152: QickPulse(waveforms=[Waveform(name='p152_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5013, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p153: QickPulse(waveforms=[Waveform(name='p153_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5045, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p154: QickPulse(waveforms=[Waveform(name='p154_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5078, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p155: QickPulse(waveforms=[Waveform(name='p155_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5111, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p156: QickPulse(waveforms=[Waveform(name='p156_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5144, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p157: QickPulse(waveforms=[Waveform(name='p157_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5177, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p158: QickPulse(waveforms=[Waveform(name='p158_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5209, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p159: QickPulse(waveforms=[Waveform(name='p159_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5242, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p160: QickPulse(waveforms=[Waveform(name='p160_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5275, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p161: QickPulse(waveforms=[Waveform(name='p161_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5308, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p162: QickPulse(waveforms=[Waveform(name='p162_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5340, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p163: QickPulse(waveforms=[Waveform(name='p163_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5373, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p164: QickPulse(waveforms=[Waveform(name='p164_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5406, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p165: QickPulse(waveforms=[Waveform(name='p165_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5439, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p166: QickPulse(waveforms=[Waveform(name='p166_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5471, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p167: QickPulse(waveforms=[Waveform(name='p167_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5504, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p168: QickPulse(waveforms=[Waveform(name='p168_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5537, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p169: QickPulse(waveforms=[Waveform(name='p169_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5570, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p170: QickPulse(waveforms=[Waveform(name='p170_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5602, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p171: QickPulse(waveforms=[Waveform(name='p171_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5635, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p172: QickPulse(waveforms=[Waveform(name='p172_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5668, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p173: QickPulse(waveforms=[Waveform(name='p173_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5701, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p174: QickPulse(waveforms=[Waveform(name='p174_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5734, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p175: QickPulse(waveforms=[Waveform(name='p175_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5766, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p176: QickPulse(waveforms=[Waveform(name='p176_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5799, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p177: QickPulse(waveforms=[Waveform(name='p177_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5832, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p178: QickPulse(waveforms=[Waveform(name='p178_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5865, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p179: QickPulse(waveforms=[Waveform(name='p179_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5897, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p180: QickPulse(waveforms=[Waveform(name='p180_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5930, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p181: QickPulse(waveforms=[Waveform(name='p181_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5963, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p182: QickPulse(waveforms=[Waveform(name='p182_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=5996, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p183: QickPulse(waveforms=[Waveform(name='p183_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6028, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p184: QickPulse(waveforms=[Waveform(name='p184_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6061, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p185: QickPulse(waveforms=[Waveform(name='p185_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6094, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p186: QickPulse(waveforms=[Waveform(name='p186_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6127, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p187: QickPulse(waveforms=[Waveform(name='p187_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6160, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p188: QickPulse(waveforms=[Waveform(name='p188_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6192, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p189: QickPulse(waveforms=[Waveform(name='p189_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6225, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p190: QickPulse(waveforms=[Waveform(name='p190_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6258, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p191: QickPulse(waveforms=[Waveform(name='p191_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6291, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p192: QickPulse(waveforms=[Waveform(name='p192_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6323, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p193: QickPulse(waveforms=[Waveform(name='p193_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6356, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p194: QickPulse(waveforms=[Waveform(name='p194_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6389, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p195: QickPulse(waveforms=[Waveform(name='p195_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6422, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p196: QickPulse(waveforms=[Waveform(name='p196_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6454, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p197: QickPulse(waveforms=[Waveform(name='p197_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6487, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p198: QickPulse(waveforms=[Waveform(name='p198_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6520, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p199: QickPulse(waveforms=[Waveform(name='p199_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6553, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p200: QickPulse(waveforms=[Waveform(name='p200_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6585, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p201: QickPulse(waveforms=[Waveform(name='p201_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6618, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p202: QickPulse(waveforms=[Waveform(name='p202_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6651, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p203: QickPulse(waveforms=[Waveform(name='p203_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6684, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p204: QickPulse(waveforms=[Waveform(name='p204_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6717, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p205: QickPulse(waveforms=[Waveform(name='p205_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6749, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p206: QickPulse(waveforms=[Waveform(name='p206_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6782, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p207: QickPulse(waveforms=[Waveform(name='p207_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6815, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p208: QickPulse(waveforms=[Waveform(name='p208_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6848, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p209: QickPulse(waveforms=[Waveform(name='p209_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6880, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p210: QickPulse(waveforms=[Waveform(name='p210_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6913, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p211: QickPulse(waveforms=[Waveform(name='p211_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6946, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p212: QickPulse(waveforms=[Waveform(name='p212_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6979, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p213: QickPulse(waveforms=[Waveform(name='p213_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7011, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p214: QickPulse(waveforms=[Waveform(name='p214_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7044, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p215: QickPulse(waveforms=[Waveform(name='p215_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7077, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p216: QickPulse(waveforms=[Waveform(name='p216_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7110, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p217: QickPulse(waveforms=[Waveform(name='p217_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7142, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p218: QickPulse(waveforms=[Waveform(name='p218_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7175, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p219: QickPulse(waveforms=[Waveform(name='p219_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7208, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p220: QickPulse(waveforms=[Waveform(name='p220_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7241, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p221: QickPulse(waveforms=[Waveform(name='p221_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7274, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p222: QickPulse(waveforms=[Waveform(name='p222_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7306, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p223: QickPulse(waveforms=[Waveform(name='p223_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7339, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p224: QickPulse(waveforms=[Waveform(name='p224_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7372, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p225: QickPulse(waveforms=[Waveform(name='p225_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7405, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p226: QickPulse(waveforms=[Waveform(name='p226_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7437, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p227: QickPulse(waveforms=[Waveform(name='p227_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7470, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p228: QickPulse(waveforms=[Waveform(name='p228_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7503, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p229: QickPulse(waveforms=[Waveform(name='p229_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7536, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p230: QickPulse(waveforms=[Waveform(name='p230_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7568, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p231: QickPulse(waveforms=[Waveform(name='p231_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7601, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p232: QickPulse(waveforms=[Waveform(name='p232_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7634, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p233: QickPulse(waveforms=[Waveform(name='p233_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7667, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p234: QickPulse(waveforms=[Waveform(name='p234_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7700, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p235: QickPulse(waveforms=[Waveform(name='p235_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7732, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p236: QickPulse(waveforms=[Waveform(name='p236_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7765, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p237: QickPulse(waveforms=[Waveform(name='p237_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7798, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p238: QickPulse(waveforms=[Waveform(name='p238_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7831, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p239: QickPulse(waveforms=[Waveform(name='p239_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7863, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p240: QickPulse(waveforms=[Waveform(name='p240_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7896, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p241: QickPulse(waveforms=[Waveform(name='p241_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7929, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p242: QickPulse(waveforms=[Waveform(name='p242_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7962, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p243: QickPulse(waveforms=[Waveform(name='p243_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=7994, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p244: QickPulse(waveforms=[Waveform(name='p244_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8027, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p245: QickPulse(waveforms=[Waveform(name='p245_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8060, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p246: QickPulse(waveforms=[Waveform(name='p246_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8093, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p247: QickPulse(waveforms=[Waveform(name='p247_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8125, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p248: QickPulse(waveforms=[Waveform(name='p248_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8158, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p249: QickPulse(waveforms=[Waveform(name='p249_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8191, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p250: QickPulse(waveforms=[Waveform(name='p250_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8224, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p251: QickPulse(waveforms=[Waveform(name='p251_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8257, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p252: QickPulse(waveforms=[Waveform(name='p252_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8289, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p253: QickPulse(waveforms=[Waveform(name='p253_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8322, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p254: QickPulse(waveforms=[Waveform(name='p254_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8355, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p255: QickPulse(waveforms=[Waveform(name='p255_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8388, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p256: QickPulse(waveforms=[Waveform(name='p256_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8420, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p257: QickPulse(waveforms=[Waveform(name='p257_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8453, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p258: QickPulse(waveforms=[Waveform(name='p258_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8486, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p259: QickPulse(waveforms=[Waveform(name='p259_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8519, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p260: QickPulse(waveforms=[Waveform(name='p260_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8551, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p261: QickPulse(waveforms=[Waveform(name='p261_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8584, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p262: QickPulse(waveforms=[Waveform(name='p262_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8617, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p263: QickPulse(waveforms=[Waveform(name='p263_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8650, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p264: QickPulse(waveforms=[Waveform(name='p264_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8682, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p265: QickPulse(waveforms=[Waveform(name='p265_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8715, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p266: QickPulse(waveforms=[Waveform(name='p266_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8748, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p267: QickPulse(waveforms=[Waveform(name='p267_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8781, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p268: QickPulse(waveforms=[Waveform(name='p268_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8814, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p269: QickPulse(waveforms=[Waveform(name='p269_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8846, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p270: QickPulse(waveforms=[Waveform(name='p270_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8879, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p271: QickPulse(waveforms=[Waveform(name='p271_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8912, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p272: QickPulse(waveforms=[Waveform(name='p272_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8945, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p273: QickPulse(waveforms=[Waveform(name='p273_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=8977, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p274: QickPulse(waveforms=[Waveform(name='p274_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9010, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p275: QickPulse(waveforms=[Waveform(name='p275_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9043, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p276: QickPulse(waveforms=[Waveform(name='p276_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9076, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p277: QickPulse(waveforms=[Waveform(name='p277_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9108, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p278: QickPulse(waveforms=[Waveform(name='p278_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9141, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p279: QickPulse(waveforms=[Waveform(name='p279_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9174, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p280: QickPulse(waveforms=[Waveform(name='p280_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9207, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p281: QickPulse(waveforms=[Waveform(name='p281_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9240, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p282: QickPulse(waveforms=[Waveform(name='p282_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9272, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p283: QickPulse(waveforms=[Waveform(name='p283_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9305, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p284: QickPulse(waveforms=[Waveform(name='p284_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9338, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p285: QickPulse(waveforms=[Waveform(name='p285_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9371, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p286: QickPulse(waveforms=[Waveform(name='p286_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9403, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p287: QickPulse(waveforms=[Waveform(name='p287_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9436, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p288: QickPulse(waveforms=[Waveform(name='p288_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9469, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p289: QickPulse(waveforms=[Waveform(name='p289_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9502, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p290: QickPulse(waveforms=[Waveform(name='p290_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9534, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p291: QickPulse(waveforms=[Waveform(name='p291_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9567, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p292: QickPulse(waveforms=[Waveform(name='p292_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9600, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p293: QickPulse(waveforms=[Waveform(name='p293_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9633, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p294: QickPulse(waveforms=[Waveform(name='p294_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9665, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p295: QickPulse(waveforms=[Waveform(name='p295_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9698, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p296: QickPulse(waveforms=[Waveform(name='p296_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9731, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p297: QickPulse(waveforms=[Waveform(name='p297_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9764, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p298: QickPulse(waveforms=[Waveform(name='p298_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9797, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+	p299: QickPulse(waveforms=[Waveform(name='p299_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=9829, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=12, spans={}, quantize=1, steps={}), conf=9)])
+expanded ASM:
+	     NOP 
+	     REG_WR s12 imm #0 
+	     TIME #430 inc_ref 
+	     REG_WR r0 imm #0 
+	reps:
+	     WPORT_WR p0 wmem [&0] @4301 
+	     WPORT_WR p0 wmem [&1] @4322 
+	     WPORT_WR p0 wmem [&2] @4344 
+	     WPORT_WR p0 wmem [&3] @4365 
+	     WPORT_WR p0 wmem [&4] @4387 
+	     WPORT_WR p0 wmem [&5] @4408 
+	     WPORT_WR p0 wmem [&6] @4430 
+	     WPORT_WR p0 wmem [&7] @4451 
+	     WPORT_WR p0 wmem [&8] @4473 
+	     WPORT_WR p0 wmem [&9] @4494 
+	     WPORT_WR p0 wmem [&10] @4516 
+	     WPORT_WR p0 wmem [&11] @4537 
+	     WPORT_WR p0 wmem [&12] @4559 
+	     WPORT_WR p0 wmem [&13] @4580 
+	     WPORT_WR p0 wmem [&14] @4602 
+	     WPORT_WR p0 wmem [&15] @4623 
+	     WPORT_WR p0 wmem [&16] @4645 
+	     WPORT_WR p0 wmem [&17] @4666 
+	     WPORT_WR p0 wmem [&18] @4688 
+	     WPORT_WR p0 wmem [&19] @4709 
+	     WPORT_WR p0 wmem [&20] @4731 
+	     WPORT_WR p0 wmem [&21] @4752 
+	     WPORT_WR p0 wmem [&22] @4774 
+	     WPORT_WR p0 wmem [&23] @4795 
+	     WPORT_WR p0 wmem [&24] @4817 
+	     WPORT_WR p0 wmem [&25] @4838 
+	     WPORT_WR p0 wmem [&26] @4860 
+	     WPORT_WR p0 wmem [&27] @4881 
+	     WPORT_WR p0 wmem [&28] @4903 
+	     WPORT_WR p0 wmem [&29] @4924 
+	     WPORT_WR p0 wmem [&30] @4946 
+	     WPORT_WR p0 wmem [&31] @4967 
+	     WPORT_WR p0 wmem [&32] @4989 
+	     WPORT_WR p0 wmem [&33] @5010 
+	     WPORT_WR p0 wmem [&34] @5032 
+	     WPORT_WR p0 wmem [&35] @5053 
+	     WPORT_WR p0 wmem [&36] @5075 
+	     WPORT_WR p0 wmem [&37] @5096 
+	     WPORT_WR p0 wmem [&38] @5118 
+	     WPORT_WR p0 wmem [&39] @5139 
+	     WPORT_WR p0 wmem [&40] @5161 
+	     WPORT_WR p0 wmem [&41] @5182 
+	     WPORT_WR p0 wmem [&42] @5204 
+	     WPORT_WR p0 wmem [&43] @5225 
+	     WPORT_WR p0 wmem [&44] @5247 
+	     WPORT_WR p0 wmem [&45] @5268 
+	     WPORT_WR p0 wmem [&46] @5290 
+	     WPORT_WR p0 wmem [&47] @5311 
+	     WPORT_WR p0 wmem [&48] @5333 
+	     WPORT_WR p0 wmem [&49] @5354 
+	     WPORT_WR p0 wmem [&50] @5376 
+	     WPORT_WR p0 wmem [&51] @5398 
+	     WPORT_WR p0 wmem [&52] @5419 
+	     WPORT_WR p0 wmem [&53] @5441 
+	     WPORT_WR p0 wmem [&54] @5462 
+	     WPORT_WR p0 wmem [&55] @5484 
+	     WPORT_WR p0 wmem [&56] @5505 
+	     WPORT_WR p0 wmem [&57] @5527 
+	     WPORT_WR p0 wmem [&58] @5548 
+	     WPORT_WR p0 wmem [&59] @5570 
+	     WPORT_WR p0 wmem [&60] @5591 
+	     WPORT_WR p0 wmem [&61] @5613 
+	     WPORT_WR p0 wmem [&62] @5634 
+	     WPORT_WR p0 wmem [&63] @5656 
+	     WPORT_WR p0 wmem [&64] @5677 
+	     WPORT_WR p0 wmem [&65] @5699 
+	     WPORT_WR p0 wmem [&66] @5720 
+	     WPORT_WR p0 wmem [&67] @5742 
+	     WPORT_WR p0 wmem [&68] @5763 
+	     WPORT_WR p0 wmem [&69] @5785 
+	     WPORT_WR p0 wmem [&70] @5806 
+	     WPORT_WR p0 wmem [&71] @5828 
+	     WPORT_WR p0 wmem [&72] @5849 
+	     WPORT_WR p0 wmem [&73] @5871 
+	     WPORT_WR p0 wmem [&74] @5892 
+	     WPORT_WR p0 wmem [&75] @5914 
+	     WPORT_WR p0 wmem [&76] @5935 
+	     WPORT_WR p0 wmem [&77] @5957 
+	     WPORT_WR p0 wmem [&78] @5978 
+	     WPORT_WR p0 wmem [&79] @6000 
+	     WPORT_WR p0 wmem [&80] @6021 
+	     WPORT_WR p0 wmem [&81] @6043 
+	     WPORT_WR p0 wmem [&82] @6064 
+	     WPORT_WR p0 wmem [&83] @6086 
+	     WPORT_WR p0 wmem [&84] @6107 
+	     WPORT_WR p0 wmem [&85] @6129 
+	     WPORT_WR p0 wmem [&86] @6150 
+	     WPORT_WR p0 wmem [&87] @6172 
+	     WPORT_WR p0 wmem [&88] @6193 
+	     WPORT_WR p0 wmem [&89] @6215 
+	     WPORT_WR p0 wmem [&90] @6236 
+	     WPORT_WR p0 wmem [&91] @6258 
+	     WPORT_WR p0 wmem [&92] @6279 
+	     WPORT_WR p0 wmem [&93] @6301 
+	     WPORT_WR p0 wmem [&94] @6322 
+	     WPORT_WR p0 wmem [&95] @6344 
+	     WPORT_WR p0 wmem [&96] @6365 
+	     WPORT_WR p0 wmem [&97] @6387 
+	     WPORT_WR p0 wmem [&98] @6408 
+	     WPORT_WR p0 wmem [&99] @6430 
+	     WPORT_WR p0 wmem [&100] @6451 
+	     WPORT_WR p0 wmem [&101] @6473 
+	     WPORT_WR p0 wmem [&102] @6494 
+	     WPORT_WR p0 wmem [&103] @6516 
+	     WPORT_WR p0 wmem [&104] @6537 
+	     WPORT_WR p0 wmem [&105] @6559 
+	     WPORT_WR p0 wmem [&106] @6580 
+	     WPORT_WR p0 wmem [&107] @6602 
+	     WPORT_WR p0 wmem [&108] @6623 
+	     WPORT_WR p0 wmem [&109] @6645 
+	     WPORT_WR p0 wmem [&110] @6666 
+	     WPORT_WR p0 wmem [&111] @6688 
+	     WPORT_WR p0 wmem [&112] @6709 
+	     WPORT_WR p0 wmem [&113] @6731 
+	     WPORT_WR p0 wmem [&114] @6752 
+	     WPORT_WR p0 wmem [&115] @6774 
+	     WPORT_WR p0 wmem [&116] @6795 
+	     WPORT_WR p0 wmem [&117] @6817 
+	     WPORT_WR p0 wmem [&118] @6838 
+	     WPORT_WR p0 wmem [&119] @6860 
+	     WPORT_WR p0 wmem [&120] @6881 
+	     WPORT_WR p0 wmem [&121] @6903 
+	     WPORT_WR p0 wmem [&122] @6924 
+	     WPORT_WR p0 wmem [&123] @6946 
+	     WPORT_WR p0 wmem [&124] @6967 
+	     WPORT_WR p0 wmem [&125] @6989 
+	     WPORT_WR p0 wmem [&126] @7010 
+	     WPORT_WR p0 wmem [&127] @7032 
+	     WPORT_WR p0 wmem [&128] @7053 
+	     WPORT_WR p0 wmem [&129] @7075 
+	     WPORT_WR p0 wmem [&130] @7096 
+	     WPORT_WR p0 wmem [&131] @7118 
+	     WPORT_WR p0 wmem [&132] @7139 
+	     WPORT_WR p0 wmem [&133] @7161 
+	     WPORT_WR p0 wmem [&134] @7182 
+	     WPORT_WR p0 wmem [&135] @7204 
+	     WPORT_WR p0 wmem [&136] @7225 
+	     WPORT_WR p0 wmem [&137] @7247 
+	     WPORT_WR p0 wmem [&138] @7268 
+	     WPORT_WR p0 wmem [&139] @7290 
+	     WPORT_WR p0 wmem [&140] @7311 
+	     WPORT_WR p0 wmem [&141] @7333 
+	     WPORT_WR p0 wmem [&142] @7354 
+	     WPORT_WR p0 wmem [&143] @7376 
+	     WPORT_WR p0 wmem [&144] @7397 
+	     WPORT_WR p0 wmem [&145] @7419 
+	     WPORT_WR p0 wmem [&146] @7440 
+	     WPORT_WR p0 wmem [&147] @7462 
+	     WPORT_WR p0 wmem [&148] @7483 
+	     WPORT_WR p0 wmem [&149] @7505 
+	     WPORT_WR p0 wmem [&150] @7526 
+	     WPORT_WR p0 wmem [&151] @7548 
+	     WPORT_WR p0 wmem [&152] @7569 
+	     WPORT_WR p0 wmem [&153] @7591 
+	     WPORT_WR p0 wmem [&154] @7612 
+	     WPORT_WR p0 wmem [&155] @7634 
+	     WPORT_WR p0 wmem [&156] @7655 
+	     WPORT_WR p0 wmem [&157] @7677 
+	     WPORT_WR p0 wmem [&158] @7698 
+	     WPORT_WR p0 wmem [&159] @7720 
+	     WPORT_WR p0 wmem [&160] @7741 
+	     WPORT_WR p0 wmem [&161] @7763 
+	     WPORT_WR p0 wmem [&162] @7784 
+	     WPORT_WR p0 wmem [&163] @7806 
+	     WPORT_WR p0 wmem [&164] @7827 
+	     WPORT_WR p0 wmem [&165] @7849 
+	     WPORT_WR p0 wmem [&166] @7870 
+	     WPORT_WR p0 wmem [&167] @7892 
+	     WPORT_WR p0 wmem [&168] @7913 
+	     WPORT_WR p0 wmem [&169] @7935 
+	     WPORT_WR p0 wmem [&170] @7956 
+	     WPORT_WR p0 wmem [&171] @7978 
+	     WPORT_WR p0 wmem [&172] @7999 
+	     WPORT_WR p0 wmem [&173] @8021 
+	     WPORT_WR p0 wmem [&174] @8042 
+	     WPORT_WR p0 wmem [&175] @8064 
+	     WPORT_WR p0 wmem [&176] @8086 
+	     WPORT_WR p0 wmem [&177] @8107 
+	     WPORT_WR p0 wmem [&178] @8129 
+	     WPORT_WR p0 wmem [&179] @8150 
+	     WPORT_WR p0 wmem [&180] @8172 
+	     WPORT_WR p0 wmem [&181] @8193 
+	     WPORT_WR p0 wmem [&182] @8215 
+	     WPORT_WR p0 wmem [&183] @8236 
+	     WPORT_WR p0 wmem [&184] @8258 
+	     WPORT_WR p0 wmem [&185] @8279 
+	     WPORT_WR p0 wmem [&186] @8301 
+	     WPORT_WR p0 wmem [&187] @8322 
+	     WPORT_WR p0 wmem [&188] @8344 
+	     WPORT_WR p0 wmem [&189] @8365 
+	     WPORT_WR p0 wmem [&190] @8387 
+	     WPORT_WR p0 wmem [&191] @8408 
+	     WPORT_WR p0 wmem [&192] @8430 
+	     WPORT_WR p0 wmem [&193] @8451 
+	     WPORT_WR p0 wmem [&194] @8473 
+	     WPORT_WR p0 wmem [&195] @8494 
+	     WPORT_WR p0 wmem [&196] @8516 
+	     WPORT_WR p0 wmem [&197] @8537 
+	     WPORT_WR p0 wmem [&198] @8559 
+	     WPORT_WR p0 wmem [&199] @8580 
+	     WPORT_WR p0 wmem [&200] @8602 
+	     WPORT_WR p0 wmem [&201] @8623 
+	     WPORT_WR p0 wmem [&202] @8645 
+	     WPORT_WR p0 wmem [&203] @8666 
+	     WPORT_WR p0 wmem [&204] @8688 
+	     WPORT_WR p0 wmem [&205] @8709 
+	     WPORT_WR p0 wmem [&206] @8731 
+	     WPORT_WR p0 wmem [&207] @8752 
+	     WPORT_WR p0 wmem [&208] @8774 
+	     WPORT_WR p0 wmem [&209] @8795 
+	     WPORT_WR p0 wmem [&210] @8817 
+	     WPORT_WR p0 wmem [&211] @8838 
+	     WPORT_WR p0 wmem [&212] @8860 
+	     WPORT_WR p0 wmem [&213] @8881 
+	     WPORT_WR p0 wmem [&214] @8903 
+	     WPORT_WR p0 wmem [&215] @8924 
+	     WPORT_WR p0 wmem [&216] @8946 
+	     WPORT_WR p0 wmem [&217] @8967 
+	     WPORT_WR p0 wmem [&218] @8989 
+	     WPORT_WR p0 wmem [&219] @9010 
+	     WPORT_WR p0 wmem [&220] @9032 
+	     WPORT_WR p0 wmem [&221] @9053 
+	     WPORT_WR p0 wmem [&222] @9075 
+	     WPORT_WR p0 wmem [&223] @9096 
+	     WPORT_WR p0 wmem [&224] @9118 
+	     WPORT_WR p0 wmem [&225] @9139 
+	     WPORT_WR p0 wmem [&226] @9161 
+	     WPORT_WR p0 wmem [&227] @9182 
+	     WPORT_WR p0 wmem [&228] @9204 
+	     WPORT_WR p0 wmem [&229] @9225 
+	     WPORT_WR p0 wmem [&230] @9247 
+	     WPORT_WR p0 wmem [&231] @9268 
+	     WPORT_WR p0 wmem [&232] @9290 
+	     WPORT_WR p0 wmem [&233] @9311 
+	     WPORT_WR p0 wmem [&234] @9333 
+	     WPORT_WR p0 wmem [&235] @9354 
+	     WPORT_WR p0 wmem [&236] @9376 
+	     WPORT_WR p0 wmem [&237] @9397 
+	     WPORT_WR p0 wmem [&238] @9419 
+	     WPORT_WR p0 wmem [&239] @9440 
+	     WPORT_WR p0 wmem [&240] @9462 
+	     WPORT_WR p0 wmem [&241] @9483 
+	     WPORT_WR p0 wmem [&242] @9505 
+	     WPORT_WR p0 wmem [&243] @9526 
+	     WPORT_WR p0 wmem [&244] @9548 
+	     WPORT_WR p0 wmem [&245] @9569 
+	     WPORT_WR p0 wmem [&246] @9591 
+	     WPORT_WR p0 wmem [&247] @9612 
+	     WPORT_WR p0 wmem [&248] @9634 
+	     WPORT_WR p0 wmem [&249] @9655 
+	     WPORT_WR p0 wmem [&250] @9677 
+	     WPORT_WR p0 wmem [&251] @9698 
+	     WPORT_WR p0 wmem [&252] @9720 
+	     WPORT_WR p0 wmem [&253] @9741 
+	     WPORT_WR p0 wmem [&254] @9763 
+	     WPORT_WR p0 wmem [&255] @9784 
+	     WPORT_WR p0 wmem [&256] @9806 
+	     WPORT_WR p0 wmem [&257] @9827 
+	     WPORT_WR p0 wmem [&258] @9849 
+	     WPORT_WR p0 wmem [&259] @9870 
+	     WPORT_WR p0 wmem [&260] @9892 
+	     WPORT_WR p0 wmem [&261] @9913 
+	     WPORT_WR p0 wmem [&262] @9935 
+	     WPORT_WR p0 wmem [&263] @9956 
+	     WPORT_WR p0 wmem [&264] @9978 
+	     WPORT_WR p0 wmem [&265] @9999 
+	     WPORT_WR p0 wmem [&266] @10021 
+	     WPORT_WR p0 wmem [&267] @10042 
+	     WPORT_WR p0 wmem [&268] @10064 
+	     WPORT_WR p0 wmem [&269] @10085 
+	     WPORT_WR p0 wmem [&270] @10107 
+	     WPORT_WR p0 wmem [&271] @10128 
+	     WPORT_WR p0 wmem [&272] @10150 
+	     WPORT_WR p0 wmem [&273] @10171 
+	     WPORT_WR p0 wmem [&274] @10193 
+	     WPORT_WR p0 wmem [&275] @10214 
+	     WPORT_WR p0 wmem [&276] @10236 
+	     WPORT_WR p0 wmem [&277] @10257 
+	     WPORT_WR p0 wmem [&278] @10279 
+	     WPORT_WR p0 wmem [&279] @10300 
+	     WPORT_WR p0 wmem [&280] @10322 
+	     WPORT_WR p0 wmem [&281] @10343 
+	     WPORT_WR p0 wmem [&282] @10365 
+	     WPORT_WR p0 wmem [&283] @10386 
+	     WPORT_WR p0 wmem [&284] @10408 
+	     WPORT_WR p0 wmem [&285] @10429 
+	     WPORT_WR p0 wmem [&286] @10451 
+	     WPORT_WR p0 wmem [&287] @10472 
+	     WPORT_WR p0 wmem [&288] @10494 
+	     WPORT_WR p0 wmem [&289] @10515 
+	     WPORT_WR p0 wmem [&290] @10537 
+	     WPORT_WR p0 wmem [&291] @10558 
+	     WPORT_WR p0 wmem [&292] @10580 
+	     WPORT_WR p0 wmem [&293] @10601 
+	     WPORT_WR p0 wmem [&294] @10623 
+	     WPORT_WR p0 wmem [&295] @10644 
+	     WPORT_WR p0 wmem [&296] @10666 
+	     WPORT_WR p0 wmem [&297] @10687 
+	     WPORT_WR p0 wmem [&298] @10709 
+	     WPORT_WR p0 wmem [&299] @10730 
+	     REG_WR s15 label SKIP 
+	     WAIT [s15] @0 time 
+	     TIME #11169 inc_ref 
+	     REG_WR s12 op -op(s12 + #1) 
+	     REG_WR s15 label reps 
+	     TEST -op(r0 - #0) 
+	     JUMP [s15] -if(NZ) -wr(r0 op) -op(r0 + #1) 
+	     REG_WR s15 label NEXT 
+	     JUMP [s15] 

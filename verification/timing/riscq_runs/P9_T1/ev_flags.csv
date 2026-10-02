@@ -1,0 +1,9 @@
+sim_time,cyc,time,rst,kind
+6925,675,674,0,ch0_freqCQ_push_dropped
+6925,675,674,0,ch0_freqPQ_push_dropped
+7625,745,744,0,ch0_freqCQ_push_dropped
+7625,745,744,0,ch0_freqPQ_push_dropped
+8325,815,814,0,ch0_freqCQ_push_dropped
+8325,815,814,0,ch0_freqPQ_push_dropped
+9155,898,897,0,ch0_freqCQ_push_dropped
+9155,898,897,0,ch0_freqPQ_push_dropped

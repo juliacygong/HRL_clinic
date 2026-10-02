@@ -1,0 +1,9 @@
+order,level,event,module_instance,signals_logged,width,clock,trigger,output_file,source
+1,Program,E0i,qick_processor (qick_dut.AXIS_QPROC.QPROC),port_we; out_port_data.p_type/.p_addr/.p_time; c_time_ref_dt,"1; 1,6,32; 48",c_clk 200 MHz,port_we && p_type==0,ev_e0i_issue.csv,qick_processor.sv:642-643; qcore_cpu.sv:719-722
+2,Dispatcher (write),E0,qproc_dispatcher (...QPROC.DISPATCHER),c_fifo_wave_push_s[0]; c_fifo_time_in_r (due); c_fifo_data_in_r,1; 48; 168,c_clk,push_s[0] high,ev_e0_sched.csv,qproc_dispatcher.sv:~160-183
+3,Timeline (read),E1,qproc_dispatcher (...DISPATCHER),t_fifo_wave_empty[0]; t_fifo_wave_time[0]; t_time_abs_o,1; 48; 48,t_clk 430 MHz,t_fifo_wave_empty[0] falls,ev_e1_timeline.csv,qproc_dispatcher.sv:262-281; _qproc_ips.sv (Verilator BRAM_FIFO_DC_2)
+4,Timeline decision,E2,qick_dut wire (m0_axis) + DISPATCHER internals,tproc_sg0cdc_axis_tvalid/tready/tdata; t_time_abs_o; t_fifo_wave_time[0]; wave_t_gr_r/wave_pop cycles,1/1/168; 48; 48,t_clk,tvalid && tready,ev_e2_tproc_out.csv; ev_e2_dispatch_trace.csv,"qproc_dispatcher.sv:202,284-293,384-400; qick_dut.sv:179-181"
+5,Transport,E3,qick_dut wire (sg_translator -> axis_signal_gen_v6 s1_axis),sgt0_sg0_axis_tvalid/tready/tdata (nsamp[143:128] gain[111:96] addr[79:64] phase[63:32] freq[31:0] conf[148:144]),1/1/160,sg_clk 599.04 MHz,tvalid && tready,ev_e3_sg_in.csv,"cdcsync.sv; sg_translator.v:49-60; qick_dut.sv:1117,1225"
+6,Generator control,E4,ctrl_sg_v6 (qick_dut.u_axis_signal_gen_v6_0.signal_gen_top_i.signal_gen_i.ctrl_i),load_int (= rd_en_int & ~fifo_empty_i); fifo_dout_i fields,1; 160,sg_clk,load_int high,ev_e4_sg_load.csv,"ctrl_sg_v6.sv:294-298,534"
+7,Generator output,E5,ctrl_sg_v6 (...ctrl_i),en_o (= en_reg_r8),1,sg_clk,rise/fall edge,ev_e5_sg_en.csv,"ctrl_sg_v6.sv:395-408,542"
+8,Physical (optional),E6,harness DAC capture,axis_sg0_dac0_tdata,16x16,sg_clk,first non-zero row,dac_out_ch0.csv (existing),"QICKEmu_harness.sv:815,907"

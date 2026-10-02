@@ -1,0 +1,9 @@
+key,value
+emu_dir,/home/amigoyith/projects/HRL_clinic/verification/timing/runs/T4/d0
+pre_run_delay_ns,0
+test_run_time_ps,1000000.000
+sg_clk_period_ps,1669.344
+t_clk_period_ps,2324.000
+c_clk_period_ps,5000.000
+proc_start_time_ps,2578478.000
+proc_start_t_cyc,1038

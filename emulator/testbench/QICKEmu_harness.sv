@@ -1472,4 +1472,6 @@ initial begin
    end
 end
 
+`include "timing_monitors.svh"
+
 endmodule

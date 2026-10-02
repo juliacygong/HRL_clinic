@@ -1,0 +1,38 @@
+QICK timing summary: runs/T9b/d0
+pre_run_delay_ns=0  t_clk=2324.000 ps  sg_clk=1669.344 ps  c_clk=5000.000 ps
+commands on port: 300   E1 arrivals 5, head refills 295
+
+ORDERING AND INTEGRITY (every E0 command delivered once, in order)
+  FAIL: E2: lost=4, duplicates=3, unknown=1; E3: lost=52, duplicates=4; E4: lost=52, duplicates=4
+  fingerprints unique: yes
+
+ACCEPTANCE
+  core acceptance E0-E0i [c_clk]        : 1 (constant, n=300)
+  lead at issue (due - user time) [t_clk]: min -1314  max 618  mean -346.567  (n=300)
+  lead at timeline (true E1) [t_clk]    : 601 (constant, n=1)
+
+START
+  release offset, head [t_clk]          : 4 (constant, n=1)
+  release offset, queued [t_clk]        : min 8  max 1908  mean 880.946  (n=295)
+  compare-rise -> pop [t_clk]           : 0 (constant, n=1)
+  release spacing, queued [t_clk]       : min 4  max 13  mean 6.454  (n=295)
+  transport E3-E2 [ps]                  : min 22492.0  max 324110.208  mean 219474.886  (n=248)
+  transport E3-E2 [sg_clk]              : min 13.474  max 194.154  mean 131.474  (n=248)
+  queue wait E4-E3, SG idle [sg_clk]    : min 1  max 191  mean 153.000  (n=5)
+  due -> SG start, head+idle [ns]       : 38.964 (constant, n=1)
+
+OUTPUT BURSTS (E5)
+  burst 0: cmds [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]  E5rise-E4 = 9 sg_clk  length 3024 vs sum(nsamp) 360  MISMATCH
+  burst 1: cmds [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 80, 82]  E5rise-E4 = None sg_clk  length None vs sum(nsamp) 432  MISMATCH
+  burst 2: cmds [83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 128, 130]  E5rise-E4 = None sg_clk  length None vs sum(nsamp) 372  MISMATCH
+  burst 3: cmds [131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 256, 258]  E5rise-E4 = None sg_clk  length None vs sum(nsamp) 1332  MISMATCH
+  burst 4: cmds [259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299]  E5rise-E4 = None sg_clk  length None vs sum(nsamp) 480  MISMATCH
+
+CORE ACCEPTANCE STALL (dispatcher FIFO full -> core_en=0)
+  none
+
+FLAGS (count, first..last)
+  c_clk  some_fifo_full_rise (fifo clear, benign)      x2      172500..2577500 ps
+  c_clk  some_fifo_full_fall (fifo clear, benign)      x2      207500..2612500 ps
+  sg_clk sg0_s1_tvalid_without_tready                  x2403   4391209..8821648 ps
+  t_clk  tproc_m0_stall                                x437    4763038..8525594 ps

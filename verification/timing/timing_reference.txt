@@ -1,0 +1,150 @@
+QICK TIMING CHARACTERIZATION: QUICK REFERENCE
+=============================================
+Scope : command acceptance time, start time, ordering on the QICK reference
+        (tProcV2 -> SGv6 channel 0), as a timing reference and verification model
+        for the controller team's RISC-Q adapter. RISC-Q comes later.
+Status: PLAN ONLY. Nothing implemented yet.
+Full plan: verification/timing/TIMING_PLAN.md
+Tables as CSV (for tracking results): verification/timing/tables/*.csv
+Paths are local (~/projects/HRL_clinic). Firmware sources are under firmware/ip/.
+Hierarchical paths are rooted at QICKEmu_harness.
+Event numbers follow the order a command passes them (renumbered 2026-09-27:
+E1 = on timeline, E2 = release; the 12:33-session plan had these as E2 and E1).
+
+
+1. HOW A COMMAND FLOWS
+----------------------
+
+        c_clk (200 MHz, core)              t_clk (430 MHz, timeline)                  sg_clk (599.04 MHz, generator)
+ +------------------------------+   +----------------------------------+   +---------------------------------------+
+ | E0i  core issues port write  |   | E1  cmd visible on timeline side |   | E3  SGv6 accepts cmd (s1_axis)        |
+ |  |                           |   |  |                               |   |  |                                    |
+ |  v                           |   |  v                               |   |  v                                    |
+ | E0   pushed into wave FIFO   |-->| compare time_abs > due --> pop   |-->| E4  SGv6 loads it and starts playing  |
+ |      (due time fixed here)   |CDC|  |                               |CDC|  |                                    |
+ +------------------------------+   |  v                               |   |  v                                    |
+                                    | E2  tProc releases (m0_axis)     |   | E5  output enable on/off (en_o)       |
+                                    +----------------------------------+   |  v                                    |
+                                                                           | E6  first non-zero DAC sample (opt.)  |
+                                                                           +---------------------------------------+
+
+Four timing layers:
+ 1) Absolute time   : time_abs[47:0], +1 per t_clk (qproc_time_ctrl.sv)
+ 2) Reference time  : c_time_ref[47:0] on c_clk, set/incremented by core time instructions (qproc_ctrl.sv)
+ 3) Dispatch        : due = sext(p_time) + c_time_ref, stored in wave FIFO {cmd[167:0], due[47:0]};
+                      released when time_abs_r > due (strict), head only, >= 3 t_clk between pops
+ 4) Transport + SG  : shared CDC FIFO (SG0-2) -> combinational translator -> SGv6 FIFO -> READ_ST/CNT_ST FSM;
+                      SGv6 plays when idle, nsamp (sg_clk cycles) sets length.
+                      Start = max(arrival + L, end of previous pulse)
+
+
+2. EVENTS: WHAT EACH NUMBER MEANS (one row per event, in time order)
+---------------------------------------------------------------------
+
+| Event        | What happens at this moment                                  | Number recorded here                                 | Interval from previous event        | What that interval means                                               | Expected (to confirm)                        | Answers                    |
+|--------------|--------------------------------------------------------------|------------------------------------------------------|-------------------------------------|------------------------------------------------------------------------|----------------------------------------------|----------------------------|
+| E0i issue    | Program executes "play this pulse at time t"                 | time, c_clk cycle, p_time, c_time_ref                | (starting point)                    | -                                                                      | -                                            | Ordering baseline          |
+| E0 schedule  | Controller accepts cmd into queue; due time fixed            | time, c_clk cycle, due time (t_clk ticks)            | E0 - E0i (c_clk)                    | Acceptance delay; larger if queue full and core stalled                | 1 cycle (more only in T9)                    | ACCEPTANCE                 |
+| E1 timeline  | Cmd reaches timeline side, can be compared against the clock | time, time_abs                                       | due - time_abs@E1 (t_clk)           | Lead margin; small or negative means the release will be late          | positive                                     | Acceptance (in time?)      |
+| E2 release   | Due time passed; comparator releases cmd toward generator    | time, time_abs, compare-fire and pop cycles          | time_abs@E2 - due; E2[k+1]-E2[k]    | Release offset (fixed controller delay); release spacing               | offset ~4 constant; spacing >= 3             | START (ctrl), ORDERING     |
+| E3 SG accept | Cmd arrives at SGv6 input (point the adapter must reproduce) | time, sg_clk cycle, gain/nsamp/fields                | E3 - E2 (ps -> sg_clk)              | Transport across t_clk -> sg_clk                                       | constant +/- 1 sg_clk (emulator value)       | Start (transport)          |
+| E4 SG start  | SGv6 takes cmd from its queue and begins the pulse           | time, sg_clk cycle, nsamp                            | E4 - E3 (sg_clk); E4[k+1]-E4[k]     | Queue wait (0 idle, grows if busy); spacing preserved?                 | small idle; spacing = delta, or nsamp b2b    | START, ORDERING            |
+| E5 on        | Output enable turns on                                       | time, sg_clk cycle                                   | E5on - E4 (sg_clk)                  | Fixed generator pipeline                                               | ~8-9 constant                                | Start (output)             |
+| E5 off       | Output enable turns off                                      | time, sg_clk cycle                                   | E5off - E5on (sg_clk)               | Pulse duration                                                         | = nsamp                                      | Duration                   |
+| E6 DAC (opt) | First non-zero DAC sample                                    | time, row                                            | E6 - E5on                           | Physical output delay (out of scope)                                   | -                                            | -                          |
+
+Summary numbers:
+  ACCEPTANCE = E0 - E0i  (+ lead margin at E1)
+  START      = E4 - due  = release offset (E2) + transport (E3) + queue wait (E4)
+  ORDERING   = gain sequence at E0i, E0, E2, E3, E4 vs. due-time order (should be identical)
+
+
+3. FINALIZED EVENT LEVELS: EXACT SIGNALS
+----------------------------------------
+
+| # | Level              | Event    | Module (instance)                                                   | Signal(s) logged                                                                    | Width          | Clock  | Trigger                          | Output file                                  | Source                                           |
+|---|--------------------|----------|---------------------------------------------------------------------|-------------------------------------------------------------------------------------|----------------|--------|----------------------------------|----------------------------------------------|--------------------------------------------------|
+| 1 | Program            | E0i      | qick_processor (qick_dut.AXIS_QPROC.QPROC)                          | port_we; out_port_data.p_type/.p_addr/.p_time; c_time_ref_dt                        | 1; 1,6,32; 48  | c_clk  | port_we && p_type==0             | ev_e0i_issue.csv                             | qick_processor.sv:642-643; qcore_cpu.sv:719-722  |
+| 2 | Dispatcher (write) | E0       | qproc_dispatcher (...QPROC.DISPATCHER)                              | c_fifo_wave_push_s[0]; c_fifo_time_in_r (due); c_fifo_data_in_r                     | 1; 48; 168     | c_clk  | push_s[0] high                   | ev_e0_sched.csv                              | qproc_dispatcher.sv:~160-183                     |
+| 3 | Timeline (read)    | E1       | qproc_dispatcher (...DISPATCHER)                                    | t_fifo_wave_empty[0]; t_fifo_wave_time[0]; t_time_abs_o                             | 1; 48; 48      | t_clk  | t_fifo_wave_empty[0] falls       | ev_e1_timeline.csv                           | qproc_dispatcher.sv:262-281; _qproc_ips.sv       |
+| 4 | Timeline decision  | E2       | qick_dut wire (m0_axis) + DISPATCHER internals                      | tproc_sg0cdc_axis_tvalid/tready/tdata; t_time_abs_o; t_fifo_wave_time[0]; wave_t_gr_r/wave_pop cycles | 1/1/168; 48; 48 | t_clk | tvalid && tready             | ev_e2_tproc_out.csv, ev_e2_dispatch_trace.csv | qproc_dispatcher.sv:202,284-293,384-400; qick_dut.sv:179-181 |
+| 5 | Transport          | E3       | qick_dut wire (sg_translator -> axis_signal_gen_v6 s1_axis)         | sgt0_sg0_axis_tvalid/tready/tdata (nsamp[143:128] gain[111:96] addr[79:64] phase[63:32] freq[31:0] conf[148:144]) | 1/1/160 | sg_clk | tvalid && tready | ev_e3_sg_in.csv                        | cdcsync.sv; sg_translator.v:49-60; qick_dut.sv:1117,1225 |
+| 6 | Generator control  | E4       | ctrl_sg_v6 (qick_dut.u_axis_signal_gen_v6_0.signal_gen_top_i.signal_gen_i.ctrl_i) | load_int (= rd_en_int & ~fifo_empty_i); fifo_dout_i fields             | 1; 160         | sg_clk | load_int high                    | ev_e4_sg_load.csv                            | ctrl_sg_v6.sv:294-298,534                        |
+| 7 | Generator output   | E5       | ctrl_sg_v6 (...ctrl_i)                                              | en_o (= en_reg_r8)                                                                  | 1              | sg_clk | rise/fall edge                   | ev_e5_sg_en.csv                              | ctrl_sg_v6.sv:395-408,542                        |
+| 8 | Physical (opt)     | E6       | harness DAC capture                                                 | axis_sg0_dac0_tdata                                                                 | 16x16          | sg_clk | first non-zero row               | dac_out_ch0.csv (existing)                   | QICKEmu_harness.sv:815,907                       |
+
+Every row also logs: seq, time_ps (%0t), cycle count in its own clock (c_cyc/t_cyc/sg_cyc from reset release),
+and the fingerprint gain.
+
+Supporting logs:
+  ev_flags.csv   : SGv6 s1 tvalid&&!tready (VIOLATION); tProc m0 tvalid&&!tready (STALL); some_fifo_full / core_en=0
+  ev_meta.csv    : clock periods, PRE_RUN_DELAY_NS, TEST_RUN_NS, PROC_START moment
+  tproc_ctrl.csv : existing, untouched; regression check vs. E2
+
+Boundaries between levels:
+| From -> To  | Crosses                                          | Latency type                                  |
+|-------------|--------------------------------------------------|-----------------------------------------------|
+| E0i -> E0   | 1 register, core domain                          | Controller acceptance (+ stall)               |
+| E0  -> E1   | c_clk -> t_clk CDC                               | Emulator-model latency                        |
+| E1  -> E2   | compare/pop pipeline, t_clk only                 | CONTROLLER TIMING DECISION (deterministic)    |
+| E2  -> E3   | t_clk -> sg_clk CDC (shared SG0-2) + translator  | Emulator-model latency                        |
+| E3  -> E4   | SGv6 FIFO + FSM                                  | Queue wait                                    |
+| E4  -> E5   | en_reg 8-stage alignment                         | Fixed generator pipeline                      |
+| E5  -> E6   | DDS/DAC model                                    | Physical (out of scope)                       |
+
+
+4. CRITICAL TIMING CHARACTERISTICS (hypotheses from RTL, to confirm or refute)
+------------------------------------------------------------------------------
+ C1  Release is strictly after due: time_abs > due (strict), release offset ~4 t_clk, constant.
+ C2  One release per >= 3 t_clk per port (2-cycle blank after each pop).
+ C3  Per-port FIFO is in issue order; only the head is compared (head-of-line blocking; no reordering by time).
+ C4  Late command (due already passed) releases immediately; no error flag.
+ C5  Core stalls when any dispatcher FIFO is full (unless TPROC_CFG[11]); commands are never dropped.
+ C6  SGv6 start = max(arrival + L, previous end); back-to-back pulses are gapless (period = nsamp).
+ C7  Due time is on the t_clk grid, duration on the sg_clk grid (different clocks).
+ C8  SG CDC FIFO is shared by SG0-2: one stalled SG stalls all three.
+ C9  SGv6 writes its FIFO on tvalid alone: an adapter must never assert tvalid while tready is low.
+ C10 Emulator-model latencies (E0->E1, E2->E3, E3->E4) are not hardware numbers:
+       time adder ignores carry-in (+dt vs +dt+1 on update); dispatcher FIFO = Verilator variant;
+       CDC fifo_dc_sv uses 16-stage wptr sync; SGv6 FIFO = fifo_behav; DDS = model.
+
+
+5. TESTS
+--------
+| Test     | Program                          | Events exercised          | Purpose                                             |
+|----------|----------------------------------|---------------------------|-----------------------------------------------------|
+| test_sim | existing 9 SG0 commands          | all                       | validate monitors (Checkpoint 1)                    |
+| T1       | one pulse                        | E0i -> E5                 | baseline latency at every stage                     |
+| T2       | two pulses, idle gap             | E2/E3/E4 spacing          | is the gap preserved at every layer                 |
+| T3       | T2 with several gaps             | E2-due, E4-E3             | does latency stay constant                          |
+| T4       | back-to-back                     | E4 spacing, E4-E3         | SGv6 chaining by nsamp                              |
+| T5       | overlapping                      | E3 vs E4                  | "late": arrives on time, starts late                |
+| T6       | later-time pulse written first   | ordering E0 -> E4         | issue order vs. due order                           |
+| T7       | T2 at 4 start delays             | E3-E2 spread              | CDC jitter from clock phase                         |
+| T8       | late command                     | E1 margin, E2             | due already passed                                  |
+| T9       | fill FIFOs                       | E0-E0i, flags             | acceptance stall (backpressure)                     |
+| T10 opt  | same due on SG0 and SG1          | E2/E3/E4 on both          | cross-channel alignment via shared CDC              |
+
+
+6. CHECKPOINTS (stop after each for review)
+-------------------------------------------
+| CP | Work                                   | Produces                          | You check                                                                   | Est. time    |
+|----|----------------------------------------|-----------------------------------|-----------------------------------------------------------------------------|--------------|
+| 1  | Monitors + rebuild + run test_sim      | ev_*.csv                          | diff = 1 include line; tproc_ctrl.csv unchanged; 9 rows/event; no flags; C1/C2/duration | 30-45 min |
+| 2  | Analysis script                        | timing_report.csv + summary       | per-stage numbers; ordering pass; optional GTKWave cross-check              | 20-30 min    |
+| 3  | Program generator                      | artifacts/timing/T1..T10          | prog.txt pulses; PROC_START present; unique gains                           | 40-60 min    |
+| 4  | Suite run                              | runs/<test>/d<delay>/ + report    | C1-C9 confirmed/refuted                                                     | 30-45 min (+30 T10) |
+| 5  | Timing contract (E3)                   | contract section                  | clear for controller team                                                   | 20-30 min    |
+
+Scope options: Minimum CP1+2 ~1 h | Core CP1-3 + CP4 subset ~2.5 h | Full CP1-5 ~3.5-4.5 h.
+Timing basis: harness rebuild ~1-2 min; test_sim run ~5 s; RISC-Q mill run ~80 s.
+
+
+7. ENVIRONMENTS
+---------------
+| Env                 | Used for                  | Path / tool                                                               |
+|---------------------|---------------------------|---------------------------------------------------------------------------|
+| QICKEmu Python      | generate T-programs (CP3) | ~/projects/HRL_clinic/.venv (Py 3.14.4, numpy 2.5.3, qick 0.2.422 editable); kernel "Python (qick)" |
+| QICK RTL replay     | CP1, CP4                  | make verilate VERILATOR_ROOT=~/projects/qick/emulator/submodules/verilator (Verilator 5.042; system 5.032 fails on -Wno-BADVLTPRAGMA); always pass +PRE_RUN_DELAY_NS (default is random 0-100) |
+| Verification Python | CP2                       | /usr/bin/python3 (stdlib only)                                            |
+| RISC-Q (deferred)   | later                     | cd risc-q; ~/projects/RISC-Q/mill (1.1.0, managed Zulu JDK 21); riscv64-unknown-elf-gcc -march=rv32i |

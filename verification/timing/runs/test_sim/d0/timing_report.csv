@@ -1,0 +1,10 @@
+k,fingerprint_gain,nsamp,due_tclk,p_time,lead_at_issue_tclk,accept_cclk,lead_at_timeline_tclk,status,release_kind,release_offset_tclk,compare_to_pop_tclk,release_spacing_tclk,transport_ps,transport_sgclk,queue_wait_sgclk,start_spacing_sgclk,due_to_start_ns,chained
+0,7ffe,60,430,0,358,1,345,ok,head,4,0,,27737.216,16.616,1,,38.703,False
+1,3fff,60,430,0,358,1,,ok,queued,8,,4,26787.936,16.047,56,60,138.863,True
+2,7ffe,60,430,0,351,1,,ok,queued,12,,4,27508.0,16.478,110,60,239.024,True
+3,7ffe,120,602,172,515,1,,ok,head,4,0,164,26982.432,16.163,1,119,37.948,False
+4,7ffe,120,774,344,680,1,,ok,head,4,0,172,27896.992,16.711,1,240,38.862,False
+5,7ffe,60,946,516,844,1,,ok,head,4,0,172,27142.208,16.259,1,239,38.108,False
+6,3fff,60,946,516,837,1,,ok,queued,8,,4,27862.272,16.691,55,60,138.268,True
+7,7ffe,60,946,516,837,1,,ok,queued,12,,4,26912.992,16.122,110,60,238.429,True
+8,7ffe,120,1118,688,1000,1,,ok,head,4,0,164,28056.768,16.807,1,120,39.022,False

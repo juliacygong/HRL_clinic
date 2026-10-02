@@ -1,0 +1,3 @@
+seq,time_ps,t_cyc,t_time_abs,head_due,gr_rise_t_cyc,pop_t_cyc,conf,nsamp,gain,addr,phase,freq
+0,4114642.000,1699,649,645,1698,1698,0009,60,0ccc,000000,00000000,02abc2bc
+1,4614302.000,1914,864,860,1913,1913,0009,60,1999,000000,00000000,02abc2bc

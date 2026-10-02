@@ -1,0 +1,2 @@
+ch,k,occurrence,amp,dur,planned_due,pushed,captured_due,due_delta,queued,release_offset,pop_leads,paired_amp,paired_freq,out_start_offset,out_covered,status
+0,0,0,3277,60,29174,True,29174,0,True,-2,amp-34 phase-35 freqC-36 freqP-52 addr-11 dur-2,True,True,0,60,ok
