@@ -12,6 +12,7 @@ import riscq.dsp.pulse.{ReadoutDecoder, ReadoutDecoderParams}
 import riscq.riscv.RiscqParam
 import riscq.soc.fabric.BramWriteFiber
 import riscq.soc.rf.{PulseDriveChannel, DemodChannel}
+import riscq.soc.qick.{QickGenChannel, QickGenParams}
 import riscq.soc.link.{RfLink, ReadoutResultLink, RfCmd}
 
 /**
@@ -63,7 +64,11 @@ case class RiscqRfWithPulseTableFiber(
     demodPulseNum: Int = 1,
     linkPipe: Int = 4,
     queueDepth: Int = 4,          // per-parameter TimedQueue depth in every drive/demod PulseGenerator
-    withTestTap: Boolean = false
+    withTestTap: Boolean = false,
+    // QICK signal generator: Some ⇒ the gate (0x00000) and readout-drive (0x10000) RF windows each feed a
+    // WaveWordBridge → sg_translator → axis_signal_gen_v6 instead of the native PulseDriveChannel; the
+    // demod carrier and readout decoder stay native. None ⇒ native drive channels (RTL unchanged).
+    qickGen: Option[QickGenParams] = None
 ) extends Area {
   val w        = dataWidth
   // envelope read-port address width = the envelope RAM's own address width (log2Up(envDepth)). Derived,
@@ -74,7 +79,8 @@ case class RiscqRfWithPulseTableFiber(
   val memLatency = 1 + memOutReg.toInt      // envelope RAM read latency (sync read + out reg)
   // 0x40000-byte RF window: gate 0x00000, readout drive 0x10000, demod 0x20000. The old decoder
   // sub-window 0x30000 is unmapped/reserved (the carrier-triggered decoder needs no CPU register), so
-  // every existing channel address is unchanged and rfAddrWidth stays 18.
+  // every existing channel address is unchanged and rfAddrWidth stays 18. With `qickGen` the gate and
+  // readout-drive windows hold the WaveWordBridge register map instead of the PulseDriveChannel one.
   val rfAddrWidth = 18
 
   // ════════════════════════ the timing-critical core unit (hard Component) ═════════════════════════
@@ -158,8 +164,20 @@ case class RiscqRfWithPulseTableFiber(
     }
     // The gate table lands in distributed RAM (PulseParamBuffer.useMem defaults on for pulseNum ≥ 2);
     // the ro channel (pulseNum = 1) has no addressable table so it stays a register file automatically.
-    val gateChannel = mkDriveChannel(gatePulseNum, 0x0,     getPipe(riscvSoc.cmd, linkPipe))
-    val roChannel   = mkDriveChannel(1,            0x10000, getPipe(riscvSoc.cmd, linkPipe))
+    val gateChannel = qickGen.isEmpty generate mkDriveChannel(gatePulseNum, 0x0,     getPipe(riscvSoc.cmd, linkPipe))
+    val roChannel   = qickGen.isEmpty generate mkDriveChannel(1,            0x10000, getPipe(riscvSoc.cmd, linkPipe))
+
+    // QICK drive channel on a demuxed sub-window. RfLink.pipe stages carry an init'd valid, so no X beat
+    // can hit a fire address out of reset; `time` gets the same 1-cycle copy PulseParamBuffer takes of
+    // `timeBcast`, so the bridge and the native demod channel schedule against the same time.
+    def mkQickChannel(p: QickGenParams, base: BigInt) = {
+      val ch = QickGenChannel(p, hostCd)
+      ch.io.cmd  << RfLink.demux(RfLink.pipe(riscvSoc.cmd, linkPipe), base, 0x10000, p.bridge.addrWidth)
+      ch.io.time := RegNext(time).addAttribute("EQUIVALENT_REGISTER_REMOVAL", "NO")
+      ch
+    }
+    val qickGate = qickGen.map(mkQickChannel(_, 0x0)).orNull
+    val qickRo   = qickGen.map(mkQickChannel(_, 0x10000)).orNull
 
     // demod carrier: a scheduled, envelope-shaped complex pulse (a PulseDriveChannel pointed at the
     // decoder). Its posted RF sub-window carries the same fire/freq/table/startTime map as a drive
@@ -184,16 +202,28 @@ case class RiscqRfWithPulseTableFiber(
     // decoder holds it high from settle until the next window's start), so the sink mirrors it.
     val upSrc = ReadoutResultLink.source(decoder.io.res.valid, decoder.io.res.payload, decoder.io.real, decoder.io.imag, readoutAccWidth)
     riscvSoc.resultIn << getPipe(upSrc, linkPipe)
+
   } }
 
   // ── datapath handles exported to the rest of the qubit core / SoC ──
-  val gatePulse      = posted.gateChannel.io.pulse
-  val readoutPulse   = posted.roChannel.io.pulse
-  val gateMemPort    = posted.gateChannel.io.memPort
-  val readoutMemPort = posted.roChannel.io.memPort
+  // A QICK channel's pulse is the gen's real samples (im = 0) with valid = m_axis_tvalid (pulse playing).
+  def qickPulse(ch: QickGenChannel): Flow[Vec[riscq.dsp.Complex]] = dspCd {
+    val f = Flow(ComplexBatch(batchSize, w))
+    f.valid := ch.io.samples.valid
+    for (k <- 0 until batchSize) {
+      f.payload(k).re := ch.io.samples.payload(k * w, w bits).asSInt
+      f.payload(k).im := 0
+    }
+    f
+  }
+  val gatePulse      = if (qickGen.isEmpty) posted.gateChannel.io.pulse else qickPulse(posted.qickGate)
+  val readoutPulse   = if (qickGen.isEmpty) posted.roChannel.io.pulse   else qickPulse(posted.qickRo)
   val demodMemPort   = posted.demodChannel.io.memPort
   val decoderRd      = posted.decoder
-  val startTime      = posted.gateChannel.startTime    // gate buffer's per-buffer startTime (sims observe it)
+  // gate buffer's per-buffer startTime (sims observe it); null with qickGen (the bridge holds its own)
+  val startTime      = if (qickGen.isEmpty) posted.gateChannel.startTime else null
+  // host-side gen_v6 ports (AXI-Lite regs + envelope stream), gate then readout; empty without qickGen
+  val qickHost       = if (qickGen.isEmpty) Nil else List(posted.qickGate.io.host, posted.qickRo.io.host)
 
   // ── envelope-memory read ports (reconstruct the full `lanes`-lane batch from the interpolated line) ──
   def expandEnv(data: Bits, interp: Int, lanes: Int): Bits =
@@ -208,8 +238,18 @@ case class RiscqRfWithPulseTableFiber(
     p.address := memPort.cmd.payload
     memPort.rsp := expandEnv(p.rdata, interp, lanes)
   }
-  wireEnv(pulseMemFiber.rams(0),   gateMemPort,    gateInterp,    batchSize)
-  wireEnv(readoutMemFiber.rams(0), readoutMemPort, readoutInterp, batchSize)
+  // With qickGen the gate/readout envelopes live in each gen's own table, so these banks go unread.
+  def tieEnv(ram: riscq.memory.Bram[Bits]): Unit = {
+    val p = ram.fastPort
+    p.enable := False; p.write := False; p.mask.setAllTo(False); p.wdata.setAllTo(False); p.address := 0
+  }
+  if (qickGen.isEmpty) {
+    wireEnv(pulseMemFiber.rams(0),   posted.gateChannel.io.memPort, gateInterp,    batchSize)
+    wireEnv(readoutMemFiber.rams(0), posted.roChannel.io.memPort,   readoutInterp, batchSize)
+  } else {
+    tieEnv(pulseMemFiber.rams(0))
+    tieEnv(readoutMemFiber.rams(0))
+  }
   wireEnv(demodMemFiber.rams(0),   demodMemPort,   demodInterp,   adcBatch)
 
   // ── DAC (real lane only) + ADC ──

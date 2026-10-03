@@ -38,7 +38,7 @@ class SgTranslator(outType: Int = 0) extends BlackBox {
   setDefinitionName("sg_translator")
   addGeneric("OUT_TYPE", outType)
   noIoPrefix()
-  addRTLPath("/Users/juliagong/HRL_clinic/firmware/ip/qick_sg_translator/src/sg_translator.v")
+  addRTLPath(new java.io.File("../firmware/ip/qick_sg_translator/src/sg_translator.v").getCanonicalPath) // repo-relative (mill runs from risc-q/)
 }
 
 /** Wrapper: WaveWordBridge → sg_translator, exposing the bridge inputs and the gen_v6 output. */
