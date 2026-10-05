@@ -1,3 +1,5 @@
+from .tprocv2_assembler import integer2bin, find_pattern
+
 instList = {}
 
 # I-type.
