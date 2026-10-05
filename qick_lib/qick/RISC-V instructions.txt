@@ -1,5 +1,7 @@
 #RISC-V Assembly Instructions
 
+# J-Type
+
 # condj p, $ra op $rb, @label 
 # op ∈ {<, <=, >, >=, ==, !=}
 < - blt ra, rb, label
@@ -9,10 +11,13 @@
 == - beq ra, rb, label
 ≠ - bne ra, rb, label
 
-
 # loopnz p, $r, @label 
 bne x0, r1, label
 addi r1, r1, -1
+
+
+
+# R-Type.
 
 # math p, $ra, $rb op $rc
 add ra, rb, rc #ra = rb + rc
@@ -27,7 +32,6 @@ mul ra, rb, rc # ra = rb*rc
 << - sll ra, rb, rc
 >> - srl ra, rb, rc
 ~ - xori ra, rb, -1
-
 
 # set ch, p, $ra,$rb,$rc,$rd,$re, $rt
 sw   r1, 0x4(chbase)      # r1 = freq
@@ -65,6 +69,56 @@ lw r, 8(ch) - higher
 
 
 
+# I-Type
+
+# popi
+lw  r, 0(sp)
+addi sp, sp, 4
+
+# pushi
+addi sp, sp, -4
+sw   ra, 0(sp)
+addi rb, x0, imm
+
+# mathi
+addi ra rb imm 
+addi ra rb -imm 
+li rc imm
+mul ra rb rc
+
+# waiti
+sw imm, addr(ctrl_base)
+lw x0, addr+8(ctrl_base)
+
+# seti h, p, $ra,...,$rt
+sw   r1, 0x4(chbase)      # r1 = freq
+sw   r2, 0x10(chbase)     # r2 = phase 
+sw   r3, 0x14(chbase)     # r3 = amp     
+sw   r4, 0x18(chbase)     # r4 = env     
+sw   r5, 0x1c(chbase)     # r5 = dur  
+sw   r6, 0x4100(chbase)   # r6 = startTime
+sw   r7, 0x0(chbase)      # r7 = idx
+
+# bitwi
+op ra rb imm
+
+# memri
+lw r, imm(x0)
+
+# memwi
+sw r, imm(x0)
+
+# regwi
+li r, imm
+
+# setb h, p, $ra,...,$rt
+sw   r1, 0x4(chbase)      # r1 = freq
+sw   r2, 0x10(chbase)     # r2 = phase 
+sw   r3, 0x14(chbase)     # r3 = amp     
+sw   r4, 0x18(chbase)     # r4 = env     
+sw   r5, 0x1c(chbase)     # r5 = dur  
+sw   r6, 0x4100(chbase)   # r6 = startTime
+sw   r7, 0x0(chbase)      # r7 = idx
 
 
 
