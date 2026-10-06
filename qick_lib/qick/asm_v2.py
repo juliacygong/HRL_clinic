@@ -2037,11 +2037,7 @@ class QickProgramV2(AsmV2, AbsQickProgram):
 
     def __init__(self, soccfg):
         super().__init__(soccfg)
-
-        if self.tproccfg['type']!='qick_processor':
-            raise RuntimeError("tProc v2 programs can only be run on a tProc v2 firmware")
-        if self.tproccfg['revision'] not in self.ASM_REVISIONS:
-            raise RuntimeError("this version of the QICK library only supports tProc v2 revisions in the list %s, you have %d"%(self.ASM_REVISIONS, self.tproccfg['revision']))
+        self._check_cfg()
 
         # all current v1 programs are processed in one pass:
         # * init the program
@@ -2074,6 +2070,12 @@ class QickProgramV2(AsmV2, AbsQickProgram):
         # The dump just keeps enough information to execute the program - ASM and initial waveform values.
         # Most of the high-level information (macros, sweeps) is lost.
         self.dump_keys += ['waves', 'prog_list', 'labels']
+
+    def _check_cfg(self):
+        if self.tproccfg['type']!='qick_processor':
+            raise RuntimeError("tProc v2 programs can only be run on a tProc v2 firmware")
+        if self.tproccfg['revision'] not in self.ASM_REVISIONS:
+            raise RuntimeError("this version of the QICK library only supports tProc v2 revisions in the list %s, you have %d"%(self.ASM_REVISIONS, self.tproccfg['revision']))
 
     def _init_declarations(self):
         # initialize the high-level objects that get filled in manually, or by a make_program()
@@ -2204,9 +2206,12 @@ class QickProgramV2(AsmV2, AbsQickProgram):
         # initialize sweep registers
         for k,v in self.reg_dict.items():
             if v.init is not None:
-                WriteReg(dst=k, src=v.init.start).translate(self)
+                self._init_reg(k, v.init.start)
         for i, macro in enumerate(self.macro_list):
             macro.translate(self)
+
+    def _init_reg(self, name, val):
+        WriteReg(dst=name, src=val).translate(self)
 
     def _add_asm(self, inst, addr_inc=1):
         inst = inst.copy()

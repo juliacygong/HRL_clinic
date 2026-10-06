@@ -2,49 +2,56 @@ from numbers import Integral
 
 import numpy as np
 
-from .asm_v2 import (WriteLabel, End, WriteReg, IncReg, ReadWmem, WriteWmem, ReadDmem, WriteDmem,
+from .asm_v2 import (Macro, Label, WriteLabel, End, WriteReg, IncReg, ReadWmem, WriteWmem, ReadDmem, WriteDmem,
                      ReadInput, Jump, Call, CondJump, OpenLoop, CloseLoop, Delay, Wait, Resync,
                      Pulse, ConfigReadout, Trigger, QickRawParam)
+from .riscq_config import READOUT_CH
 
-# from riscq.map.SocMap.CTRL_*
-CTRL_BASE = 0x4000            
+# symbols come from the .equ block built from riscq_map.h
+CTRL_BASE = "RQ_CTRL_TIME_CMP"
 WAIT_ADDR = 0x0
-CTRL_TIME = 0xBFF8            
-CTRL_RES  = 0x4200           
+CTRL_TIME = "RQ_CTRL_TIME"
+CTRL_RES  = "RQ_CTRL_RES"
 
-RF_BASES = {0: 0x10000,       
-            1: 0x20000,       
-            2: 0x30000}       
-RF_DEMOD = RF_BASES[2]
+RF_DEMOD = f"RF_CH{READOUT_CH}"
 RF_FIRE = 0x0
 RF_FREQ = 0x4
 RF_PHASE_OFFSET = 0xC
-RF_SLOT_STRIDE = 0x10         
+RF_SLOT_STRIDE = 0x10
 RF_START_TIME = 0x4100
 
+EXIT_LABEL = "__qick_exit"
+EXT_LABEL = "__qick_ext"
 DMEM_LABEL = "__qick_dmem"
 WMEM_LABEL = "__qick_wmem"
 WMEM_FIELDS = ['freq', 'phase', 'env', 'gain', 'length', 'conf']
 WMEM_STRIDE = 4 * len(WMEM_FIELDS)
 
-CTRL_REG    = "t1"            
-REF_REG     = "s11"           
-T_REG       = "t0"            
-SCRATCH_REG = "t2"           
+CTRL_REG    = "t1"
+REF_REG     = "s11"
+T_REG       = "t0"
+SCRATCH_REG = "t2"
 
-# tProc register -> RISC-V register
+# QICK register -> RISC-V register
 DREG_RV = ['s0', 's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10',
-           'a0', 'a1', 'a2', 'a3', 'a4']                      
-WREG_RV = ['a5', 'a6', 'a7', 't3', 't4', 't5']                 
-SREG_RV = {'s0': 'x0',                                         
-           's8': 'gp',                                         
-           's9': 'tp',                                         
-           's14': 't6'}                                        
+           'a0', 'a1', 'a2', 'a3', 'a4']
+WREG_RV = ['a5', 'a6', 'a7', 't3', 't4', 't5']
+SREG_RV = {'s0': 'x0',
+           's8': 'gp',
+           's9': 'tp',
+           's14': 't6'}
 OUT_REG = SREG_RV['s14']
 
 
+def rf_base(prog, ch: int) -> str:
+    sym = f"RF_CH{ch}"
+    if sym not in prog.soccfg.equs:
+        raise RuntimeError(f"gen channel {ch} has no RISC-Q drive channel")
+    return sym
+
+
 def rv_reg(prog, name: str) -> str:
-    """Translate a QICK register name or tProc address to a RISC-V register."""
+    """Translate a QICK register name or address to a RISC-V register."""
     addr = prog._get_reg(name)
     kind, idx = addr[0], int(addr[1:])
     if kind == 'r':
@@ -58,12 +65,17 @@ def rv_reg(prog, name: str) -> str:
     raise RuntimeError(f"special register {addr} ({name}) has no RISC-V equivalent")
 
 
+def ext_off(prog, name):
+    """Byte offset in EXT_LABEL if name is a host-visible register (kept in memory), else None."""
+    return {'s12': 0, 's13': 4}.get(prog._get_reg(name))
+
+
 def fits_imm12(val: int) -> bool:
     return -2048 <= val < 2048
 
 
 def to_int32(val: int) -> int:
-    # constrain the value to signed 32-bit (same as tProc)
+    # constrain the value to signed 32-bit
     return int(np.int64(val).astype(np.int32))
 
 
@@ -104,8 +116,9 @@ def rv_data_section(prog, dmem_words: int = 256) -> list[str]:
             val = getattr(wave, f)
             if isinstance(val, QickRawParam):
                 val = val.start
-            lines.append(f'    .word {to_int32(val)}    # {wave.name}.{f}')
-    lines += [f'{DMEM_LABEL}:', f'    .space {4*dmem_words}']
+            lines.append(f'.word {to_int32(val)}    # {wave.name}.{f}')
+    for label, nbytes in [(EXT_LABEL, 8), (DMEM_LABEL, 4*dmem_words)]:
+        lines += [f'.type {label}, @object', f'.size {label}, {nbytes}', f'{label}:', f'.space {nbytes}']
     return lines
 
 
@@ -118,17 +131,37 @@ def wait_rv(r: str) -> list[str]:
     fields = {'r': r, 'addr': WAIT_ADDR, 'addr_cmp': WAIT_ADDR + 8, 'ctrl_base': CTRL_REG}
     return [line.format(**fields) for line in WAIT_RV]
 
-class RvWriteLabel(WriteLabel):
+class RvMacro:
+    def translate(self, prog):
+        for line in self.expand_rv(prog):
+            prog._add_rv(line)
+
+
+class RvLabel(RvMacro, Label):
+    def expand_rv(self, prog):
+        return [f'{self.label}:']
+
+
+class RvAsmInst(RvMacro, Macro):
+    def expand_rv(self, prog):
+        return [self.inst]
+
+
+class RvWriteLabel(RvMacro, WriteLabel):
     def expand_rv(self, prog):
         return []
 
 
-class RvEnd(End):
+class RvEnd(RvMacro, End):
     def expand_rv(self, prog):
-        return ['j .']
+        return [f'j {EXIT_LABEL}']
 
-class RvWriteReg(WriteReg):
+class RvWriteReg(RvMacro, WriteReg):
     def expand_rv(self, prog):
+        off = ext_off(prog, self.dst)
+        if off is not None:
+            setup, src = operand_rv(prog, self.src)
+            return [f'la {T_REG}, {EXT_LABEL}+{off}', *setup, f'sw {src}, 0({T_REG})']
         dst = rv_reg(prog, self.dst)
         if isinstance(self.src, Integral):
             return [f'li {dst}, {to_int32(self.src)}']
@@ -136,8 +169,13 @@ class RvWriteReg(WriteReg):
             return [f'mv {dst}, {rv_reg(prog, self.src)}']
         raise RuntimeError(f"invalid src: {self.src}")
 
-class RvIncReg(IncReg):
+class RvIncReg(RvMacro, IncReg):
     def expand_rv(self, prog):
+        off = ext_off(prog, self.dst)
+        if off is not None:
+            return [f'la {T_REG}, {EXT_LABEL}+{off}', f'lw {CTRL_REG}, 0({T_REG})',
+                    *add_rv(CTRL_REG, CTRL_REG, self.src if isinstance(self.src, Integral) else rv_reg(prog, self.src)),
+                    f'sw {CTRL_REG}, 0({T_REG})']
         dst = rv_reg(prog, self.dst)
         if isinstance(self.src, Integral):
             return add_rv(dst, dst, self.src)
@@ -146,7 +184,7 @@ class RvIncReg(IncReg):
         raise RuntimeError(f"invalid src: {self.src}")
 
 
-class RvReadWmem(ReadWmem):
+class RvReadWmem(RvMacro, ReadWmem):
     def expand_rv(self, prog):
         offset = prog.wave2idx[self.name] * WMEM_STRIDE
         insts = [f'la {CTRL_REG}, {WMEM_LABEL}+{offset}']
@@ -154,7 +192,7 @@ class RvReadWmem(ReadWmem):
         return insts
 
 
-class RvWriteWmem(WriteWmem):
+class RvWriteWmem(RvMacro, WriteWmem):
     def expand_rv(self, prog):
         offset = prog.wave2idx[self.name] * WMEM_STRIDE
         insts = [f'la {CTRL_REG}, {WMEM_LABEL}+{offset}']
@@ -173,39 +211,39 @@ def dmem_addr_rv(prog, addr) -> list[str]:
     raise RuntimeError(f"invalid addr: {addr}")
 
 
-class RvReadDmem(ReadDmem):
+class RvReadDmem(RvMacro, ReadDmem):
     def expand_rv(self, prog):
         dst = rv_reg(prog, self.dst)
         return [*dmem_addr_rv(prog, self.addr), f'lw {dst}, 0({T_REG})']
 
 
-class RvWriteDmem(WriteDmem):
+class RvWriteDmem(RvMacro, WriteDmem):
     def expand_rv(self, prog):
         insts = dmem_addr_rv(prog, self.addr)
         setup, src = operand_rv(prog, self.src)
         return [*insts, *setup, f'sw {src}, 0({T_REG})']
 
-class RvReadInput(ReadInput):
+class RvReadInput(RvMacro, ReadInput):
     def expand_rv(self, prog):
         port_l = rv_reg(prog, 's_port_l')
         port_h = rv_reg(prog, 's_port_h')
         return [f'li {CTRL_REG}, {CTRL_RES}',
-                f'lw x0, 0({CTRL_REG})',          
-                f'lw {port_l}, 4({CTRL_REG})',   
-                f'lw {port_h}, 8({CTRL_REG})']    
+                f'lw x0, 0({CTRL_REG})',
+                f'lw {port_l}, 4({CTRL_REG})',
+                f'lw {port_h}, 8({CTRL_REG})']
 
 
-class RvJump(Jump):
+class RvJump(RvMacro, Jump):
     def expand_rv(self, prog):
         return [f'j {self.label}']
 
 
-class RvCall(Call):
+class RvCall(RvMacro, Call):
     def expand_rv(self, prog):
         return [f'jal ra, {self.label}']
 
 
-class RvCondJump(CondJump):
+class RvCondJump(RvMacro, CondJump):
     ZERO_TESTS = {'Z': 'beqz', 'NZ': 'bnez', 'S': 'bltz', 'NS': 'bgez'}
     CMP_TESTS = {'Z': 'beq', 'NZ': 'bne', 'S': 'blt', 'NS': 'bge'}
     OPS = {'+': ('add', 'addi'),
@@ -243,14 +281,14 @@ class RvCondJump(CondJump):
 
 
 
-class RvOpenLoop(OpenLoop):
+class RvOpenLoop(RvMacro, OpenLoop):
     def expand_rv(self, prog):
         prog.loop_stack.append((self.name, self.n))
         return [*RvWriteReg(dst=self.name, src=0).expand_rv(prog),
                 f'{self.name}:']
 
 
-class RvCloseLoop(CloseLoop):
+class RvCloseLoop(RvMacro, CloseLoop):
     def expand_rv(self, prog):
         insts = []
 
@@ -302,7 +340,7 @@ def inc_timereg_rv(prog, t_reg) -> list[str]:
     return RvIncReg(dst='s_out_time', src=t_reg).expand_rv(prog)
 
 
-class RvDelay(Delay):
+class RvDelay(RvMacro, Delay):
     def expand_rv(self, prog):
         t_reg = self.t_regs["t"]
         if t_reg is None:
@@ -312,7 +350,7 @@ class RvDelay(Delay):
         return add_rv(REF_REG, REF_REG, rv_reg(prog, t_reg))
 
 
-class RvWait(Wait):
+class RvWait(RvMacro, Wait):
     def expand_rv(self, prog):
         t_reg = self.t_regs["t"]
         if t_reg is None:
@@ -324,7 +362,7 @@ class RvWait(Wait):
                 *wait_rv(T_REG)]
 
 
-class RvResync(Resync):
+class RvResync(RvMacro, Resync):
     def expand_rv(self, prog):
         t = self.t_regs["t"]
         t_val = t if isinstance(t, int) else rv_reg(prog, t)
@@ -339,22 +377,20 @@ class RvResync(Resync):
                 f'add {REF_REG}, {REF_REG}, {T_REG}']
 
 
-def fire_rv(ch_base: int, slot: int) -> list[str]:
+def fire_rv(ch_base: str, slot: int) -> list[str]:
     """Write T_REG as the start time of ch_base, then fire slot."""
-    return [f'li {SCRATCH_REG}, {ch_base + RF_START_TIME}',
+    return [f'li {SCRATCH_REG}, {ch_base}+{RF_START_TIME}',
             f'sw {T_REG}, 0({SCRATCH_REG})',
             f'li {CTRL_REG}, {ch_base}',
             *([f'sw x0, {RF_FIRE}({CTRL_REG})'] if slot == 0 else
               [f'li {SCRATCH_REG}, {slot}', f'sw {SCRATCH_REG}, {RF_FIRE}({CTRL_REG})'])]
 
 
-class RvPulse(Pulse):
+class RvPulse(RvMacro, Pulse):
     def expand_rv(self, prog):
         insts = []
         pulse = prog.pulses[self.name]
-        if self.ch not in RF_BASES:
-            raise RuntimeError(f"gen channel {self.ch} has no RISC-Q drive channel")
-        ch_base = RF_BASES[self.ch]
+        ch_base = rf_base(prog, self.ch)
         t_reg = self.t_regs['t']
         if isinstance(t_reg, Integral):
             insts += abs_time_rv(prog, t_reg)
@@ -377,7 +413,7 @@ class RvPulse(Pulse):
         return insts
 
 
-class RvConfigReadout(ConfigReadout):
+class RvConfigReadout(RvMacro, ConfigReadout):
     def expand_rv(self, prog):
         insts = []
         pulse = prog.pulses[self.name]
@@ -390,10 +426,17 @@ class RvConfigReadout(ConfigReadout):
         return insts
 
 
-class RvTrigger(Trigger):
-    def expand_rv(self, prog):
+class RvTrigger(RvMacro, Trigger):
+    def preprocess(self, prog):
+        self.check()
+        super().preprocess(prog)
+
+    def check(self):
         if self.pins or self.tts or self.ddr4 or self.mr:
             raise RuntimeError("RISC-Q only supports readout triggers (no pins, time taggers, ddr4 or mr)")
+
+    def expand_rv(self, prog):
+        self.check()
         if not self.ros:
             return []
         t_reg = self.t_regs['t']
@@ -404,7 +447,7 @@ class RvTrigger(Trigger):
         return [*insts, *fire_rv(RF_DEMOD, 0)]
 
 
-RV_MACROS = {WriteLabel: RvWriteLabel, End: RvEnd,
+RV_MACROS = {Label: RvLabel, WriteLabel: RvWriteLabel, End: RvEnd,
              WriteReg: RvWriteReg, IncReg: RvIncReg,
              ReadWmem: RvReadWmem, WriteWmem: RvWriteWmem,
              ReadDmem: RvReadDmem, WriteDmem: RvWriteDmem,
