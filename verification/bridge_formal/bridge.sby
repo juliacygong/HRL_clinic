@@ -1,0 +1,146 @@
+# SymbiYosys tasks for WaveWordBridge (see README.md for what each task means).
+#
+#   p1            release exactly at startTime - 32, in order, word unchanged     expect PASS
+#   cov           cover traces: 1 word, 2 words, back to back, 3 pending         expect covers reached
+#   p2_m<M>       same as p1 but fires only M+32 cycles ahead (M = 0,1,2)         find minimum margin
+#   p2_m<M>_t<T>  ... and allow T cycles of lateness                             find how late
+#   p3            startTimes fired out of order (head-of-line blocking)          expect FAIL
+#   p4_g<G>       startTimes G cycles apart (G = 0,1,2)                          find min spacing
+#   p4_g<G>_t<T>  ... and allow T cycles of lateness                             find how late
+#   p5_data       every word comes out with exactly the 168 bits that were fired   expect PASS
+#   p5_order      out-of-order startTimes: words still out in fire order, intact expect PASS
+#   p6_k<N>       N fires before the first release: every fire accepted?        find capacity
+#   p7            consumer tready free: AXIS hold rule                           expect FAIL
+#   cov_p7        cover: consumer not ready on the release cycle
+#   p8            reset at any time with words pending: no stale word afterwards expect PASS
+#   cov_p8        cover: reset while words are pending
+#   b4            every word reaching SGv6 has nsamp >= 3                        expect FAIL
+#   tr_func       bridge -> sg_translator: SGv6 decodes exactly what the CPU wrote  expect PASS
+#                 (CPU values fit SGv6's fields)
+#   cov_tr        cover: translated commands reach SGv6
+#   tr_trunc_<f>  one field out of SGv6's range (nsamp/env/gain/conf), others in range:
+#                 is the out-of-range value silently changed?                      expect FAIL
+
+[tasks]
+p1
+cov
+p2_m0
+p2_m1
+p2_m2
+p2_m0_t1
+p2_m0_t2
+p2_m0_t3
+p2_m1_t1
+p2_m1_t2
+p2_m2_t1
+p3
+p4_g0
+p4_g1
+p4_g2
+p4_g0_t1
+p4_g0_t2
+p4_g1_t1
+p4_g0_t4
+p4_g1_t2
+p5_data
+p5_order
+p6_k9
+p6_k10
+p7
+cov_p7
+p8
+cov_p8
+b4
+tr_func
+cov_tr
+tr_trunc_nsamp
+tr_trunc_env
+tr_trunc_gain
+tr_trunc_conf
+
+[options]
+p1: mode bmc
+p2_m0: mode bmc
+p2_m1: mode bmc
+p2_m2: mode bmc
+p2_m0_t1: mode bmc
+p2_m0_t2: mode bmc
+p2_m0_t3: mode bmc
+p2_m1_t1: mode bmc
+p2_m1_t2: mode bmc
+p2_m2_t1: mode bmc
+p3: mode bmc
+p4_g0: mode bmc
+p4_g1: mode bmc
+p4_g2: mode bmc
+p4_g0_t1: mode bmc
+p4_g0_t2: mode bmc
+p4_g1_t1: mode bmc
+p4_g0_t4: mode bmc
+p4_g1_t2: mode bmc
+p5_data: mode bmc
+p5_order: mode bmc
+p6_k9: mode bmc
+p6_k10: mode bmc
+p7: mode bmc
+p8: mode bmc
+b4: mode bmc
+cov:    mode cover
+cov_p7: mode cover
+cov_p8: mode cover
+tr_func: mode bmc
+cov_tr: mode cover
+tr_trunc_nsamp: mode bmc
+tr_trunc_env: mode bmc
+tr_trunc_gain: mode bmc
+tr_trunc_conf: mode bmc
+depth 25
+p6_k9:  depth 30
+p6_k10: depth 30
+
+[engines]
+smtbmc boolector
+
+[script]
+p1:       read_slang -D NO_DATA -D TIMING                                         WaveWordBridge.v bridge_formal.sv --top bridge_formal
+cov:      read_slang -D TIMING -D NO_DATA -G TGAP=2 -G TMAX=54                                   WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p2_m0:    read_slang -D NO_DATA -D TIMING -G MARGIN=0                             WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p2_m1:    read_slang -D NO_DATA -D TIMING -G MARGIN=1                             WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p2_m2:    read_slang -D NO_DATA -D TIMING -G MARGIN=2                             WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p2_m0_t1: read_slang -D NO_DATA -D TIMING -G MARGIN=0 -G LATE_TOL=1               WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p2_m0_t2: read_slang -D NO_DATA -D TIMING -G MARGIN=0 -G LATE_TOL=2               WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p2_m0_t3: read_slang -D NO_DATA -D TIMING -G MARGIN=0 -G LATE_TOL=3               WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p2_m1_t1: read_slang -D NO_DATA -D TIMING -G MARGIN=1 -G LATE_TOL=1               WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p2_m1_t2: read_slang -D NO_DATA -D TIMING -G MARGIN=1 -G LATE_TOL=2               WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p2_m2_t1: read_slang -D NO_DATA -D TIMING -G MARGIN=2 -G LATE_TOL=1               WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p3:       read_slang -D NO_DATA -D TIMING -D REVERSE_ORDER -G K=2                     WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p4_g0:    read_slang -D NO_DATA -D TIMING -G TGAP=0                               WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p4_g1:    read_slang -D NO_DATA -D TIMING -G TGAP=1                               WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p4_g2:    read_slang -D NO_DATA -D TIMING -G TGAP=2                               WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p4_g0_t1: read_slang -D NO_DATA -D TIMING -G TGAP=0 -G LATE_TOL=1                 WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p4_g0_t2: read_slang -D NO_DATA -D TIMING -G TGAP=0 -G LATE_TOL=2                 WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p4_g1_t1: read_slang -D NO_DATA -D TIMING -G TGAP=1 -G LATE_TOL=1                 WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p4_g0_t4: read_slang -D NO_DATA -D TIMING -G TGAP=0 -G LATE_TOL=4                 WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p4_g1_t2: read_slang -D NO_DATA -D TIMING -G TGAP=1 -G LATE_TOL=2                 WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p5_data:  read_slang -G K=2 -G TGAP=2                              WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p5_order: read_slang -D ANY_ORDER -G LATE_TOL=31 -G K=2                     WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p6_k9:    read_slang -D NO_DATA -D CAPACITY -G K=9  -G TGAP=2 -G TMAX=84           WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p6_k10:   read_slang -D NO_DATA -D CAPACITY -G K=10 -G TGAP=2 -G TMAX=84           WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p7:       read_slang -D NO_DATA -D READY_FREE                                     WaveWordBridge.v bridge_formal.sv --top bridge_formal
+cov_p7:   read_slang -D NO_DATA -D READY_FREE -G TGAP=2 -G TMAX=54                                     WaveWordBridge.v bridge_formal.sv --top bridge_formal
+p8:       read_slang -D NO_DATA -D TIMING -D RESET_FREE                           WaveWordBridge.v bridge_formal.sv --top bridge_formal
+cov_p8:   read_slang -D NO_DATA -D TIMING -D RESET_FREE -G TGAP=2 -G TMAX=54                           WaveWordBridge.v bridge_formal.sv --top bridge_formal
+b4:       read_slang -D NO_DATA -D NSAMP_CHECK                                    WaveWordBridge.v bridge_formal.sv --top bridge_formal
+tr_func:  read_slang -D TRANSLATOR -D TR_FIT                         WaveWordBridge.v sg_translator.v bridge_formal.sv --top bridge_formal
+cov_tr:   read_slang -D TRANSLATOR -D TR_FIT -G TGAP=2 -G TMAX=54    WaveWordBridge.v sg_translator.v bridge_formal.sv --top bridge_formal
+tr_trunc_nsamp: read_slang -D TRANSLATOR -G FIT=14                        WaveWordBridge.v sg_translator.v bridge_formal.sv --top bridge_formal
+tr_trunc_env: read_slang -D TRANSLATOR -G FIT=13                        WaveWordBridge.v sg_translator.v bridge_formal.sv --top bridge_formal
+tr_trunc_gain: read_slang -D TRANSLATOR -G FIT=11                        WaveWordBridge.v sg_translator.v bridge_formal.sv --top bridge_formal
+tr_trunc_conf: read_slang -D TRANSLATOR -G FIT=7                         WaveWordBridge.v sg_translator.v bridge_formal.sv --top bridge_formal
+prep -top bridge_formal
+async2sync
+
+[files]
+WaveWordBridge.v
+bridge_formal.sv
+sg_translator.v ../../firmware/ip/qick_sg_translator/src/sg_translator.v
