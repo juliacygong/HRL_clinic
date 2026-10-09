@@ -10,11 +10,17 @@ import riscq.dsp.pulse.TimedQueue
  * signal-generator command word and releases it at the scheduled cycle using TimedQueue.
  *
  * io.cmd is fed by using core→DSP: core `sw` → RfLinkBridge → link pipe → demux.
+ *
+ * Released words pass through a small output buffer, so a word released while the signal generator is busy
+ * (io.wave.ready low) waits instead of being lost. Sticky flags report what can still go wrong: a word lost
+ * because the buffer was full (dropOut), a fire lost because the TimedQueue was full (dropSched), and a word
+ * that had to wait (late). Each flag stays set until its `clear` bit is pulsed.
  */
 case class WaveWordBridgeParams(
     addrWidth: Int = 16,      // Address width of RfCmd
     timeWidth: Int = 32,      // Batch time counter width
-    depth: Int = 8,           // TimedQueue depth
+    depth: Int = 8,           // TimedQueue FIFO depth: holds depth + 1 scheduled pulses (FIFO + registered head)
+    waveBufDepth: Int = 4,    // Output buffer depth (released words waiting for io.wave.ready)
     leadTime: Int = 8,        // Pulse: cycles released early
     leadTrig: Int = 8,        // trigger: cycles released early
     widthBits: Int = 16,      // Trigger width counter size (max trigger hold = 2^widthBits - 1 cycles)
@@ -41,6 +47,12 @@ case class WaveWordBridge(p: WaveWordBridgeParams = WaveWordBridgeParams()) exte
     val time = in     port UInt(timeWidth bits)     // Shared batch time counter
     val wave = master port Stream(Bits(168 bits))   // 168-bit QICK wave word
     val trig = out    port Bool()                   // 1-bit readout trigger
+
+    // Sticky status flags (stay set until cleared through `clear`; bit order matches `clear`)
+    val dropOut   = out port Bool()                 // a released word was lost: output buffer full
+    val dropSched = out port Bool()                 // a fire was lost: TimedQueue full (too many pulses scheduled)
+    val late      = out port Bool()                 // a word could not leave on its release cycle (sent late)
+    val clear     = in  port Bits(3 bits)           // one-cycle pulse per bit: 0 dropOut, 1 dropSched, 2 late
   }
 
   // Registers hold each pulse field until fire
@@ -92,9 +104,29 @@ case class WaveWordBridge(p: WaveWordBridgeParams = WaveWordBridgeParams()) exte
   q.io.push.payload.data      := word
   q.io.push.payload.startTime := startTime
 
-  // AXIS output with no hand-off buffer. Drive straight from the fire-once pop
-  io.wave.valid   := q.io.pop.valid
-  io.wave.payload := q.io.pop.payload
+  // Output buffer: released words wait here while io.wave.ready is low (signal generator busy), and leave in
+  // order. Zero latency when empty: if ready is high the word passes straight through on its release cycle,
+  // so on-time pulses are still valid exactly at startTime minus leadTime.
+  val buf = StreamFifo(Bits(168 bits), waveBufDepth, latency = 0)
+  buf.io.push.valid   := q.io.pop.valid
+  buf.io.push.payload := q.io.pop.payload
+  io.wave << buf.io.pop
+
+  // Status events (one cycle each)
+  val dropOutEvt   = q.io.pop.valid && !buf.io.push.ready                           // released into a full buffer
+  val dropSchedEvt = fire && !q.io.push.ready                                        // fired into a full TimedQueue
+  val lateEvt      = buf.io.push.fire && (buf.io.occupancy =/= 0 || !io.wave.ready) // queued instead of sent
+
+  // Sticky flags: an event in the same cycle as a clear wins, so no event is ever missed
+  def sticky(evt: Bool, clr: Bool): Bool = {
+    val f = Reg(Bool()) init False
+    when(clr) { f := False }
+    when(evt) { f := True }
+    f
+  }
+  io.dropOut   := sticky(dropOutEvt,   io.clear(0))
+  io.dropSched := sticky(dropSchedEvt, io.clear(1))
+  io.late      := sticky(lateEvt,      io.clear(2))
 
   // Readout trigger: Schedule with a TimedQueue and hold width cycles with a counter
   val tq = TimedQueue(UInt(widthBits bits), timeWidth, depth, leadTrig)  // Payload is the hold width
