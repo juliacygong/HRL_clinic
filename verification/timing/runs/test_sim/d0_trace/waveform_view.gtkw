@@ -1,0 +1,18 @@
+[dumpfile] "/home/amigoyith/projects/HRL_clinic/verification/timing/runs/test_sim/d0_trace/waveform.fst"
+[timestart] 24241722000
+@28
+QICKEmu_harness.c_clk
+QICKEmu_harness.t_clk
+@22
+QICKEmu_harness.t_time_abs_o[47:0]
+@28
+QICKEmu_harness.qick_dut.AXIS_QPROC.QPROC.port_we
+(0)QICKEmu_harness.qick_dut.AXIS_QPROC.QPROC.DISPATCHER.c_fifo_wave_push_s[4:0]
+(0)QICKEmu_harness.qick_dut.AXIS_QPROC.QPROC.DISPATCHER.t_fifo_wave_empty[4:0]
+(0)QICKEmu_harness.qick_dut.AXIS_QPROC.QPROC.DISPATCHER.wave_t_gr_r[4:0]
+(0)QICKEmu_harness.qick_dut.AXIS_QPROC.QPROC.DISPATCHER.wave_pop[4:0]
+QICKEmu_harness.qick_dut.tproc_sg0cdc_axis_tvalid
+QICKEmu_harness.qick_dut.tproc_sg0cdc_axis_tready
+QICKEmu_harness.qick_dut.sgt0_sg0_axis_tvalid
+QICKEmu_harness.qick_dut.u_axis_signal_gen_v6_0.signal_gen_top_i.signal_gen_i.ctrl_i.load_int
+QICKEmu_harness.qick_dut.u_axis_signal_gen_v6_0.signal_gen_top_i.signal_gen_i.ctrl_i.en_o

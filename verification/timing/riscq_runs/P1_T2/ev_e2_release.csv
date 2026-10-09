@@ -1,0 +1,3 @@
+seq,sim_time,cyc,time,rst,ch,ch_time,dur,pop_amp_cyc,pop_phase_cyc,pop_freqC_cyc,pop_freqP_cyc,pop_addr_cyc,pop_dur_cyc,pop_amp_val,pop_freqC_val
+0,291125,29095,29094,0,0,29093,60,29063,29062,29061,29045,29086,29095,3277,1800
+1,294115,29394,29393,0,0,29392,60,29362,29361,29360,29344,29385,29394,6553,1800

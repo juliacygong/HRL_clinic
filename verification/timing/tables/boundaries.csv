@@ -1,0 +1,8 @@
+from,to,crosses,latency_type
+E0i,E0,"1 register, core domain",Controller acceptance (+ stall)
+E0,E1,c_clk -> t_clk CDC,Emulator-model latency
+E1,E2,"compare/pop pipeline, t_clk only",CONTROLLER TIMING DECISION (deterministic)
+E2,E3,t_clk -> sg_clk CDC (shared SG0-2) + translator,Emulator-model latency
+E3,E4,SGv6 FIFO + FSM,Queue wait
+E4,E5,en_reg 8-stage alignment,Fixed generator pipeline
+E5,E6,DDS/DAC model,Physical (out of scope)

@@ -1,0 +1,34 @@
+{
+  "probe": "P4_freq",
+  "why": "issue order != due order, distinct freq per pulse (freq/pulse pairing)",
+  "qick_test": "T6",
+  "qick_desc": "later-time pulse written first",
+  "base_offset_batches": 599,
+  "batch_mhz": 599.04,
+  "waits_batches": {},
+  "text_bytes": 248,
+  "pulses": [
+    {
+      "k": 0,
+      "ch": 0,
+      "slot": 0,
+      "qick_t_us": 1.0,
+      "start_offset": 599,
+      "dur": 60,
+      "amp": 3277,
+      "freq16": 1800,
+      "explicit_start": true
+    },
+    {
+      "k": 1,
+      "ch": 0,
+      "slot": 1,
+      "qick_t_us": 0.5,
+      "start_offset": 300,
+      "dur": 60,
+      "amp": 6553,
+      "freq16": 2056,
+      "explicit_start": true
+    }
+  ]
+}

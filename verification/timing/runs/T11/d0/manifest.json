@@ -1,0 +1,305 @@
+{
+  "test": "T11",
+  "desc": "shared-CDC coupling: SG0 backed up (40 overlapping pulses), SG1 gets 2 distinct pulses",
+  "freq_mhz": 100.0,
+  "f_time_mhz": 430.08,
+  "test_run_ns": 12000,
+  "wait_before": {},
+  "pulses": [
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.001,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.002,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.003,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.004,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.005,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.006,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.007,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.008,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.009,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.01,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.011,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.012,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.013,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.014,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.015,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.016,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.017,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.018,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.019,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.02,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.021,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.022,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.023,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.024,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.025,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.026,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.027,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.028,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.029,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.03,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.031,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.032,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.033,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.034,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.035,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.036,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.037,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.038,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.039,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.04,
+      "t_ticks": 215
+    },
+    {
+      "t": 0.6,
+      "length": 0.1,
+      "ch": 1,
+      "gain": 0.041,
+      "t_ticks": 258
+    },
+    {
+      "t": 1.0,
+      "length": 0.1,
+      "ch": 1,
+      "gain": 0.042,
+      "t_ticks": 430
+    }
+  ],
+  "qick_lib": "/home/amigoyith/projects/HRL_clinic/qick_lib"
+}

@@ -1,0 +1,30 @@
+RISC-Q timing summary: riscq_runs/P6_n4  channel 0 (gate)
+elf=/home/amigoyith/projects/HRL_clinic/verification/timing/riscq_programs/P6_n4/prog.elf  mode=driver  abort=none  window starts at cyc 28185
+post-release counts: E0i 4, E0 4, E1 4, E2 4, output bursts 4
+
+INTEGRITY
+  PASS: every fire reached E0, E1, E2
+
+ACCEPTANCE
+  store -> fire decoded E0-E0i [cyc]     : 4
+  fire -> queue push E1-E0 [cyc]         : 2
+  lead at timeline (due - ch_time) [cyc] : 6458..6521
+
+START
+  dur pop - due [cyc]                    : -2
+  per-queue pop lead vs due              : amp-4 phase-5 freqC-6 freqP-22 addr-11 dur-2
+  output rise - due [cyc]                : 0
+  output duration vs dur                 : 12 vs 12
+  store -> output rise [cyc]             : 6464..6527
+
+BEFORE WINDOW (power-up / load traffic; channels are not reset by riscqReset)
+  RfCmds 0, fires 0, output pulses 0
+
+QUEUE PUSH DROPS (push.valid && !push.ready; queue depth 4, no backpressure to the CPU)
+  none
+
+PROBE CHECKS (planned pulses from manifest.json)
+  ch0: planned 4, pushed 4, dur-queue drops 0, released 4, output bursts 4
+
+ATTENTION
+  none

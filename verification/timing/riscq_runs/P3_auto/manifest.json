@@ -1,0 +1,34 @@
+{
+  "probe": "P3_auto",
+  "why": "back-to-back relying on startTime auto-advance (one startTime write)",
+  "qick_test": "T4",
+  "qick_desc": "back-to-back: pulse 2 due at pulse 1's end",
+  "base_offset_batches": 599,
+  "batch_mhz": 599.04,
+  "waits_batches": {},
+  "text_bytes": 228,
+  "pulses": [
+    {
+      "k": 0,
+      "ch": 0,
+      "slot": 0,
+      "qick_t_us": 0.5,
+      "start_offset": 300,
+      "dur": 60,
+      "amp": 3277,
+      "freq16": 1800,
+      "explicit_start": true
+    },
+    {
+      "k": 1,
+      "ch": 0,
+      "slot": 1,
+      "qick_t_us": 0.6,
+      "start_offset": 359,
+      "dur": 60,
+      "amp": 6553,
+      "freq16": 1800,
+      "explicit_start": false
+    }
+  ]
+}

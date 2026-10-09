@@ -1,0 +1,6 @@
+cp,work,produces,you_check,est_time,status
+1,Monitors + rebuild + run test_sim,ev_*.csv,diff = 1 include line; tproc_ctrl.csv unchanged; 9 rows/event; no flags; C1/C2/duration,30-45 min,"DONE 2026-09-25, reviewed"
+2,Analysis script,timing_report.csv + summary,per-stage numbers; ordering pass; optional GTKWave cross-check,20-30 min,"DONE 2026-09-27, reviewed"
+3,Program generator,artifacts/timing/T1..T10,prog.txt pulses; PROC_START present; unique gains,40-60 min,"DONE 2026-09-27, reviewed"
+4,Suite run,runs/<test>/d<delay>/ + report,C1-C9 confirmed/refuted,30-45 min (+30 T10),"DONE 2026-09-27, reviewed"
+5,Timing contract (E3),contract section,clear for controller team,20-30 min,"DONE 2026-09-27, awaiting review"

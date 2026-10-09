@@ -1,0 +1,56 @@
+{
+  "probe": "P6_n4",
+  "why": "capacity: 4 pending pulses (= queue depth)",
+  "qick_test": "T9a",
+  "qick_desc": "acceptance stall: 300 pulses due 10 us + k*0.05 us (fills 256-entry dispatcher FIFO, no SG backpressure)",
+  "base_offset_batches": 599,
+  "batch_mhz": 599.04,
+  "waits_batches": {},
+  "text_bytes": 488,
+  "pulses": [
+    {
+      "k": 0,
+      "ch": 0,
+      "slot": 0,
+      "qick_t_us": 10.0,
+      "start_offset": 5990,
+      "dur": 12,
+      "amp": 33,
+      "freq16": 1800,
+      "explicit_start": true
+    },
+    {
+      "k": 1,
+      "ch": 0,
+      "slot": 1,
+      "qick_t_us": 10.05,
+      "start_offset": 6020,
+      "dur": 12,
+      "amp": 66,
+      "freq16": 1800,
+      "explicit_start": true
+    },
+    {
+      "k": 2,
+      "ch": 0,
+      "slot": 2,
+      "qick_t_us": 10.1,
+      "start_offset": 6050,
+      "dur": 12,
+      "amp": 98,
+      "freq16": 1800,
+      "explicit_start": true
+    },
+    {
+      "k": 3,
+      "ch": 0,
+      "slot": 3,
+      "qick_t_us": 10.15,
+      "start_offset": 6080,
+      "dur": 12,
+      "amp": 131,
+      "freq16": 1800,
+      "explicit_start": true
+    }
+  ]
+}

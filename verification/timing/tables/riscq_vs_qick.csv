@@ -1,0 +1,11 @@
+rule,name,qick,riscq_native,verdict,conversion_action,evidence
+R1-R3,time reference,QICK output ~31.6-32.6 sg_clk after due (E5); release +4 t_clk,"output at due+0, params pop early (-52..-2)",DIFFERS,startTime = QICK due + ~32 batches or define golden convention,P1_*
+R4,isolated duration,nsamp,dur exact,MATCH,-,P1_*
+R5,busy/overlap,"chains after previous end, nothing lost","dur counter reload truncates previous pulse, no flag",RISK,"serialize (startTime=max(due,prev end)) or auto-advance",P2_T5 29/60; P3_T4 59/60; P6_same5 2/12
+R6,issue order != due order,"both played in issue order, full length","first cut to 2/60, second +301 late",RISK,reorder or serialize in adapter,"P4_T6, P4_freq"
+R7,same-port throughput,4 t_clk,2 cycles per pop,DIFFERS,-,P6_same5
+R8,late command,"released immediately, intact","released immediately, stale amp/phase ~32 batches, env ~9",RISK,guarantee lead >= ~55 batches or detect lateness,P5_T8
+R9,capacity,"256/port, core stalls, no drop","5 per queue, silent drop, CPU not stalled",RISK,throttle to 5 pending per channel or add backpressure,P6_n8 3 dropped
+R9b,acceptance latency,1 c_clk,4 + 2 cycles (store->decode->push),DIFFERS,-,all
+R10,cross-channel,skew 0,skew 0,MATCH,-,P7_T10
+R11,reset/rerun,FIFO flush on core reset,abort does not cancel queued pulses; power-up stray pulses,RISK,explicit drain/flush; hold reset before load,P8_T2 4 for 2; P9_T1 2 stray

@@ -1,0 +1,3 @@
+seq,sim_time,cyc,time,rst,ch,ch_time,edge
+0,291145,29097,29096,0,0,29095,rise
+1,292335,29216,29215,0,0,29214,fall

@@ -1,0 +1,9 @@
+k,amp,dur,due_time,accept_cyc,push_cyc,lead_at_timeline,release_offset,pop_leads,start_offset,duration,issue_to_start_cyc
+0,33,12,34785,4,2,6521,-2,amp-4 phase-5 freqC-6 freqP-22 addr-11 dur-2,,,
+1,66,12,34815,4,2,6500,-2,amp-4 phase-5 freqC-6 freqP-22 addr-11 dur-2,,,
+2,98,12,34845,4,2,6479,-2,amp-4 phase-5 freqC-6 freqP-22 addr-11 dur-2,,,
+3,131,12,34875,4,2,6458,-2,amp-4 phase-5 freqC-6 freqP-22 addr-11 dur-2,,,
+4,164,12,34905,4,2,6437,-2,amp-34 phase-35 freqC-36 freqP-52 addr-11 dur-2,,,
+5,197,12,34935,4,2,6416,,,,,
+6,229,12,34965,4,2,6394,,,,,
+7,262,12,34995,4,2,6373,,,,,

@@ -1,0 +1,11 @@
+id,hypothesis,confirmed_by,result,notes
+C1,Release strictly after due (time_abs > due); offset ~4 t_clk; constant,"CP1, T1-T3",CONFIRMED (all 15 runs),release offset = +4 t_clk for every head release incl. 300 in T9a; 0 spread across T7 delays
+C2,>= 3 t_clk between releases per port (2-cycle blank),"CP1, T4","CONFIRMED, value = 4 t_clk",queued same-due releases 4 t_clk apart (Verilator FIFO variant)
+C3,Per-port FIFO releases in issue order; head-only compare; no reordering by time,T6,CONFIRMED (T6),"pulse due 645 written after pulse due 860 released at 868 (+223); issue order, not due order"
+C4,Late command releases immediately; no error flag,T8,CONFIRMED (T8),"issued 92 t_clk after due; released 20.4 ns (8.8 t_clk) after issue, no flag"
+C5,Core stalls when a dispatcher FIFO is full (unless TPROC_CFG[11]); no drops,T9,CONFIRMED (T9a),"256 accepted in 3.8 us, core halted 7.11 us until first release; 45 stall intervals, 8.6 us total; no drops. Stall appears as core_en=0 (E0i delayed), not as E0-E0i"
+C6,"SGv6 start = max(arrival + L, previous end); back-to-back gapless (period = nsamp)","T4, T5","CONFIRMED (T4,T5,test_sim)","T5: arrived on time, waited 31 sg_clk, started at prev end (88 ns vs 39 ns); T4 gapless without queuing"
+C7,Due time on t_clk grid; duration on sg_clk grid,T1-T3,CONSISTENT,due->start 37.69..39.34 ns across all idle head releases; spread from t_clk->sg_clk phase
+C8,Shared SG CDC FIFO: one stalled SG stalls all three,T10 (optional),REFUTED as stated (T11),"a backed-up SG makes the other SGs sharing the CDC replay the same command (F8), not stall"
+C9,SGv6 writes FIFO on tvalid alone; adapter must never assert tvalid while tready low,ev_flags (all runs),VIOLATED under backpressure (T9b),"see tables/findings.csv F1,F2: commands lost/duplicated when SGv6/CDC fills"
+C10,"E0->E1, E2->E3, E3->E4 absolute latencies are emulator-model numbers",documentation,CONFIRMED + new emulator defect,E2->E3 16.0-17.0 sg_clk (emulator 16-stage sync); F2 emulator CDC FIFO read bug

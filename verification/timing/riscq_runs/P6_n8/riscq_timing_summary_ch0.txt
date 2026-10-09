@@ -1,0 +1,38 @@
+RISC-Q timing summary: riscq_runs/P6_n8  channel 0 (gate)
+elf=/home/amigoyith/projects/HRL_clinic/verification/timing/riscq_programs/P6_n8/prog.elf  mode=driver  abort=none  window starts at cyc 28185
+post-release counts: E0i 8, E0 8, E1 8, E2 5, output bursts 5
+
+INTEGRITY
+  FAIL: layer counts differ {'E0i': 8, 'E0': 8, 'E1': 8, 'E2': 5, 'E5': 10}
+
+ACCEPTANCE
+  store -> fire decoded E0-E0i [cyc]     : 4
+  fire -> queue push E1-E0 [cyc]         : 2
+  lead at timeline (due - ch_time) [cyc] : 6373..6521
+
+START
+  dur pop - due [cyc]                    : -2
+  per-queue pop lead vs due              : amp-4 phase-5 freqC-6 freqP-22 addr-11 dur-2
+  output rise - due [cyc]                : n/a
+  output duration vs dur                 : n/a vs 12
+  store -> output rise [cyc]             : n/a
+
+BEFORE WINDOW (power-up / load traffic; channels are not reset by riscqReset)
+  RfCmds 0, fires 0, output pulses 0
+
+QUEUE PUSH DROPS (push.valid && !push.ready; queue depth 4, no backpressure to the CPU)
+  POST-release ch0_freqCQ_push_dropped: 3
+  POST-release ch0_freqPQ_push_dropped: 3
+  POST-release ch0_ampQ_push_dropped: 3
+  POST-release ch0_phaseQ_push_dropped: 3
+  POST-release ch0_addrQ_push_dropped: 3
+  POST-release ch0_durQ_push_dropped: 3
+
+PROBE CHECKS (planned pulses from manifest.json)
+  ch0: planned 8, pushed 8, dur-queue drops 3, released 5, output bursts 5
+
+ATTENTION
+  - ch0 pulse 5 (occ 0): DROPPED at dur queue
+  - ch0 pulse 6 (occ 0): DROPPED at dur queue
+  - ch0 pulse 7 (occ 0): DROPPED at dur queue
+  - queue push drops in window: {'ch0_freqCQ_push_dropped': 3, 'ch0_freqPQ_push_dropped': 3, 'ch0_ampQ_push_dropped': 3, 'ch0_phaseQ_push_dropped': 3, 'ch0_addrQ_push_dropped': 3, 'ch0_durQ_push_dropped': 3}

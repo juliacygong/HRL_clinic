@@ -1,0 +1,23 @@
+{
+  "probe": "P9_T1",
+  "why": "power-up window (run in powerup mode)",
+  "qick_test": "T1",
+  "qick_desc": "one pulse",
+  "base_offset_batches": 599,
+  "batch_mhz": 599.04,
+  "waits_batches": {},
+  "text_bytes": 136,
+  "pulses": [
+    {
+      "k": 0,
+      "ch": 0,
+      "slot": 0,
+      "qick_t_us": 0.5,
+      "start_offset": 300,
+      "dur": 60,
+      "amp": 3277,
+      "freq16": 1800,
+      "explicit_start": true
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+seq,time_ps,sg_cyc,conf,nsamp,gain,addr,phase,freq
+0,4112428.944,2364,09,60,0ccc,0000,00000000,02abc2bc
+1,4611562.800,2663,09,60,1999,0000,00000000,02abc2bc

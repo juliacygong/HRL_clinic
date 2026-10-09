@@ -1,0 +1,32 @@
+QICK timing summary: runs/T1/d0
+pre_run_delay_ns=0  t_clk=2324.000 ps  sg_clk=1669.344 ps  c_clk=5000.000 ps
+commands on port: 1   E1 arrivals 1, head refills 0
+
+ORDERING AND INTEGRITY (every E0 command delivered once, in order)
+  PASS: every command reached E2, E3, E4 exactly once, in E0 order
+  fingerprints unique: yes
+
+ACCEPTANCE
+  core acceptance E0-E0i [c_clk]        : 1 (constant, n=1)
+  lead at issue (due - user time) [t_clk]: 618 (constant, n=1)
+  lead at timeline (true E1) [t_clk]    : 601 (constant, n=1)
+
+START
+  release offset, head [t_clk]          : 4 (constant, n=1)
+  release offset, queued [t_clk]        : n/a
+  compare-rise -> pop [t_clk]           : 0 (constant, n=1)
+  release spacing, queued [t_clk]       : n/a
+  transport E3-E2 [ps]                  : 27998.944 (constant, n=1)
+  transport E3-E2 [sg_clk]              : 16.772 (constant, n=1)
+  queue wait E4-E3, SG idle [sg_clk]    : 1 (constant, n=1)
+  due -> SG start, head+idle [ns]       : 38.964 (constant, n=1)
+
+OUTPUT BURSTS (E5)
+  burst 0: cmds [0]  E5rise-E4 = 9 sg_clk  length 60 vs sum(nsamp) 60  OK
+
+CORE ACCEPTANCE STALL (dispatcher FIFO full -> core_en=0)
+  none
+
+FLAGS (count, first..last)
+  c_clk  some_fifo_full_rise (fifo clear, benign)      x2      172500..2577500 ps
+  c_clk  some_fifo_full_fall (fifo clear, benign)      x2      207500..2612500 ps

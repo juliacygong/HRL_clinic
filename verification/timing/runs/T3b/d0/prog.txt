@@ -1,0 +1,33 @@
+macros:
+	WriteReg(dst='s_core_w1', src=0)
+	Delay(t=1.0, auto=True, gens=True, ros=True, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x7465fd0ac850>}, t_regs={'t': 430})
+	OpenLoop(n=1, name='reps')
+	Pulse(ch=0, name='p0', t=0.5, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x7465fd0adad0>}, t_regs={'t': 215})
+	Pulse(ch=0, name='p1', t=1.0, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x7465fd0add50>}, t_regs={'t': 430})
+	Wait(t=0, auto=True, gens=False, ros=True, tag=None, no_warn=True, t_params={'t': <qick.asm_v2.QickParam object at 0x7465fd0adcd0>}, t_regs={'t': 0})
+	Delay(t=1.0, auto=True, gens=True, ros=True, tag=None, t_params={'t': <qick.asm_v2.QickParam object at 0x7465fd0ad8d0>}, t_regs={'t': 903})
+	IncReg(dst='s_core_w1', src=1)
+	CloseLoop()
+	End()
+registers:
+	reps: QickRegisterV2(addr=0, init=None)
+pulses:
+	p0: QickPulse(waveforms=[Waveform(name='p0_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=3276, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=60, spans={}, quantize=1, steps={}), conf=9)])
+	p1: QickPulse(waveforms=[Waveform(name='p1_w0', freq=QickRawParam(par='freq', start=44810940, spans={}, quantize=1, steps={}), phase=QickRawParam(par='phase', start=0, spans={}, quantize=1, steps={}), env=0, gain=QickRawParam(par='gain', start=6553, spans={}, quantize=1, steps={}), length=QickRawParam(par='length', start=60, spans={}, quantize=1, steps={}), conf=9)])
+expanded ASM:
+	     NOP 
+	     REG_WR s12 imm #0 
+	     TIME #430 inc_ref 
+	     REG_WR r0 imm #0 
+	reps:
+	     WPORT_WR p0 wmem [&0] @215 
+	     WPORT_WR p0 wmem [&1] @430 
+	     REG_WR s15 label SKIP 
+	     WAIT [s15] @0 time 
+	     TIME #903 inc_ref 
+	     REG_WR s12 op -op(s12 + #1) 
+	     REG_WR s15 label reps 
+	     TEST -op(r0 - #0) 
+	     JUMP [s15] -if(NZ) -wr(r0 op) -op(r0 + #1) 
+	     REG_WR s15 label NEXT 
+	     JUMP [s15] 

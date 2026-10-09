@@ -1,0 +1,5 @@
+# Large waveform dumps (regenerate with obj_dir_trace build)
+*.fst
+# Windows download metadata and stray mill output
+*:Zone.Identifier
+out/

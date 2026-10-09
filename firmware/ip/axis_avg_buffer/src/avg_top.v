@@ -54,6 +54,7 @@ parameter N = 10;
 
 // Number of bits.
 parameter B = 16;
+parameter EMULATOR = 0;
 
 ///////////
 // Ports //
@@ -105,28 +106,59 @@ wire				fifo_empty;
 //////////////////
 
 // AVG_START_REG_resync
-synchronizer_n
-	#(
-		.N	(2)
-	)
-	AVG_START_REG_resync_i (
-		.rstn	    (rstn					),
-		.clk 		(clk					),
-		.data_in	(AVG_START_REG			),
-		.data_out	(AVG_START_REG_resync	)
-	);
+generate
+if (!EMULATOR) begin : gen_synchronizer_AVG
+	synchronizer_n
+		#(
+			.N	(2)
+		)
+		AVG_START_REG_resync_i (
+			.rstn	    (rstn					),
+			.clk 		(clk					),
+			.data_in	(AVG_START_REG			),
+			.data_out	(AVG_START_REG_resync	)
+		);
+		
+end else begin: gen_synchronizer_AVG_sv
+	synchronizer_n_sv
+		#(
+			.N	(2)
+		)
+		AVG_START_REG_resync_i (
+			.rstn	    (rstn					),
+			.clk 		(clk					),
+			.data_in	(AVG_START_REG			),
+			.data_out	(AVG_START_REG_resync	)
+		);
+end
+endgenerate
 
+generate
+if (!EMULATOR) begin : gen_synchronizer_DR
 // DR_START_REG_resync
-synchronizer_n
-	#(
-		.N	(2)
-	)
-	DR_START_REG_resync_i (
-		.rstn	    (m_axis_aresetn			),
-		.clk 		(m_axis_aclk			),
-		.data_in	(DR_START_REG			),
-		.data_out	(DR_START_REG_resync	)
-	);
+	synchronizer_n
+		#(
+			.N	(2)
+		)
+		DR_START_REG_resync_i (
+			.rstn	    (m_axis_aresetn			),
+			.clk 		(m_axis_aclk			),
+			.data_in	(DR_START_REG			),
+			.data_out	(DR_START_REG_resync	)
+		);
+end else begin: gen_synchronizer_DR
+	synchronizer_n_sv
+		#(
+			.N	(2)
+		)
+		DR_START_REG_resync_i (
+			.rstn	    (m_axis_aresetn			),
+			.clk 		(m_axis_aclk			),
+			.data_in	(DR_START_REG			),
+			.data_out	(DR_START_REG_resync	)
+		);
+end
+endgenerate
 
 // Average block.
 avg 
@@ -162,86 +194,177 @@ avg
 	);
 
 // Dual port BRAM.
-bram_dp
-    #(
-		.N	(N	),
-        .B 	(4*B)
-    )
-    bram_i 
-	( 
-		.clka	(clk			),
-		.clkb	(m_axis_aclk	),
-		.ena    (1'b1			),
-		.enb    (1'b1			),
-		.wea    (mem_we_int		),
-		.web    (1'b0			),
-		.addra  (mem_addra_int	),
-		.addrb  (mem_addrb_int	),
-		.dia    (mem_di_int		),
-		.dib    ({4*B{1'b0}}	),
-		.doa    (				),
-		.dob    (mem_do_int		)
-    );
+generate
+if (!EMULATOR) begin : gen_bram_dp
+	bram_dp
+		#(
+			.N	(N	),
+			.B 	(4*B)
+		)
+		bram_i 
+		( 
+			.clka	(clk			),
+			.clkb	(m_axis_aclk	),
+			.ena    (1'b1			),
+			.enb    (1'b1			),
+			.wea    (mem_we_int		),
+			.web    (1'b0			),
+			.addra  (mem_addra_int	),
+			.addrb  (mem_addrb_int	),
+			.dia    (mem_di_int		),
+			.dib    ({4*B{1'b0}}	),
+			.doa    (				),
+			.dob    (mem_do_int		)
+		);
+end else begin: gen_bram_dp_sv
+	bram_dp_sv
+		#(
+			.N	(N	),
+			.B 	(4*B)
+		)
+		bram_i 
+		( 
+			.clka	(clk			),
+			.clkb	(m_axis_aclk	),
+			.ena    (1'b1			),
+			.enb    (1'b1			),
+			.wea    (mem_we_int		),
+			.web    (1'b0			),
+			.addra  (mem_addra_int	),
+			.addrb  (mem_addrb_int	),
+			.dia    (mem_di_int		),
+			.dib    ({4*B{1'b0}}	),
+			.doa    (				),
+			.dob    (mem_do_int		)
+		);
+end
+endgenerate
 
 // Data reader.
-data_reader
-    #(
-		.N	(N	),
-		.B	(4*B)
-    )
-    data_reader_i
-    (
-        // Reset and clock.
-        .rstn		(m_axis_aresetn			),
-        .clk		(m_axis_aclk			),
-        
-        // Memory I/F.
-        .mem_en     (						),
-        .mem_we     (						),
-        .mem_addr   (mem_addrb_int			),
-        .mem_dout   (mem_do_int				),
-        
-        // Data out.
-        .dout       (m0_axis_tdata			),
-        .dready     (m0_axis_tready			),
-        .dvalid     (m0_axis_tvalid			),
-        .dlast      (m0_axis_tlast			),
+generate
+if (!EMULATOR) begin : gen_data_reader
+	data_reader
+		#(
+			.N	(N	),
+			.B	(4*B)
+		)
+		data_reader_i
+		(
+			// Reset and clock.
+			.rstn		(m_axis_aresetn			),
+			.clk		(m_axis_aclk			),
+			
+			// Memory I/F.
+			.mem_en     (						),
+			.mem_we     (						),
+			.mem_addr   (mem_addrb_int			),
+			.mem_dout   (mem_do_int				),
+			
+			// Data out.
+			.dout       (m0_axis_tdata			),
+			.dready     (m0_axis_tready			),
+			.dvalid     (m0_axis_tvalid			),
+			.dlast      (m0_axis_tlast			),
 
-        // Registers.
-		.START_REG	(DR_START_REG_resync	),
-		.ADDR_REG	(DR_ADDR_REG			),
-		.LEN_REG	(DR_LEN_REG				)
-    );
+			// Registers.
+			.START_REG	(DR_START_REG_resync	),
+			.ADDR_REG	(DR_ADDR_REG			),
+			.LEN_REG	(DR_LEN_REG				)
+		);
+end else begin: gen_data_reader_sv
+	data_reader_sv
+		#(
+			.N	(N	),
+			.B	(4*B)
+		)
+		data_reader_i
+		(
+			// Reset and clock.
+			.rstn		(m_axis_aresetn			),
+			.clk		(m_axis_aclk			),
+			
+			// Memory I/F.
+			.mem_en     (						),
+			.mem_we     (						),
+			.mem_addr   (mem_addrb_int			),
+			.mem_dout   (mem_do_int				),
+			
+			// Data out.
+			.dout       (m0_axis_tdata			),
+			.dready     (m0_axis_tready			),
+			.dvalid     (m0_axis_tvalid			),
+			.dlast      (m0_axis_tlast			),
+
+			// Registers.
+			.START_REG	(DR_START_REG_resync	),
+			.ADDR_REG	(DR_ADDR_REG			),
+			.LEN_REG	(DR_LEN_REG				)
+		);
+end
+endgenerate
 
 // Output data register (dc fifo to cross domain).
-fifo_dc_axi_xpm
-    #(
-        // Data width.
-        .B	(4*B	),
-        
-        // Fifo depth.
-        .N	(16		)
-    )
-    fifo_i
-    ( 
-        .wr_rstn	(rstn			),
-        .wr_clk 	(clk			),
+generate
+if (!EMULATOR) begin : gen_fifo_cd_xpm
+	fifo_dc_axi_xpm
+		#(
+			// Data width.
+			.B	(4*B	),
 
-        .rd_rstn	(m_axis_aresetn	),
-        .rd_clk 	(m_axis_aclk	),
-        
-        // Write I/F.
-        .wr_en  	(mem_we_int		),
-        .din     	(mem_di_int		),
-        
-        // Read I/F.
-        .rd_en  	(m1_axis_tready	),
-        .dout   	(m1_axis_tdata	),
-        
-        // Flags.
-        .full    	(				),
-        .empty   	(fifo_empty		)
-    );
+			// Fifo depth.
+			.N	(16		)
+		)
+		fifo_i
+		(
+			.wr_rstn	(rstn			),
+			.wr_clk 	(clk			),
+
+			.rd_rstn	(m_axis_aresetn	),
+			.rd_clk 	(m_axis_aclk	),
+
+			// Write I/F.
+			.wr_en  	(mem_we_int		),
+			.din     	(mem_di_int		),
+
+			// Read I/F.
+			.rd_en  	(m1_axis_tready	),
+			.dout   	(m1_axis_tdata	),
+
+			// Flags.
+			.full    	(				),
+			.empty   	(fifo_empty		)
+		);
+end else begin: gen_fifo_dc_sv
+	fifo_dc_sv
+		#(
+			// Data width.
+			.B	(4*B	),
+
+			// Fifo depth.
+			.N	(16		)
+		)
+		fifo_i
+		(
+			.wr_rstn	(rstn			),
+			.wr_clk 	(clk			),
+
+			.rd_rstn	(m_axis_aresetn	),
+			.rd_clk 	(m_axis_aclk	),
+
+			// Write I/F.
+			.wr_en  	(mem_we_int		),
+			.din     	(mem_di_int		),
+
+			// Read I/F.
+			.rd_en  	(m1_axis_tready	),
+			.dout   	(m1_axis_tdata	),
+
+			// Flags.
+			.full    	(				),
+			.empty   	(fifo_empty		)
+		);
+end
+endgenerate
 
 // Assign outputs.
 assign m1_axis_tvalid	= ~fifo_empty;

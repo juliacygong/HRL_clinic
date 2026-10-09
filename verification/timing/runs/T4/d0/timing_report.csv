@@ -1,0 +1,3 @@
+k,fingerprint_gain,nsamp,due_tclk,p_time,lead_at_issue_tclk,accept_cclk,lead_at_timeline_tclk,status,release_kind,release_offset_tclk,compare_to_pop_tclk,release_spacing_tclk,transport_ps,transport_sgclk,queue_wait_sgclk,start_spacing_sgclk,due_to_start_ns,chained
+0,0ccc,60,645,215,618,1,601,ok,head,4,0,,27998.944,16.772,1,,38.964,False
+1,1999,60,688,258,653,1,,ok,head,4,0,43,28227.584,16.909,1,60,39.193,True

@@ -1,0 +1,67 @@
+{
+  "probe": "P6_same5",
+  "why": "capacity: 5 pulses, same due",
+  "qick_test": "T9b",
+  "qick_desc": "downstream backpressure: 300 pulses all due at 0.5 us, 0.02 us long",
+  "base_offset_batches": 599,
+  "batch_mhz": 599.04,
+  "waits_batches": {},
+  "text_bytes": 584,
+  "pulses": [
+    {
+      "k": 0,
+      "ch": 0,
+      "slot": 0,
+      "qick_t_us": 0.5,
+      "start_offset": 300,
+      "dur": 12,
+      "amp": 33,
+      "freq16": 1800,
+      "explicit_start": true
+    },
+    {
+      "k": 1,
+      "ch": 0,
+      "slot": 1,
+      "qick_t_us": 0.5,
+      "start_offset": 300,
+      "dur": 12,
+      "amp": 66,
+      "freq16": 1800,
+      "explicit_start": true
+    },
+    {
+      "k": 2,
+      "ch": 0,
+      "slot": 2,
+      "qick_t_us": 0.5,
+      "start_offset": 300,
+      "dur": 12,
+      "amp": 98,
+      "freq16": 1800,
+      "explicit_start": true
+    },
+    {
+      "k": 3,
+      "ch": 0,
+      "slot": 3,
+      "qick_t_us": 0.5,
+      "start_offset": 300,
+      "dur": 12,
+      "amp": 131,
+      "freq16": 1800,
+      "explicit_start": true
+    },
+    {
+      "k": 4,
+      "ch": 0,
+      "slot": 4,
+      "qick_t_us": 0.5,
+      "start_offset": 300,
+      "dur": 12,
+      "amp": 164,
+      "freq16": 1800,
+      "explicit_start": true
+    }
+  ]
+}

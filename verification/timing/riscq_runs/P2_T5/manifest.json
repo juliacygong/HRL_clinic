@@ -1,0 +1,34 @@
+{
+  "probe": "P2_T5",
+  "why": "overlap: QICK chains, RISC-Q dur counter reloads",
+  "qick_test": "T5",
+  "qick_desc": "overlap: pulse 2 due before pulse 1 ends",
+  "base_offset_batches": 599,
+  "batch_mhz": 599.04,
+  "waits_batches": {},
+  "text_bytes": 248,
+  "pulses": [
+    {
+      "k": 0,
+      "ch": 0,
+      "slot": 0,
+      "qick_t_us": 0.5,
+      "start_offset": 300,
+      "dur": 60,
+      "amp": 3277,
+      "freq16": 1800,
+      "explicit_start": true
+    },
+    {
+      "k": 1,
+      "ch": 0,
+      "slot": 1,
+      "qick_t_us": 0.55,
+      "start_offset": 329,
+      "dur": 60,
+      "amp": 6553,
+      "freq16": 1800,
+      "explicit_start": true
+    }
+  ]
+}

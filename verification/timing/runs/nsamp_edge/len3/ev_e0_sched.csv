@@ -1,0 +1,2 @@
+seq,time_ps,c_cyc,port,due,conf,nsamp,gain,addr,phase,freq,raw168
+0,2667500.000,500,0,645,0009,3,0ccc,000000,00000000,02abc2bc,00090000000300000ccc0000000000000002abc2bc

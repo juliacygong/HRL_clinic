@@ -1,0 +1,12 @@
+test,program,events_exercised,purpose,status,notes
+test_sim,existing 9 SG0 commands,all,validate monitors (CP1),run d0 (PRE_RUN_DELAY_NS=0),runs/test_sim/d0
+T1,one pulse,E0i -> E5,baseline latency at every stage,run 2026-09-27: PASS,runs/T1/d0 matches test_sim numbers
+T2,"two pulses, idle gap",E2/E3/E4 spacing,gap preserved at every layer,run 2026-09-27: PASS,
+T3,T2 with several gaps,"E2-due, E4-E3",latency constant,run 2026-09-27: PASS (T3a/b/c),
+T4,back-to-back,"E4 spacing, E4-E3",SGv6 chaining by nsamp,run 2026-09-27: PASS,
+T5,overlapping,E3 vs E4,"arrives on time, starts late",run 2026-09-27: PASS,
+T6,later-time pulse written first,ordering E0 -> E4,issue order vs due order,run 2026-09-27: PASS,
+T7,"T2 at 4 start delays (0,13,37,71 ns)",E3-E2 spread,CDC jitter from clock phase,"run 2026-09-27: PASS (d0,13,37,71)",
+T8,late command,"E1 margin, E2",due already passed,run 2026-09-27: PASS,WAIT @430 then pulse due @344 (late)
+T9,fill FIFOs,"E0-E0i, flags",acceptance stall,"run 2026-09-27: T9a PASS (acceptance stall), T9b FAIL (backpressure defects)","300 pulses, nsamp 12, all due 645; wmem 300/2048"
+T10,same due on SG0 and SG1 (optional),E2/E3/E4 on both,cross-channel alignment via shared CDC,run 2026-09-27: PASS,"SG0/SG1 equal due: skew 0 at E2,E3,E4,E5"

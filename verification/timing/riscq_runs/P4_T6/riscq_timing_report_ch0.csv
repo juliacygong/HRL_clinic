@@ -1,0 +1,3 @@
+k,amp,dur,due_time,accept_cyc,push_cyc,lead_at_timeline,release_offset,pop_leads,start_offset,duration,issue_to_start_cyc
+0,3277,60,29394,4,2,1132,-2,amp-32 phase-33 freqC-34 freqP-50 addr-9 dur-2,,,
+1,6553,60,29095,4,2,784,299,amp+267 phase+266 freqC+265 freqP+249 addr+290 dur+299,,,

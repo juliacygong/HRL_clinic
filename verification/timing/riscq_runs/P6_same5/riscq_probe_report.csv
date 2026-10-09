@@ -1,0 +1,6 @@
+ch,k,occurrence,amp,dur,planned_due,pushed,captured_due,due_delta,queued,release_offset,pop_leads,paired_amp,paired_freq,out_start_offset,out_covered,status
+0,0,0,33,12,29095,True,29095,0,True,-2,amp-34 phase-35 freqC-36 freqP-52 addr-11 dur-2,True,True,0,2,TRUNCATED to 2/12
+0,1,0,66,12,29095,True,29095,0,True,0,amp-34 phase-35 freqC-36 freqP-52 addr-11 dur-2,True,True,0,2,LATE release (+2 cyc); TRUNCATED to 2/12
+0,2,0,98,12,29095,True,29095,0,True,2,amp-34 phase-35 freqC-36 freqP-52 addr-11 dur-2,True,True,0,2,LATE release (+4 cyc); TRUNCATED to 2/12
+0,3,0,131,12,29095,True,29095,0,True,4,amp-34 phase-35 freqC-36 freqP-52 addr-11 dur-2,True,True,0,2,LATE release (+6 cyc); TRUNCATED to 2/12
+0,4,0,164,12,29095,True,29095,0,True,6,amp-34 phase-35 freqC-36 freqP-52 addr-11 dur-2,True,True,0,12,LATE release (+8 cyc)
