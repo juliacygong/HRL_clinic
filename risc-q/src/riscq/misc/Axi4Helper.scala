@@ -47,3 +47,19 @@ object Axi4VivadoHelper {
     tag(axi.r.resp, "RRESP"); tag(axi.r.last, "RLAST")
   }
 }
+
+object AxiLite4VivadoHelper {
+  def addInference(axi: spinal.lib.bus.amba4.axilite.AxiLite4, ifcName: String = "S_AXI"): Unit = {
+    def tag(d: Data, sig: String): Unit =
+      d.addAttribute("X_INTERFACE_INFO", "xilinx.com:interface:aximm:1.0 " + ifcName + " " + sig)
+    tag(axi.aw.valid, "AWVALID"); tag(axi.aw.ready, "AWREADY")
+    tag(axi.aw.addr, "AWADDR"); tag(axi.aw.prot, "AWPROT")
+    tag(axi.w.valid, "WVALID"); tag(axi.w.ready, "WREADY")
+    tag(axi.w.data, "WDATA"); tag(axi.w.strb, "WSTRB")
+    tag(axi.b.valid, "BVALID"); tag(axi.b.ready, "BREADY"); tag(axi.b.resp, "BRESP")
+    tag(axi.ar.valid, "ARVALID"); tag(axi.ar.ready, "ARREADY")
+    tag(axi.ar.addr, "ARADDR"); tag(axi.ar.prot, "ARPROT")
+    tag(axi.r.valid, "RVALID"); tag(axi.r.ready, "RREADY")
+    tag(axi.r.data, "RDATA"); tag(axi.r.resp, "RRESP")
+  }
+}

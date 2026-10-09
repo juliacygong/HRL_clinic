@@ -10,6 +10,8 @@ import spinal.lib.bus.amba4.axi.Axi4ToTilelinkFiber
 import spinal.lib.bus.misc.SizeMapping
 import riscq.dsp.{AdderTree, ComplexBatch}
 import riscq.riscv.RiscqParam
+import riscq.misc.{Axi4StreamVivadoHelper, AxiLite4VivadoHelper, VivadoClkHelper}
+import riscq.soc.qick.{QickGenHost, QickGenParams}
 import riscq.soc.fabric.{BramFiber, MemMapDriverFiber}
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable
@@ -76,6 +78,11 @@ case class PulseTableSoc(
     // RAM and the B2 dcOffset MAX_FANOUT cap are baked into PulseParamBuffer; the B3 queue lean-pop into
     // TimedQueue; the C1 registered head is a TimedQueue-level option, no longer plumbed here).
     adcPipe: Int = 3,                   // C2: register stages on the ADC nets off the RFDC edge
+    // QICK signal generator in place of the native gate/readout drive channels: every core's gate and
+    // readout-drive RF windows feed WaveWordBridge → sg_translator → axis_signal_gen_v6 (BlackBoxes of the
+    // QICK IP). Each gen adds host-side ports `qickGen{c}_{gate,ro}_{s_axi,s0_axis}` (hostClk) for its
+    // envelope table. None ⇒ native channels and no extra ports (RTL unchanged).
+    qickGen: Option[QickGenParams] = None,
 ) extends Zcu216Top(dacNum = dacNum, adcNum = adcNum, dacBatch = 16, adcBatch = 4, dataWidth = 16, vivado = vivado) {
   val N        = 16    // DAC drive batch
   val adcBatch = 4
@@ -133,6 +140,13 @@ case class PulseTableSoc(
   val riscqReset = Bool()
   val riscqCd    = ClockDomain(dspCd.readClockWire, riscqReset)
 
+  // ── QICK gen clock (qickGen only): the DAC fabric clock the gens run on, 599.04 MHz on the ZCU216 (QICK
+  // clk_dac0). Each QICK channel crosses into it from dspCd through axis_cdcsync_v1. ──
+  val genClk = qickGen.nonEmpty generate (in port Bool()).setName("genClk")
+  val genRst = qickGen.nonEmpty generate (in port Bool()).setName("genRst")
+  val genCd  = qickGen.nonEmpty generate ClockDomain(genClk, genRst)
+  if (qickGen.nonEmpty && vivado) VivadoClkHelper.addInference(genClk, genRst, 599040000L)
+
   /** Converter-boundary pipeline: `converterPipe` extra register stages on the long DAC/ADC nets
    *  into/out of the RFDC edge. converterPipe = 0 ⇒ identity (no behavioural change). */
   def pipe[T <: Data](x: T, converterPipe: Int): T = (0 until converterPipe).foldLeft(x)((s, _) => RegNext(s))
@@ -170,7 +184,7 @@ case class PulseTableSoc(
         time = coreTimes(i), batchSize = N, dataWidth = w, adcBatch = adcBatch,
         envDepth = envDepth, readoutInterp = readoutInterp, gateInterp = gateInterp, demodInterp = demodInterp,
         linkPipe = linkPipe, withTestTap = withTest, memDepth = memDepth, gatePulseNum = gatePulseNum,
-        queueDepth = queueDepth))
+        queueDepth = queueDepth, qickGen = qickGen, genCd = genCd))
 
     // floorplan: keep each core's RiscvSoc a hard synth boundary so opt can't merge logic across the
     // identical cores into a MUXF7/F8 macro that straddles two per-core pblocks. The shared host AXI fans
@@ -271,6 +285,30 @@ case class PulseTableSoc(
     rb0.wdata   := Vec(adcSum).asBits
   }
 
+  // ── QICK gen_v6 host ports (hostClk): per core, gate then readout ──
+  val qickHostPorts = for ((core, c) <- riscqArea.riscqCores.zipWithIndex;
+                           (gen, name) <- core.qickHost.zip(List("gate", "ro"))) yield {
+    val port = slave port QickGenHost()
+    port.setName(s"qickGen${c}_$name")
+    port <> gen
+    if (vivado) {
+      AxiLite4VivadoHelper.addInference(port.s_axi, s"QICKGEN${c}_${name.toUpperCase}_S_AXI")
+      Axi4StreamVivadoHelper.addStreamInference(port.s0_axis, s"QICKGEN${c}_${name.toUpperCase}_S0_AXIS")
+    }
+    port
+  }
+
+  // ── QICK gen_v6 sample streams (genClk): per core, gate then readout = each gen's m_axis (16 × 16-bit
+  // samples per genClk cycle) for the RFDC DAC tile, as in QICK's block design. ──
+  val qickSamplePorts = for ((core, c) <- riscqArea.riscqCores.zipWithIndex;
+                             (s, name) <- core.qickSamples.zip(List("gate", "ro"))) yield {
+    val port = master port Stream(Bits(s.payload.getWidth bits))
+    port.setName(s"qickGen${c}_${name}_m_axis")
+    port << s
+    if (vivado) Axi4StreamVivadoHelper.addStreamInference(port, s"QICKGEN${c}_${name.toUpperCase}_M_AXIS")
+    port
+  }
+
   // ── host control block (host clock domain) ──
   val riscqResetHostCd = Bool()
   val bufferedReset    = dspCd(BufferCC(riscqResetHostCd, 3))
@@ -321,7 +359,7 @@ object SocChannelMap {
  * `X_INTERFACE_INFO`/`FREQ_HZ` bus-interface attributes (host clock renamed `hostClk`/`hostRst`) plus the
  * `ClockInterface.v` clock-buffer wrapper, both into `build/rtl`. The qubit count is `args(0)` (default 14,
  * the full ZCU216 config); use a small count for quick script iteration. `romReuse` shares the per-core
- * register-file ROM init across the identical cores.
+ * register-file ROM init across the identical cores. `--qick` builds the QICK gen_v6 drive variant.
  */
 object GenPulseTableSocVivado extends App {
   // args: `[N]` qubit count (default 14) and `[dir]` target directory (the first non-numeric arg;
@@ -331,16 +369,20 @@ object GenPulseTableSocVivado extends App {
   // PulseTableSoc tags each core's `RiscvSoc` `(* KEEP_HIERARCHY = "TRUE" *)` so synthesis can't
   // dissolve or cross-merge the identical cores; the per-core pblocks pin each core's `RiscvSoc`, so
   // that boundary must remain a distinct macro for the floorplan to bind.
+  // `--qick` swaps every core's gate/readout drive channels for the QICK sg_translator + gen_v6 path
+  // (BlackBoxes resolved by the QICK IP in the block design).
+  val qick     = args.contains("--qick")
   val qubitNum = args.filter(_.forall(_.isDigit)).headOption.map(_.toInt).getOrElse(14)
-  val dir      = args.find(a => a.nonEmpty && !a.forall(_.isDigit)).getOrElse("./build/rtl")
+  val dir      = args.find(a => a.nonEmpty && !a.forall(_.isDigit) && !a.startsWith("--")).getOrElse("./build/rtl")
   val cfg      = SpinalConfig(mode = Verilog, targetDirectory = dir, romReuse = true).setScopeProperty(LutInputs, 6)
   cfg.generate(PulseTableSoc(
     qubitNum = qubitNum,
     dacMap   = SocChannelMap.dacMap(qubitNum),
     adcMap   = SocChannelMap.adcMap(qubitNum),
-    vivado   = true))
+    vivado   = true,
+    qickGen  = if (qick) Some(riscq.soc.qick.QickGenParams()) else None))
   cfg.generate(riscq.misc.ClockInterface())
-  println(s"[GenPulseTableSocVivado] emitted $dir/PulseTableSoc.v + ClockInterface.v (qubitNum=$qubitNum, vivado=true)")
+  println(s"[GenPulseTableSocVivado] emitted $dir/PulseTableSoc.v + ClockInterface.v (qubitNum=$qubitNum, vivado=true, qick=$qick)")
 }
 
 /**
