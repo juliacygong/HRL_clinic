@@ -18,4 +18,14 @@ set _fh [open $BUILD_DIR/constraints-dacclk.xdc w]
 puts $_fh "create_clock -period [format %.3f [expr {1000.0 / $_dac_ref_mhz}]] -name dac_clk_clk_p \[get_ports {dac_clk_clk_p}\]"
 close $_fh
 add_files -fileset constrs_1 -norecurse $BUILD_DIR/constraints-dacclk.xdc
+
+# XCOM constraints: the CDC exceptions whenever the IP is in the design, the pinout only when the
+# link actually leaves the die (in-fabric loopback creates no ports for those pins to attach to, and
+# an xdc referencing non-existent ports is a hard error).
+if {$WITH_XCOM} {
+  add_files -fileset constrs_1 -norecurse $SCRIPT_DIR/constraints-xcom.xdc
+  if {!$XCOM_LOOPBACK} {
+    add_files -fileset constrs_1 -norecurse $SCRIPT_DIR/constraints-xcom-pins-zcu216.xdc
+  }
+}
 update_compile_order -fileset sources_1

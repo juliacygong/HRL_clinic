@@ -49,9 +49,36 @@ set IP_REPO     $BUILD_DIR/ip
 # subset create_project accepts.
 set PRJ         [regsub -all {[^A-Za-z0-9_]} $PROJ_NAME _]
 
+# ---- optional XCOM board-link IP ------------------------------------------------------------------
+# OFF by default: a build without it is identical to the pre-XCOM flow, so enabling XCOM can never be
+# the reason a known-good bitstream stops working. See docs/soc/XcomBringup.md.
+#   RISCQ_WITH_XCOM=1      instantiate QICK's xcom beside the SoC, AXI-Lite on the SmartConnect
+#   RISCQ_XCOM_LOOPBACK=1  (default) tie the link's tx back to its rx IN FABRIC — no pins, no cable
+#   RISCQ_XCOM_LOOPBACK=0  bring the link out to PMOD pins (constraints-xcom-zcu216.xdc)
+#   RISCQ_XCOM_NCH         receive channels; 1 = point-to-point or loopback
+set WITH_XCOM     0
+set XCOM_LOOPBACK 1
+set XCOM_NCH      1
+set XCOM_BASEADDR 0x90000000
+set XCOM_IP_DIR   [file normalize $SCRIPT_DIR/../../../firmware/ip/xcom]
+
+if {[info exists ::env(RISCQ_WITH_XCOM)]}     { set WITH_XCOM     $::env(RISCQ_WITH_XCOM) }
+if {[info exists ::env(RISCQ_XCOM_LOOPBACK)]} { set XCOM_LOOPBACK $::env(RISCQ_XCOM_LOOPBACK) }
+if {[info exists ::env(RISCQ_XCOM_NCH)]}      { set XCOM_NCH      $::env(RISCQ_XCOM_NCH) }
+if {[info exists ::env(RISCQ_XCOM_BASEADDR)]} { set XCOM_BASEADDR $::env(RISCQ_XCOM_BASEADDR) }
+
+if {$WITH_XCOM && ![file exists $XCOM_IP_DIR/component.xml]} {
+  error "RISCQ_WITH_XCOM=1 but no packaged xcom IP at $XCOM_IP_DIR (expected component.xml)"
+}
+
 puts "\[config\] top=$TOP_MODULE part=$PART dsp=${DSP_FREQ}Hz host=${HOST_FREQ}Hz  synth=$RUN_SYNTH impl=$RUN_IMPL bit=$RUN_BITSTREAM"
 if {$QICK} { puts "\[config\] QICK gen_v6 variant: gen=${GEN_FREQ}Hz  qick_fw=$QICK_FW" }
 puts "\[config\] rtl=$SOURCE_PATH  build=$BUILD_DIR"
+if {$WITH_XCOM} {
+  puts "\[config\] xcom=ON nch=$XCOM_NCH loopback=$XCOM_LOOPBACK base=$XCOM_BASEADDR ip=$XCOM_IP_DIR"
+} else {
+  puts "\[config\] xcom=off (set RISCQ_WITH_XCOM=1 to include the board link)"
+}
 
 if {![file exists $SOURCE_PATH/$TOP_MODULE.v]} {
   error "missing $SOURCE_PATH/$TOP_MODULE.v — run ./build-riscvsoc-bd.sh (it generates the RTL first)"

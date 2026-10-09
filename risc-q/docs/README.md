@@ -81,6 +81,7 @@ The multi-qubit SoC tying cores to converter-edge DSP over a narrow posted link.
 | [RiscvSoc](soc/RiscvSoc.md) | The hard per-core unit (registered-boundary floorplan target) |
 | [RiscqRfWithPulseTableFiber](soc/RiscqRfWithPulseTableFiber.md) | One qubit: core + RAM + control + RF tree over the link |
 | [Zcu216Top](soc/Zcu216Top.md) | ZCU216 board toplevel scaffolding |
+| [XcomBringup](soc/XcomBringup.md) | Board-to-board link (XCOM): what is proven, how to build it into a bitstream, how to test it |
 | [floorplan-harnesses](soc/floorplan-harnesses.md) | `RiscqFarmTop` / `RiscqCloneTop` floorplan-sweep tops |
 | [SOC_TIPS](soc/SOC_TIPS.md) | SoC / fabric / SpinalSim gotchas |
 | [vs QubiC datapath](soc/QUBIC_DATAPATH_COMPARISON.md) | Pulse→DAC datapath comparison vs QubiC |

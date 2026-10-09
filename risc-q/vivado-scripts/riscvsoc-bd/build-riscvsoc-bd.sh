@@ -39,6 +39,9 @@
 # the gens on the 599.04 MHz DAC fabric clock. The config must give every gen its own DAC (default
 # software/configs/zcu216-qick-1q.json). The board's dac_clk must be 245.76 MHz (QICK's reference). The
 # 14q floorplan does not apply, so it is off unless RISCQ_PBLOCK_TCL is set.
+
+#   RISCQ_WITH_XCOM=1  ./build-riscvsoc-bd.sh # + QICK's xcom board link, in-fabric loopback (no pins)
+#   RISCQ_WITH_XCOM=1 RISCQ_XCOM_LOOPBACK=0 ./build-riscvsoc-bd.sh # ... with the link out to PMOD pins
 #
 # Env: RISCQ_VIVADO_BIN, RISCQ_CONFIG (default software/configs/zcu216-14q.json), RISCQ_SKIP_GEN,
 #   RISCQ_RUN_BITSTREAM (default 1 — bitstream + xsa; set 0 for impl-only),
@@ -46,6 +49,13 @@
 #   RISCQ_{ROW,PERROW,CONFINE}, RISCQ_BD_BASE, and RISCQ_PLACE_DIRECTIVE (default ExtraNetDelay_high —
 #   the placer directive). RISCQ_MREG_LOCK=1 freezes the carrierGen ComplexMul product DSPs against
 #   phys_opt MREG-stripping (specs/dsp-fmax.md). See README.md.
+#
+# XCOM (the board-to-board link) is OFF unless RISCQ_WITH_XCOM=1, so its presence in the flow leaves
+# the default build unchanged. With it on, the IP is instantiated BESIDE PulseTableSoc with its
+# AXI-Lite slave on the SmartConnect at RISCQ_XCOM_BASEADDR (default 0x90000000 — outside the SoC's
+# 0x80000000+0x10000000 window, so the existing pynq MMIO mapping is untouched). The RISC-V command
+# port is not wired yet; the link is driven entirely from the PS. RISCQ_XCOM_LOOPBACK=1 (default)
+# ties tx back to rx in fabric for a no-cable bring-up; =0 brings it out to PMOD0/PMOD1.
 # ============================================================================================
 set -e
 BD_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"   # vivado-scripts/riscvsoc-bd
@@ -99,6 +109,9 @@ if [ -f "$BUILD/timing_impl.rpt" ]; then
   grep -m2 -E "WNS|TNS|Worst Negative|Total Negative" "$BUILD/timing_impl.rpt" | sed 's/^/[riscvsoc-bd]   /' || true
 else
   echo "[riscvsoc-bd] (no timing_impl.rpt — see $BUILD/vivado.log)"
+fi
+if [ "${RISCQ_WITH_XCOM:-0}" = "1" ]; then
+  echo "[riscvsoc-bd] xcom: INCLUDED (loopback=${RISCQ_XCOM_LOOPBACK:-1}, axi base=${RISCQ_XCOM_BASEADDR:-0x90000000})"
 fi
 [ -f "$BUILD/PulseTableSoc.bit" ] && echo "[riscvsoc-bd] bitstream: $BUILD/PulseTableSoc.bit"
 [ -f "$BUILD/PulseTableSoc.xsa" ] && echo "[riscvsoc-bd] hardware platform: $BUILD/PulseTableSoc.xsa"

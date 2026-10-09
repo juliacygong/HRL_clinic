@@ -90,7 +90,11 @@ ipx::create_xgui_files [ipx::current_core]
 ipx::update_checksums [ipx::current_core]
 ipx::check_integrity [ipx::current_core]
 ipx::save_core [ipx::current_core]
-set_property ip_repo_paths $IP_REPO [current_project]
+# ip_repo_paths takes a LIST — the packaged SoC, plus QICK's xcom when it is enabled. Without the
+# second entry create_bd_cell cannot resolve QICK:QICK:xcom:1.0.
+set _ip_repos [list $IP_REPO]
+if {$WITH_XCOM} { lappend _ip_repos $XCOM_IP_DIR }
+set_property ip_repo_paths $_ip_repos [current_project]
 update_ip_catalog
 
 # ClockInterface is a plain BD module reference (instantiated as `clkifc`), not part of the user IP —
