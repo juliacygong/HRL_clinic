@@ -186,6 +186,8 @@ class SocMap:
     CTRL_RES = 0x4200               # read HALTS until the armed readout completes
     CTRL_REAL = 0x4204
     CTRL_IMAG = 0x4208
+    CTRL_ACCEL = 0x4300             # read BLOCKS until the accelerator has a result, and CONSUMES it
+    CTRL_ACCEL_STATUS = 0x4304      # non-blocking poll: is a result ready?
     CTRL_TIME = 0xBFF8
 
     # ── RF window (CPU addresses; RfLinkBridge at 0x10000, demux bases in RiscqRfWithPulseTableFiber) ──
@@ -371,6 +373,7 @@ class SocMap:
             ("RQ_CTRL_WAIT_TIME_CMP", self.CTRL_WAIT_TIME_CMP),
             ("RQ_CTRL_RES", self.CTRL_RES), ("RQ_CTRL_REAL", self.CTRL_REAL),
             ("RQ_CTRL_IMAG", self.CTRL_IMAG), ("RQ_CTRL_TIME", self.CTRL_TIME),
+            ("RQ_CTRL_ACCEL", self.CTRL_ACCEL), ("RQ_CTRL_ACCEL_STATUS", self.CTRL_ACCEL_STATUS),
             ("RQ_GATE", self.RF_GATE), ("RQ_READOUT", self.RF_READOUT),
             ("RQ_DEMOD", self.RF_DEMOD),
             ("RQ_FIRE", self.RF_FIRE), ("RQ_FREQ", self.RF_FREQ),

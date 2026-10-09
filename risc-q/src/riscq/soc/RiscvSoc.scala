@@ -12,6 +12,7 @@ import riscq.memory.{Bram, HalfUram, Uram}
 import riscq.soc.fabric.{RiscqFiber, TileLinkCpuMemFiber, MemMapFiber}
 import riscq.soc.rf.TimeMemMap
 import riscq.soc.link.{RfLinkBridge, ReadoutResult, ReadoutResultSink, RfCmd}
+import riscq.soc.comm.{AccelResult, AccelResultSink}
 
 /**
  * The **timing-critical core unit** carved out of [[RiscqRfWithPulseTableFiber]] for the
@@ -52,6 +53,10 @@ case class RiscvSoc(
     rfAddrWidth: Int = 18,
     // test harness: add a second master into the CPU data-bus decode (a sim drives it directly).
     withTestTap: Boolean = false,
+    // optional accelerator socket: adds an `accelIn` Flow and a CPU-readable, BLOCKING result
+    // register. Default off, so builds that do not use it are byte-identical.
+    withAccel: Boolean = false,
+    accelDataWidth: Int = 32,
     // host-load master params (the BRAM slow-port image load). Must match what the parent's host fabric
     // presents to `iLoad` (source-id width included), so keep it a single shared definition.
     hostLoadM2s: tilelink.M2sParameters = RiscvSoc.defaultHostLoadM2s,
@@ -63,6 +68,9 @@ case class RiscvSoc(
   val time     = in  port UInt(timeWidth bits)        // shared batch-time broadcast
   val cmd      = master port Flow(RfCmd(rfAddrWidth)) // posted RF writes (RfLinkBridge) → DSP
   val resultIn = slave  port Flow(ReadoutResult(readoutAccWidth)) // readout result ← DSP → sink
+  // accelerator result ← accelerator → AccelResultSink (a CPU read of RQ_CTRL_ACCEL blocks until a
+  // result arrives, and CONSUMES it, so a premature re-read blocks rather than returning stale data).
+  val accelIn  = withAccel generate (slave port Flow(AccelResult(accelDataWidth)))
 
   def getPipe[T <: Data](data: T, cycles: Int): T = {
     var res = data
@@ -150,6 +158,13 @@ case class RiscvSoc(
 
   // finish the control block: add the local result-sink read map, then connect the bus.
   memMapFiber.addMapping(posted.sink.mapping)        // res@0x4200 / real@0x4204 / imag@0x4208 (local)
+
+  // ── optional accelerator socket (core-local, same control block as the readout result) ──
+  val accel = withAccel generate riscqCd(new Composite(this, "accel") {
+    val sink = AccelResultSink(accelDataWidth, dataAddr = 0x4300, statusAddr = 0x4304)
+    sink.resultIn << accelIn
+  })
+  if (withAccel) memMapFiber.addMapping(accel.sink.mapping)   // accel@0x4300 / status@0x4304
   memMapFiber.up at SizeMapping(0, 1 << 16) of dMemPortDec
   memMapFiber.up.setUpConnection(a = StreamPipe.FULL, d = StreamPipe.FULL)
 }

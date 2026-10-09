@@ -116,6 +116,16 @@ static inline int32_t read_res(void)  { return (int32_t)RQ_MMIO(RQ_CTRL_RES); } 
 static inline int32_t read_real(void) { return (int32_t)RQ_MMIO(RQ_CTRL_REAL); }
 static inline int32_t read_imag(void) { return (int32_t)RQ_MMIO(RQ_CTRL_IMAG); }
 
+/* ── accelerator socket ──
+ * read_accel BLOCKS until the accelerator has produced a result, then CONSUMES it: a second read
+ * blocks again rather than returning the same answer twice. That is deliberate and differs from
+ * read_res (which is idempotent) - in a feedback loop, silently re-reading the PREVIOUS round's
+ * answer is worse than stalling, because a wrong correction looks like an accelerator accuracy
+ * problem rather than a timing bug. Latch the value; do not re-read it.
+ * accel_ready() is the non-blocking poll, for code that cannot afford to stall. */
+static inline int32_t  read_accel(void)  { return (int32_t)RQ_MMIO(RQ_CTRL_ACCEL); }  /* BLOCKS; consumes */
+static inline uint32_t accel_ready(void) { return RQ_MMIO(RQ_CTRL_ACCEL_STATUS); }    /* non-blocking */
+
 static inline uint32_t from_host(void) { return RQ_MMIO(RQ_CTRL_FROM_HOST); }
 
 #endif
