@@ -71,3 +71,6 @@ Temporary Items
 
 !/.gitignore
 !/README.md
+
+# SpinalSim / Verilator wave dumps (regenerable; RISCQ_WAVES=1 produces them)
+*.vcd

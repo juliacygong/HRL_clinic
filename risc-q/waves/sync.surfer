@@ -1,0 +1,13 @@
+# synchronized start: both boards fire on the same cycle
+divider_add SYNC
+variable_add TOP.XcomMesh.io_sync
+variable_add TOP.XcomMesh.io_aProcStart
+variable_add TOP.XcomMesh.io_bProcStart
+divider_add LINK
+variable_add TOP.XcomMesh.io_aTxClk
+variable_add TOP.XcomMesh.io_aTxData
+variable_add TOP.XcomMesh.io_bDt1
+divider_add TIME_COMMIT
+variable_add TOP.XcomMesh.io_bTimeUpd
+variable_add TOP.XcomMesh.io_bTimeDat
+zoom_fit

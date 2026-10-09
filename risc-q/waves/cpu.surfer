@@ -1,0 +1,7 @@
+# CPU to CPU across the link
+variable_add TOP.Dut.xa_o_xcom_id
+variable_add TOP.Dut.xb_o_xcom_id
+variable_add TOP.Dut.xa_o_xcom_data
+variable_add TOP.Dut.xb_o_core_valid
+variable_add TOP.Dut.xb_o_core_data1
+zoom_fit
