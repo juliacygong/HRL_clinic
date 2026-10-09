@@ -298,14 +298,19 @@ case class PulseTableSoc(
     port
   }
 
-  // ── QICK gen_v6 sample streams (genClk): per core, gate then readout = each gen's m_axis (16 × 16-bit
-  // samples per genClk cycle) for the RFDC DAC tile, as in QICK's block design. ──
+  // ── QICK gen_v6 sample streams (genClk): each gen's m_axis (16 × 16-bit samples per genClk cycle) on a
+  // port named for the physical DAC `dacMap` assigns it (gate = channel 0, readout = channel 1), so the
+  // block design wires `QICKDAC{d}_AXIS` straight to RFDC DAC d. A gen owns its DAC: gens are not summed. ──
+  val qickDacIds = for (c <- riscqArea.riscqCores.indices; ch <- 0 until 2 if qickGen.nonEmpty) yield dacMap((c, ch))
+  require(qickDacIds.distinct.size == qickDacIds.size,
+    s"qickGen needs a distinct DAC per gen (gens are not summed), got DACs $qickDacIds")
   val qickSamplePorts = for ((core, c) <- riscqArea.riscqCores.zipWithIndex;
-                             (s, name) <- core.qickSamples.zip(List("gate", "ro"))) yield {
+                             (s, ch) <- core.qickSamples.zipWithIndex) yield {
+    val d    = dacMap((c, ch))
     val port = master port Stream(Bits(s.payload.getWidth bits))
-    port.setName(s"qickGen${c}_${name}_m_axis")
+    port.setName(s"qickDac$d")
     port << s
-    if (vivado) Axi4StreamVivadoHelper.addStreamInference(port, s"QICKGEN${c}_${name.toUpperCase}_M_AXIS")
+    if (vivado) Axi4StreamVivadoHelper.addStreamInference(port, s"QICKDAC${d}_AXIS")
     port
   }
 

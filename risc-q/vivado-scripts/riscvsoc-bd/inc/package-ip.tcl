@@ -15,6 +15,10 @@
 set fh [open $SOURCE_PATH/PulseTableSoc_ooc.xdc w]
 puts $fh "create_clock -name dspClk -period [format %.3f [expr {1e9 / $DSP_FREQ}]] \[get_ports dspClk\]"
 puts $fh "create_clock -name hostClk -period [format %.3f [expr {1e9 / $HOST_FREQ}]] \[get_ports hostClk\]"
+if {$QICK} {
+  puts $fh "create_clock -name genClk -period [format %.3f [expr {1e9 / $GEN_FREQ}]] \[get_ports genClk\]"
+  puts $fh "set_clock_groups -asynchronous -group dspClk -group hostClk -group genClk"
+}
 close $fh
 add_files -fileset constrs_1 $SOURCE_PATH/PulseTableSoc_ooc.xdc
 set_property USED_IN {synthesis implementation out_of_context} [get_files $SOURCE_PATH/PulseTableSoc_ooc.xdc]
@@ -48,6 +52,29 @@ for {set i 0} {$i < 16} {incr i} {
   ipx::associate_bus_interfaces -busif DAC${i}_AXIS -clock hostClk -remove [ipx::current_core]
   ipx::associate_bus_interfaces -busif ADC${i}_AXIS -clock dspClk [ipx::current_core]
   ipx::associate_bus_interfaces -busif ADC${i}_AXIS -clock hostClk -remove [ipx::current_core]
+}
+
+# QICK variant: genClk (the gens' DAC fabric clock) carries every QICKDAC{d}_AXIS gen sample stream; the
+# gens' AXI-Lite registers and envelope streams (QICKGEN{c}_{GATE,RO}_{S_AXI,S0_AXIS}) are on hostClk.
+if {$QICK} {
+  ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces genClk -of_objects [ipx::current_core]]
+  set_property value $GEN_FREQ [ipx::get_bus_parameters FREQ_HZ \
+    -of_objects [ipx::get_bus_interfaces genClk -of_objects [ipx::current_core]]]
+  foreach _b [ipx::get_bus_interfaces QICKDAC*_AXIS -of_objects [ipx::current_core]] {
+    set _n [get_property NAME $_b]
+    ipx::associate_bus_interfaces -busif $_n -clock genClk [ipx::current_core]
+    ipx::associate_bus_interfaces -busif $_n -clock dspClk  -remove [ipx::current_core]
+    ipx::associate_bus_interfaces -busif $_n -clock hostClk -remove [ipx::current_core]
+  }
+  foreach _b [ipx::get_bus_interfaces QICKGEN* -of_objects [ipx::current_core]] {
+    set _n [get_property NAME $_b]
+    ipx::associate_bus_interfaces -busif $_n -clock hostClk [ipx::current_core]
+    ipx::associate_bus_interfaces -busif $_n -clock dspClk -remove [ipx::current_core]
+    ipx::associate_bus_interfaces -busif $_n -clock genClk -remove [ipx::current_core]
+  }
+  ipx::add_bus_parameter POLARITY [ipx::get_bus_interfaces genRst -of_objects [ipx::current_core]]
+  set_property value ACTIVE_HIGH [ipx::get_bus_parameters POLARITY \
+    -of_objects [ipx::get_bus_interfaces genRst -of_objects [ipx::current_core]]]
 }
 
 # reset polarities

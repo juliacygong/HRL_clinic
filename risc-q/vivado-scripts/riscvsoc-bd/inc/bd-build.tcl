@@ -47,16 +47,25 @@ set RFDC_TARGET [get_bd_cells rf_data_converter]
 source $INC/rfdc-config.tcl
 source $INC/rfdc-connect.tcl
 
-# ---- AXI SmartConnect: PS HPM0_LPD -> { top S_AXIS, rfdc s_axi } ----
+# ---- AXI SmartConnect: PS HPM0_LPD -> { top S_AXIS, rfdc s_axi [, QICK gen_v6 s_axi ...] } ----
+# QICK variant: one more manager port per gen's AXI-Lite registers (START_ADDR / WE), on hostClk like
+# S_AXIS. The gens' envelope streams (QICKGEN*_S0_AXIS) are left unconnected for now (no envelope DMA
+# yet), so the gens can play DDS-only pulses (outsel = 1) but not envelope-shaped ones.
+set _qick_saxi [expr {$QICK ? [get_bd_intf_pins -quiet $TOP/QICKGEN*_S_AXI] : {}}]
 set AXI_CONNECT [create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect]
 set_property CONFIG.NUM_SI 1 $AXI_CONNECT
-set_property CONFIG.NUM_MI 2 $AXI_CONNECT
+set_property CONFIG.NUM_MI [expr {2 + [llength $_qick_saxi]}] $AXI_CONNECT
 set_property CONFIG.NUM_CLKS {2} $AXI_CONNECT
 set_property CONFIG.HAS_ARESETN {0} $AXI_CONNECT
 
 connect_bd_intf_net [get_bd_intf_pins $AXI_CONNECT/M00_AXI]      [get_bd_intf_pins $TOP/S_AXIS]
 connect_bd_intf_net [get_bd_intf_pins $AXI_CONNECT/M01_AXI]      [get_bd_intf_pins rf_data_converter/s_axi]
 connect_bd_intf_net [get_bd_intf_pins zynq_ps/M_AXI_HPM0_LPD]    [get_bd_intf_pins $AXI_CONNECT/S00_AXI]
+set _mi 2
+foreach _p $_qick_saxi {
+  connect_bd_intf_net [get_bd_intf_pins $AXI_CONNECT/M[format %02d $_mi]_AXI] $_p
+  incr _mi
+}
 connect_bd_net      [get_bd_pins zynq_ps/pl_clk0]                [get_bd_pins $AXI_CONNECT/aclk]
 connect_bd_net      [get_bd_pins $CLKIFC/hostClk]                [get_bd_pins $AXI_CONNECT/aclk1]
 

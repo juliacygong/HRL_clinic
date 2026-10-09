@@ -31,6 +31,14 @@
 #   RISCQ_CONFIG=software/configs/sim-2q.json ./build-riscvsoc-bd.sh # a different SocParams JSON
 #   RISCQ_SKIP_GEN=1   ./build-riscvsoc-bd.sh # reuse the RTL already in the build dir (skip mill)
 #   RISCQ_PROJ_NAME=foo ./build-riscvsoc-bd.sh # build into <repo>/build/foo (parallel designs)
+#   RISCQ_QICK=1 ./build-riscvsoc-bd.sh          # QICK gen_v6 variant (zcu216-qick-1q config, no floorplan)
+#
+# QICK variant (RISCQ_QICK=1): the RTL is generated with `qick` (PulseTableSoc.qickGen — each core's gate /
+# readout drive = WaveWordBridge -> axis_cdcsync_v1 -> sg_translator -> axis_signal_gen_v6), the QICK IP
+# sources come from <clinic>/firmware (RISCQ_QICK_FW), and the DAC tiles run at QICK's 9.58464 GS/s with
+# the gens on the 599.04 MHz DAC fabric clock. The config must give every gen its own DAC (default
+# software/configs/zcu216-qick-1q.json). The board's dac_clk must be 245.76 MHz (QICK's reference). The
+# 14q floorplan does not apply, so it is off unless RISCQ_PBLOCK_TCL is set.
 #
 # Env: RISCQ_VIVADO_BIN, RISCQ_CONFIG (default software/configs/zcu216-14q.json), RISCQ_SKIP_GEN,
 #   RISCQ_RUN_BITSTREAM (default 1 — bitstream + xsa; set 0 for impl-only),
@@ -43,15 +51,23 @@ set -e
 BD_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"   # vivado-scripts/riscvsoc-bd
 REPO_DIR="$(cd "$BD_DIR/../.." && pwd)"                  # agentic-rv-dev (repo root)
 VIVADO_BIN="${RISCQ_VIVADO_BIN:-$(dirname "$(command -v vivado)")}"
-CONFIG="${RISCQ_CONFIG:-$REPO_DIR/software/configs/zcu216-14q.json}"
-PROJ="${RISCQ_PROJ_NAME:-riscvsoc-bd}"
+QICK="${RISCQ_QICK:-0}"
+if [ "$QICK" = "1" ]; then
+  CONFIG="${RISCQ_CONFIG:-$REPO_DIR/software/configs/zcu216-qick-1q.json}"
+  PROJ="${RISCQ_PROJ_NAME:-riscvsoc-bd-qick}"
+  GEN_ARGS="vivado qick"
+else
+  CONFIG="${RISCQ_CONFIG:-$REPO_DIR/software/configs/zcu216-14q.json}"
+  PROJ="${RISCQ_PROJ_NAME:-riscvsoc-bd}"
+  GEN_ARGS="vivado"
+fi
 BUILD="$REPO_DIR/build/$PROJ"
 mkdir -p "$BUILD"
 
 # 1) RTL — the BD (vivado=true) form — emitted INTO the project build dir from the SocParams JSON.
 if [ "${RISCQ_SKIP_GEN:-0}" != "1" ]; then
-  echo "[riscvsoc-bd] generating BD RTL (GenPulseTableSocJson $CONFIG, vivado=true) → $BUILD"
-  ( cd "$REPO_DIR" && mill runMain riscq.soc.GenPulseTableSocJson "$CONFIG" "$BUILD" vivado )
+  echo "[riscvsoc-bd] generating BD RTL (GenPulseTableSocJson $CONFIG, $GEN_ARGS) → $BUILD"
+  ( cd "$REPO_DIR" && mill runMain riscq.soc.GenPulseTableSocJson "$CONFIG" "$BUILD" $GEN_ARGS )
 else
   echo "[riscvsoc-bd] RISCQ_SKIP_GEN=1 — reusing RTL in $BUILD"
   [ -f "$BUILD/PulseTableSoc.v" ] || { echo "[riscvsoc-bd] no $BUILD/PulseTableSoc.v — run once without RISCQ_SKIP_GEN" >&2; exit 1; }
@@ -61,8 +77,13 @@ fi
 #    just enables the pre-place hook (any value); RISCQ_PBLOCK_TCL is the actual floorplan file.
 export RISCQ_PROJ_NAME="$PROJ"
 export RISCQ_BUILD_DIR="$BUILD"
-export RISCQ_PBLOCK=1
-export RISCQ_PBLOCK_TCL="$BD_DIR/pblocks-bd.tcl"
+export RISCQ_QICK="$QICK"
+if [ "$QICK" != "1" ]; then
+  export RISCQ_PBLOCK=1
+  export RISCQ_PBLOCK_TCL="$BD_DIR/pblocks-bd.tcl"
+elif [ -n "${RISCQ_PBLOCK_TCL:-}" ]; then
+  export RISCQ_PBLOCK=1                       # QICK variant: only an explicitly given floorplan
+fi
 export RISCQ_IP_RETIMING=1
 export RISCQ_PLACE_DIRECTIVE="${RISCQ_PLACE_DIRECTIVE:-ExtraNetDelay_high}"   # route stays AggressiveExplore (run.tcl)
 export RISCQ_RUN_IMPL=1
