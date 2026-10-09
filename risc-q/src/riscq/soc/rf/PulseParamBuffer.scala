@@ -7,8 +7,8 @@ import riscq.soc.link.RfCmd
 /** One pulse's parameters as stored in the CPU-writable table: raw `Bits` (the PulseGenerator io
  *  flows `assignFromBits` them). `env` is the envelope-memory base address. Each field's width matches
  *  its destination generator port (so `assignFromBits` is a no-resize copy). */
-case class PulseTableTerm(dataWidth: Int, envWidth: Int, durWidth: Int) extends Bundle {
-  val phase = Bits(dataWidth bit)
+case class PulseTableTerm(dataWidth: Int, envWidth: Int, durWidth: Int, phaseWidth: Int) extends Bundle {
+  val phase = Bits(phaseWidth bit)
   val amp   = Bits(dataWidth bit)
   val env   = Bits(envWidth bit)
   val dur   = Bits(durWidth bit)
@@ -19,7 +19,7 @@ case class PulseTableTerm(dataWidth: Int, envWidth: Int, durWidth: Int) extends 
  * control software writes, with `startTime` folded in per-buffer:
  *
  *   - `fire`@0x0        — write the table index `outId` ⇒ enqueue that entry at the current `startTime`
- *   - `freq`@0x4        — shared carrier frequency (16-bit field at bit 16)
+ *   - `freq`@0x4        — shared carrier frequency (16-bit field at bit 16; `freqWidth` 32 = the whole word)
  *   - `dcOffset`@0x8    — DC bias added to the real output lanes downstream (16-bit field at bit 16)
  *   - `phaseOffset`@0xC — virtual-Z phase added to the generator's phase input downstream (16-bit field at bit 16)
  *   - `table[i]`        — entry `i` at `(i+1)*0x10`: `+0` phase, `+4` amp, `+8` env, `+12` dur
@@ -39,10 +39,18 @@ case class PulseParamBufferParams(
     startTimeAddr: Int = 0x4100,
     pulseOffset: Int = 0x10,     // 4 words per table entry; entry i at (i+1)*pulseOffset
     bitOffset: Int = 16,         // 16-bit fields packed in data[31:16]
-    useMem: Boolean = true       // table storage: true (default) = distributed-RAM Mem; false = FF Vec
+    useMem: Boolean = true,      // table storage: true (default) = distributed-RAM Mem; false = FF Vec
                                  // register file. Clamped to a register file when pulseNum = 1 (a depth-1
                                  // table has no address, e.g. ro/demod) — see `memTable` in the body.
+    // freq and phase (table phase + phaseOffset) widths. 0 = dataWidth, the 16-bit field at `bitOffset`
+    // that RISC-Q's PulseGenerator takes. Wider fields take the top bits of the data word (32 = the whole
+    // word), e.g. 32 for QICK's 32-bit DDS freq/phase; a `pack16`-seated code then reads as the same value.
+    freqWidth: Int = 0,
+    phaseWidth: Int = 0
 ) {
+  val fw = if (freqWidth  == 0) dataWidth else freqWidth
+  val pw = if (phaseWidth == 0) dataWidth else phaseWidth
+  require(fw >= dataWidth && fw <= 32 && pw >= dataWidth && pw <= 32, "freq/phase width must be in [dataWidth, 32]")
   require(pulseNum >= 1)
   require(addrWidth >= log2Up(startTimeAddr + 1), "addrWidth too small for startTimeAddr")
   // the parallel cmd decode splits the address at the 16-byte slot boundary (slot = address >> 4,
@@ -71,15 +79,15 @@ case class PulseParamBuffer(p: PulseParamBufferParams) extends Component {
   val io = new Bundle {
     val cmd       = slave  port Flow(RfCmd(addrWidth))   // demuxed posted writes for THIS generator
     val timeBcast = in     port UInt(timeWidth bits)     // shared time broadcast (equal delay to all)
-    val phase     = master port Flow(SInt(w bits))
+    val phase     = master port Flow(SInt(pw bits))
     val amp       = master port Flow(SInt(w bits))
     val addr      = master port Flow(UInt(envAddrWidth bits))
     val dur       = master port Flow(UInt(durWidth bits))
-    val freq      = master port Flow(SInt(w bits))
+    val freq      = master port Flow(SInt(fw bits))
     val time      = out    port UInt(timeWidth bits)     // local copy → pg.io.time
     val startTime = out    port UInt(timeWidth bits)     // per-buffer, cmd-written → pg.io.startTime
     val dcOffset  = out    port SInt(w bits)             // per-buffer, cmd-written → real-lane DC bias
-    val phaseOffset = out  port SInt(w bits)             // per-buffer, cmd-written → generator phase-input bias (virtual Z)
+    val phaseOffset = out  port SInt(pw bits)            // per-buffer, cmd-written → generator phase-input bias (virtual Z)
   }
 
   // local low-fanout time copy: equal pipeline delay across buffers ⇒ same-startTime same-cycle rise.
@@ -88,6 +96,8 @@ case class PulseParamBuffer(p: PulseParamBufferParams) extends Component {
   // ── posted register file ──
   val cmd = io.cmd
   def field(width: Int): Bits = cmd.payload.data(bitOffset, width bits)
+  // freq/phase: the default-width field, or the top `width` bits of the word when widened
+  def wideField(width: Int): Bits = if (width == w) field(w) else cmd.payload.data(32 - width, width bits)
 
   val startTime = Reg(UInt(timeWidth bits)) init 0
   // One export stage (spec 09 B0): a fired pulse reaches the timed-queue push 2 cycles after its
@@ -103,7 +113,7 @@ case class PulseParamBuffer(p: PulseParamBufferParams) extends Component {
   dcOffset.addAttribute("MAX_FANOUT", 4)
   io.dcOffset := dcOffset
 
-  val phaseOffset = Reg(SInt(w bits)) init 0
+  val phaseOffset = Reg(SInt(pw bits)) init 0
   io.phaseOffset := phaseOffset
 
   val outId = Reg(UInt(log2Up(pulseNum) bit)) init 0
@@ -124,7 +134,7 @@ case class PulseParamBuffer(p: PulseParamBufferParams) extends Component {
   val explicitStartWrite = hit(startTimeAddr)   // also gates the fire auto-advance below (explicit wins)
   when(explicitStartWrite)   { startTime   := cmd.payload.data(0, timeWidth bits).asUInt }
   when(hit(dcOffsetAddr))    { dcOffset    := field(w).asSInt }
-  when(hit(phaseOffsetAddr)) { phaseOffset := field(w).asSInt }
+  when(hit(phaseOffsetAddr)) { phaseOffset := wideField(pw).asSInt }
 
   // table write request, shared by both storage styles; only one field of one entry per beat.
   val slot   = addr >> log2Up(pulseOffset)                  // table slot: entry i lives in slot i+1
@@ -143,26 +153,26 @@ case class PulseParamBuffer(p: PulseParamBufferParams) extends Component {
   //   - Mem : a distributed-RAM (async-read) memory — drops the table out of FFs (fewer control sets /
   //           reset FFs) at the cost of a read-modify-write for the per-field write (only one field is
   //           written per beat, so the other fields are read back and re-stored). ──
-  val zeroTerm = PulseTableTerm(w, envAddrWidth, durWidth).getZero
-  val outParam = PulseTableTerm(w, envAddrWidth, durWidth)    // the fired entry, read by outId
+  val zeroTerm = PulseTableTerm(w, envAddrWidth, durWidth, pw).getZero
+  val outParam = PulseTableTerm(w, envAddrWidth, durWidth, pw)    // the fired entry, read by outId
   // Mem storage only where the table is addressable; a depth-1 table (pulseNum = 1) stays a register
   // file regardless of the requested `useMem`, since a depth-1 Mem has no address.
   val memTable = useMem && pulseNum >= 2
   if (!memTable) {
-    val table = Vec.fill(pulseNum)(Reg(PulseTableTerm(w, envAddrWidth, durWidth)) init zeroTerm)
+    val table = Vec.fill(pulseNum)(Reg(PulseTableTerm(w, envAddrWidth, durWidth, pw)) init zeroTerm)
     outParam := table(outId)
     when(tWrEn) {
       val e = table(tWrIdx)
-      when(wrPhase) { e.phase := field(w) }
+      when(wrPhase) { e.phase := wideField(pw) }
       when(wrAmp)   { e.amp   := field(w) }
       when(wrEnv)   { e.env   := field(envAddrWidth) }
       when(wrDur)   { e.dur   := field(durWidth) }
     }
   } else {
-    val table = Mem(PulseTableTerm(w, envAddrWidth, durWidth), pulseNum).init(Seq.fill(pulseNum)(zeroTerm))
+    val table = Mem(PulseTableTerm(w, envAddrWidth, durWidth, pw), pulseNum).init(Seq.fill(pulseNum)(zeroTerm))
     outParam := table.readAsync(outId)
     val rmw = CombInit(table.readAsync(tWrIdx))              // keep the untouched fields
-    when(wrPhase) { rmw.phase := field(w) }
+    when(wrPhase) { rmw.phase := wideField(pw) }
     when(wrAmp)   { rmw.amp   := field(w) }
     when(wrEnv)   { rmw.env   := field(envAddrWidth) }
     when(wrDur)   { rmw.dur   := field(durWidth) }
@@ -181,7 +191,7 @@ case class PulseParamBuffer(p: PulseParamBufferParams) extends Component {
 
   // fire path: writing outId pulses the selected entry into the param flows — Reg(Flow) + `fired`
   // staging so the pulse is bit-exact vs the PulseGenerator golden.
-  val outParamFlow  = Reg(Flow(PulseTableTerm(w, envAddrWidth, durWidth)))
+  val outParamFlow  = Reg(Flow(PulseTableTerm(w, envAddrWidth, durWidth, pw)))
   outParamFlow.valid init False                       // reset-clean: no X-driven spurious fire at t=0
   outParamFlow.payload := outParam
   outParamFlow.valid   := fired
@@ -194,7 +204,7 @@ case class PulseParamBuffer(p: PulseParamBufferParams) extends Component {
   // timing-invisible (the timed queue still captures the same startTime ⇒ bit-exact). valid inits False —
   // reset-clean, no X-driven spurious freq push at t=0 (mirrors outParamFlow above).
   io.freq.valid   := RegNext(hit(freqAddr)) init False
-  io.freq.payload := RegNext(field(w).asSInt)
+  io.freq.payload := RegNext(wideField(fw).asSInt)
 
   // fire the popped table entry into the generator's queues.
   io.phase.valid := outParamFlow.valid; io.phase.payload := outParamFlow.phase.asSInt

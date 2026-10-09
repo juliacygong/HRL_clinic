@@ -11,7 +11,7 @@ import riscq.dsp.{ComplexBatch, SinCosMethod}
 import riscq.dsp.pulse.{ReadoutDecoder, ReadoutDecoderParams}
 import riscq.riscv.RiscqParam
 import riscq.soc.fabric.BramWriteFiber
-import riscq.soc.rf.{PulseDriveChannel, DemodChannel}
+import riscq.soc.rf.{PulseDriveChannel, DemodChannel, PulseParamBufferParams}
 import riscq.soc.qick.{QickGenChannel, QickGenParams}
 import riscq.soc.link.{RfLink, ReadoutResultLink, RfCmd}
 
@@ -171,17 +171,21 @@ case class RiscqRfWithPulseTableFiber(
     val gateChannel = qickGen.isEmpty generate mkDriveChannel(gatePulseNum, 0x0,     getPipe(riscvSoc.cmd, linkPipe))
     val roChannel   = qickGen.isEmpty generate mkDriveChannel(1,            0x10000, getPipe(riscvSoc.cmd, linkPipe))
 
-    // QICK drive channel on a demuxed sub-window. RfLink.pipe stages carry an init'd valid, so no X beat
-    // can hit a fire address out of reset; `time` gets the same 1-cycle copy PulseParamBuffer takes of
-    // `timeBcast`, so the bridge and the native demod channel schedule against the same time.
-    def mkQickChannel(p: QickGenParams, base: BigInt) = {
-      val ch = QickGenChannel(p, hostCd, genCd)
-      ch.io.cmd  << RfLink.demux(RfLink.pipe(riscvSoc.cmd, linkPipe), base, 0x10000, p.bridge.addrWidth)
-      ch.io.time := RegNext(time).addAttribute("EQUIVALENT_REGISTER_REMOVAL", "NO")
+    // QICK drive channel on a demuxed sub-window: the same PulseParamBuffer (map, table depth, widths) as
+    // the native drive channel it replaces, but with QICK's 32-bit freq/phase. RfLink.pipe stages carry an
+    // init'd valid, so no X beat can hit a fire address out of reset. `time` is the shared broadcast, like
+    // a native channel's timeBcast (the buffer takes its own 1-cycle copy), so the QICK channels and the
+    // native demod channel schedule against the same time.
+    def mkQickChannel(p: QickGenParams, pulseNum: Int, base: BigInt) = {
+      val buf = PulseParamBufferParams(pulseNum = pulseNum, dataWidth = w, envAddrWidth = envAddrWidth,
+        durWidth = durWidth, timeWidth = timeWidth, addrWidth = 16, freqWidth = 32, phaseWidth = 32)
+      val ch = QickGenChannel(p, buf, hostCd, genCd)
+      ch.io.cmd  << RfLink.demux(RfLink.pipe(riscvSoc.cmd, linkPipe), base, 0x10000, buf.addrWidth)
+      ch.io.time := time
       ch
     }
-    val qickGate = qickGen.map(mkQickChannel(_, 0x0)).orNull
-    val qickRo   = qickGen.map(mkQickChannel(_, 0x10000)).orNull
+    val qickGate = qickGen.map(mkQickChannel(_, gatePulseNum, 0x0)).orNull
+    val qickRo   = qickGen.map(mkQickChannel(_, 1,            0x10000)).orNull
 
     // demod carrier: a scheduled, envelope-shaped complex pulse (a PulseDriveChannel pointed at the
     // decoder). Its posted RF sub-window carries the same fire/freq/table/startTime map as a drive

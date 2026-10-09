@@ -4,7 +4,7 @@ import spinal.core._
 import spinal.lib._
 import spinal.lib.bus.amba4.axilite.{AxiLite4, AxiLite4Config}
 import riscq.soc.link.RfCmd
-import riscq.soc.rf.{WaveWordBridge, WaveWordBridgeParams}
+import riscq.soc.rf.{PulseParamBuffer, PulseParamBufferParams, WaveFields, WaveWordBridge, WaveWordBridgeParams}
 
 /**
  * QICK signal-generator path for a RISC-Q drive channel: [[WaveWordBridge]] → QICK `sg_translator`
@@ -130,41 +130,90 @@ case class QickGenHost() extends Bundle with IMasterSlave {
  *                That latency is 32 *genCd* cycles, and the CDC adds a few more, while `leadTime` counts
  *                dsp cycles, so with genCd ≠ dspCd it only approximates the chain latency.
  *                TODO: re-characterise against the real CDC + gen in xsim.
+ *                The bridge takes its pulse fields from the channel's PulseParamBuffer (io.params); its
+ *                own cmd registers only hold `conf` and the readout trigger, moved past the buffer's
+ *                startTime (0x4100) so they never overlap the compiler's map. `conf` resets to 0x08:
+ *                outsel = envelope × DDS, one-shot, output 0 when idle (stdysel = 1), no phase reset.
  * @param envN    log2 of the gen's envelope-table depth (QICK generic N).
  * @param nDds    samples per aclk (QICK N_DDS) = the DAC batch (16).
+ * @param genFreqHz / dspFreqHz  gen (DAC fabric) and dsp clocks: `dur` counts dsp cycles (batches), gen_v6's
+ *                `nsamp` counts gen cycles, so nsamp = round(dur × genFreqHz / dspFreqHz).
  */
 case class QickGenParams(
-    bridge: WaveWordBridgeParams = WaveWordBridgeParams(leadTime = 32),
+    bridge: WaveWordBridgeParams = WaveWordBridgeParams(leadTime = 32, withParamPort = true, confInit = 0x08,
+      confAddr = 0x4104, trigTimeAddr = 0x4108, widthAddr = 0x410c, fireTrigAddr = 0x4110),
     envN: Int = 12,
     nDds: Int = 16,
     genDds: Boolean = true,
-    complexEnvelope: Boolean = true
-)
+    complexEnvelope: Boolean = true,
+    genFreqHz: Double = 599.04e6,
+    dspFreqHz: Double = 500e6
+) {
+  require(bridge.withParamPort, "QickGenChannel feeds the bridge from its PulseParamBuffer (withParamPort)")
+}
 
 /** One QICK drive channel, the same chain QICK builds after its tProc:
  *
- *    RfCmd window → WaveWordBridge ─(dsp)─► axis_cdcsync_v1 ─(gen)─► sg_translator → axis_signal_gen_v6
+ *    RfCmd window → PulseParamBuffer → WaveWordBridge ─(dsp)─► axis_cdcsync_v1 ─(gen)─► sg_translator → axis_signal_gen_v6
  *
- *  The bridge runs on the current (dsp) domain; the CDC crosses into `genCd` (the DAC fabric clock,
- *  599.04 MHz on the ZCU216), where the translator and the gen run, as in QICK's block design.
+ *  The window keeps the RISC-Q register map the compiler targets: a PulseParamBuffer (the same module as a
+ *  native drive channel, with `buf` giving its widths) decodes it — slot table, fire by index, startTime
+ *  with auto-advance, freq, phaseOffset. On each fire its decoded fields are packed into the QICK wave word
+ *  by the bridge (io.params) and queued at the pulse's startTime:
+ *    freq  = the freq register (latest write before the fire)    phase = table phase + phaseOffset
+ *    gain  = amp (sign-extended)    env = addr    nsamp = round(dur × genFreqHz / dspFreqHz)
+ *  dcOffset is accepted but unused (gen_v6 has no DC offset). The bridge's own cmd registers (conf,
+ *  readout trigger) sit at 0x4104.. on the same window.
+ *
+ *  The buffer and bridge run on the current (dsp) domain; the CDC crosses into `genCd` (the DAC fabric
+ *  clock, 599.04 MHz on the ZCU216), where the translator and the gen run, as in QICK's block design.
  *  `samples` (genCd) carries the gen's `nDds` 16-bit real samples per cycle = gen `m_axis`, for the RFDC.
  *  `released` (dsp) pulses when the bridge hands a word to the CDC. */
-case class QickGenChannel(p: QickGenParams, hostCd: ClockDomain, genCd: ClockDomain) extends Component {
+case class QickGenChannel(p: QickGenParams, buf: PulseParamBufferParams, hostCd: ClockDomain, genCd: ClockDomain)
+    extends Component {
+  require(buf.addrWidth == p.bridge.addrWidth && buf.timeWidth == p.bridge.timeWidth,
+    "PulseParamBuffer and bridge must share the window address width and time width")
+  require(buf.fw == 32 && buf.pw == 32, "QICK channels take 32-bit freq/phase (QICK's DDS resolution)")
   val io = new Bundle {
-    val cmd      = slave  port Flow(RfCmd(p.bridge.addrWidth))
-    val time     = in     port UInt(p.bridge.timeWidth bits)
+    val cmd      = slave  port Flow(RfCmd(buf.addrWidth))
+    val time     = in     port UInt(buf.timeWidth bits)   // shared time broadcast (the buffer keeps a local copy)
     val samples  = master port Stream(Bits(p.nDds * 16 bits))
     val released = out    port Bool()
     val trig     = out    port Bool()
     val host     = slave  port QickGenHost()
   }
 
+  // the compiler-facing register file: same module and map as a native drive channel
+  val params = PulseParamBuffer(buf)
+  params.io.cmd << io.cmd
+  params.io.timeBcast := io.time
+
+  // freq is a register write of its own (not part of the fired entry): hold the latest for the next fire
+  val freq = Reg(Bits(32 bits)) init 0
+  when(params.io.freq.valid) { freq := params.io.freq.payload.asBits }
+
+  // pack the fired entry into the bridge's fields. One register stage (Flow.stage) after the buffer's fire
+  // output keeps the dur → nsamp constant multiply off the TimedQueue push path; startTime travels with it.
+  val nsampScale = BigInt(scala.math.round(p.genFreqHz / p.dspFreqHz * (1 << 16)))
+  val fields = Flow(WaveFields(buf.timeWidth))
+  fields.valid             := params.io.amp.valid
+  fields.payload.freq      := freq
+  fields.payload.phase     := (params.io.phase.payload + params.io.phaseOffset).asBits
+  fields.payload.gain      := params.io.amp.payload.resize(32 bits).asBits
+  fields.payload.env       := params.io.addr.payload.resize(24 bits).asBits
+  // gen_v6 plays nsamp[15:0] only (sg_translator), so saturate instead of wrapping: dur > ~54700 batches
+  // (~109 us at 500 MHz) plays the 65535-cycle maximum
+  val nsampFull = (params.io.dur.payload * U(nsampScale) + (1 << 15)) >> 16
+  fields.payload.nsamp     := (nsampFull > 0xFFFF) ? B(0xFFFF, 32 bits) | nsampFull.resize(32 bits).asBits
+  fields.payload.startTime := params.io.startTime
+
   val bridge = WaveWordBridge(p.bridge)
-  bridge.io.cmd  << io.cmd
-  bridge.io.time  := io.time
-  bridge.io.clear := 0          // sticky status flags not exported yet
-  io.trig         := bridge.io.trig
-  io.released     := bridge.io.wave.fire
+  bridge.io.cmd    << io.cmd        // conf + readout trigger registers at 0x4104..
+  bridge.io.params << fields.stage()
+  bridge.io.time   := params.io.time
+  bridge.io.clear  := 0             // sticky status flags not exported yet
+  io.trig          := bridge.io.trig
+  io.released      := bridge.io.wave.fire
 
   val cdc = new AxisCdcSync(168, genCd)
   cdc.s_tdata(0)       := bridge.io.wave.payload
