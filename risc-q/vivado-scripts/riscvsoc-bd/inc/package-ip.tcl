@@ -36,6 +36,16 @@ foreach _g [ipx::get_file_groups -of_objects [ipx::current_core]] {
 }
 remove_files [get_files $SOURCE_PATH/PulseTableSoc_ooc.xdc]
 
+# the packager writes the .bin ROM inits as fileType "unknown"; mark them mem so the IP's OOC synth run
+# reads them as $readmemb data
+foreach _g [ipx::get_file_groups -of_objects [ipx::current_core]] {
+  foreach _f [ipx::get_files -of_objects $_g "*.bin"] { set_property type mem $_f }
+}
+
+# QICK: the gen's scoped XDC now lives in the IP (applied in its OOC run); drop the project-side copy,
+# or the BD wrapper's synth_1 — where the IP is a black box — warns it cannot find axis_signal_gen_v6.
+if {$QICK} { remove_files [get_files -of_objects [get_filesets constrs_1] *signal_gen_v6.xdc] }
+
 # clock frequencies
 ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces hostClk -of_objects [ipx::current_core]]
 set_property value $HOST_FREQ [ipx::get_bus_parameters FREQ_HZ \
@@ -85,7 +95,9 @@ ipx::add_bus_parameter POLARITY [ipx::get_bus_interfaces dspRst -of_objects [ipx
 set_property value ACTIVE_HIGH [ipx::get_bus_parameters POLARITY \
   -of_objects [ipx::get_bus_interfaces dspRst -of_objects [ipx::current_core]]]
 
-ipx::merge_project_changes ports [ipx::current_core]
+# QICK: skipped — with the QICK VHDL sources in the IP it re-parses a VHDL file as the top (IP_Flow 19-262);
+# the ports were just imported by package_project, so there is nothing to merge.
+if {!$QICK} { ipx::merge_project_changes ports [ipx::current_core] }
 ipx::create_xgui_files [ipx::current_core]
 ipx::update_checksums [ipx::current_core]
 ipx::check_integrity [ipx::current_core]

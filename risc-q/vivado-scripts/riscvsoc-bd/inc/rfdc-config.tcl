@@ -297,7 +297,7 @@ if {$QICK} {
   set _cfg [list CONFIG.DAC2_PLL_Enable {true} CONFIG.DAC2_Refclk_Freq {245.760}]
   for {set t 0} {$t < 4} {incr t} {
     lappend _cfg CONFIG.DAC${t}_Sampling_Rate $_ghz CONFIG.DAC${t}_Outclk_Freq $_mhz
-    if {$t != 2} { lappend _cfg CONFIG.DAC${t}_Refclk_Freq [format %.3f [expr {$GEN_FREQ * 16 / 1e6}]] }
+    if {$t != 2} { lappend _cfg CONFIG.DAC${t}_Refclk_Freq [format %.3f [expr {$GEN_FREQ * 16 / 1e6}]] CONFIG.DAC${t}_Clock_Source {6} }
   }
   set_property -dict $_cfg $RFDC_TARGET
 }
