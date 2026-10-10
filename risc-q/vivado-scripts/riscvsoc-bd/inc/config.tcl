@@ -22,6 +22,18 @@ if {[info exists ::env(RISCQ_RUN_BITSTREAM)]} { set RUN_BITSTREAM $::env(RISCQ_R
 # Bitstream implies implementation.
 if {$RUN_BITSTREAM} { set RUN_IMPL 1 }
 
+# QICK gen_v6 variant (RTL generated with `qick`, see build-riscvsoc-bd.sh): adds the QICK IP sources, runs
+# the DAC tiles at QICK's 9.58464 GS/s (599.04 MHz fabric clock = genClk, 245.76 MHz reference), and
+# wires each QICKDAC{d}_AXIS gen stream to RFDC DAC d. QICK_FW is the repo's QICK firmware tree.
+set QICK          0
+set GEN_FREQ      599040000
+set QICK_FW       [file normalize $SCRIPT_DIR/../../../firmware]
+if {[info exists ::env(RISCQ_QICK)]}          { set QICK          $::env(RISCQ_QICK) }
+if {[info exists ::env(RISCQ_QICK_FW)]}       { set QICK_FW       $::env(RISCQ_QICK_FW) }
+if {$QICK && ![file exists $QICK_FW/ip/axis_signal_gen_v6]} {
+  error "RISCQ_QICK=1 but no QICK IP under $QICK_FW/ip — set RISCQ_QICK_FW to the QICK firmware dir"
+}
+
 # Paths. One folder per project under the repo-root build/ (git-ignored), so several designs build in
 # parallel without clobbering each other. The RTL (PulseTableSoc.v + ClockInterface.v + register-file
 # .bin) is emitted into that same folder by build-riscvsoc-bd.sh's GenPulseTableSocJson, so SOURCE_PATH
@@ -38,6 +50,7 @@ set IP_REPO     $BUILD_DIR/ip
 set PRJ         [regsub -all {[^A-Za-z0-9_]} $PROJ_NAME _]
 
 puts "\[config\] top=$TOP_MODULE part=$PART dsp=${DSP_FREQ}Hz host=${HOST_FREQ}Hz  synth=$RUN_SYNTH impl=$RUN_IMPL bit=$RUN_BITSTREAM"
+if {$QICK} { puts "\[config\] QICK gen_v6 variant: gen=${GEN_FREQ}Hz  qick_fw=$QICK_FW" }
 puts "\[config\] rtl=$SOURCE_PATH  build=$BUILD_DIR"
 
 if {![file exists $SOURCE_PATH/$TOP_MODULE.v]} {

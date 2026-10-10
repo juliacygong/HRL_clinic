@@ -15,7 +15,22 @@ import riscq.dsp.pulse.TimedQueue
  * (io.wave.ready low) waits instead of being lost. Sticky flags report what can still go wrong: a word lost
  * because the buffer was full (dropOut), a fire lost because the TimedQueue was full (dropSched), and a word
  * that had to wait (late). Each flag stays set until its `clear` bit is pulsed.
+ *
+ * With `withParamPort`, the pulse fields come instead from an upstream register file that has already
+ * decoded them (io.params, e.g. a PulseParamBuffer's fire): each io.params beat is packed with `conf`
+ * and queued at its own startTime. The cmd-side fire is then disabled, so io.cmd only writes `conf`
+ * and the trigger registers.
  */
+
+/** One pulse's decoded fields, in QICK wave-word widths, plus its start time (io.params). */
+case class WaveFields(timeWidth: Int) extends Bundle {
+  val freq      = Bits(32 bits)
+  val phase     = Bits(32 bits)
+  val env       = Bits(24 bits)
+  val gain      = Bits(32 bits)
+  val nsamp     = Bits(32 bits)
+  val startTime = UInt(timeWidth bits)
+}
 case class WaveWordBridgeParams(
     addrWidth: Int = 16,      // Address width of RfCmd
     timeWidth: Int = 32,      // Batch time counter width
@@ -36,7 +51,9 @@ case class WaveWordBridgeParams(
     // trigger registers
     trigTimeAddr: Int = 0x20,
     widthAddr: Int = 0x24,
-    fireTrigAddr: Int = 0x28
+    fireTrigAddr: Int = 0x28,
+    withParamPort: Boolean = false, // pulse fields from io.params (decoded upstream) instead of the cmd registers
+    confInit: Int = 0               // reset value of conf
 )
 
 case class WaveWordBridge(p: WaveWordBridgeParams = WaveWordBridgeParams()) extends Component {
@@ -53,6 +70,7 @@ case class WaveWordBridge(p: WaveWordBridgeParams = WaveWordBridgeParams()) exte
     val dropSched = out port Bool()                 // a fire was lost: TimedQueue full (too many pulses scheduled)
     val late      = out port Bool()                 // a word could not leave on its release cycle (sent late)
     val clear     = in  port Bits(3 bits)           // one-cycle pulse per bit: 0 dropOut, 1 dropSched, 2 late
+    val params    = withParamPort generate (slave port Flow(WaveFields(timeWidth)))  // decoded pulse fields at fire
   }
 
   // Registers hold each pulse field until fire
@@ -61,7 +79,7 @@ case class WaveWordBridge(p: WaveWordBridgeParams = WaveWordBridgeParams()) exte
   val env       = Reg(Bits(24 bits)) init 0
   val gain      = Reg(Bits(32 bits)) init 0
   val nsamp     = Reg(Bits(32 bits)) init 0
-  val conf      = Reg(Bits(16 bits)) init 0
+  val conf      = Reg(Bits(16 bits)) init confInit
   val startTime = Reg(UInt(timeWidth bits)) init 0
 
   val cmd = io.cmd
@@ -75,8 +93,8 @@ case class WaveWordBridge(p: WaveWordBridgeParams = WaveWordBridgeParams()) exte
   when(hit(confAddr))      { conf      := cmd.payload.data(15 downto 0) }
   when(hit(startTimeAddr)) { startTime := cmd.payload.data(timeWidth - 1 downto 0).asUInt }
 
-  // Fire strobe: Writing the fire address enqueues the current fields
-  val fire = hit(fireAddr)
+  // Fire strobe: Writing the fire address enqueues the current fields (the cmd path; off with io.params)
+  val fire = if (withParamPort) False else hit(fireAddr)
 
   // Trigger registers. When to fire and how long to hold high
   val trigTime = Reg(UInt(timeWidth bits)) init 0
@@ -100,9 +118,26 @@ case class WaveWordBridge(p: WaveWordBridgeParams = WaveWordBridgeParams()) exte
   // Timed release. Fire the word when time equals startTime minus leadTime
   val q = TimedQueue(Bits(168 bits), timeWidth, depth, leadTime)
   q.io.time                   := io.time
-  q.io.push.valid             := fire
-  q.io.push.payload.data      := word
-  q.io.push.payload.startTime := startTime
+  // Decoded-field input: pack each io.params beat (same layout as `word`) and queue it at its startTime
+  val paramIn = withParamPort generate new Area {
+    val f = io.params.payload
+    val pword = Bits(168 bits)
+    pword(31 downto 0)    := f.freq
+    pword(63 downto 32)   := f.phase
+    pword(87 downto 64)   := f.env
+    pword(119 downto 88)  := f.gain
+    pword(151 downto 120) := f.nsamp
+    pword(167 downto 152) := conf
+    q.io.push.valid             := io.params.valid
+    q.io.push.payload.data      := pword
+    q.io.push.payload.startTime := f.startTime
+  }
+  if (!withParamPort) {
+    q.io.push.valid             := fire
+    q.io.push.payload.data      := word
+    q.io.push.payload.startTime := startTime
+  }
+  val push = q.io.push.valid      // a pulse entering the TimedQueue (cmd fire or io.params)
 
   // Output buffer: released words wait here while io.wave.ready is low (signal generator busy), and leave in
   // order. Zero latency when empty: if ready is high the word passes straight through on its release cycle,
@@ -114,7 +149,7 @@ case class WaveWordBridge(p: WaveWordBridgeParams = WaveWordBridgeParams()) exte
 
   // Status events (one cycle each)
   val dropOutEvt   = q.io.pop.valid && !buf.io.push.ready                           // released into a full buffer
-  val dropSchedEvt = fire && !q.io.push.ready                                        // fired into a full TimedQueue
+  val dropSchedEvt = push && !q.io.push.ready                                        // fired into a full TimedQueue
   val lateEvt      = buf.io.push.fire && (buf.io.occupancy =/= 0 || !io.wave.ready) // queued instead of sent
 
   // Sticky flags: an event in the same cycle as a clear wins, so no event is ever missed

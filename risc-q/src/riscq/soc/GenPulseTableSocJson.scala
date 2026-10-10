@@ -15,13 +15,17 @@ import riscq.riscv.RiscqParam
  *
  *   mill runMain riscq.soc.GenPulseTableSocJson software/configs/sim-2q.json software/build/sim-2q/rtl
  *   mill runMain riscq.soc.GenPulseTableSocJson software/configs/zcu216-14q.json build/rtl vivado
+ *
+ * `qick` (with `vivado`) builds the QICK gen_v6 drive variant (`PulseTableSoc.qickGen`); its config must
+ * give each gen its own DAC, e.g. software/configs/zcu216-qick-1q.json.
  */
 object GenPulseTableSocJson extends App {
-  require(args.length == 2 || args.length == 3,
-    "usage: GenPulseTableSocJson <config.json> <targetDir> [vivado]")
+  require(args.length >= 2 && args.length <= 4,
+    "usage: GenPulseTableSocJson <config.json> <targetDir> [vivado] [qick]")
   val cfg = ujson.read(scala.io.Source.fromFile(args(0)).mkString)
   val dir = args(1)
-  val vivadoMode = args.lift(2).contains("vivado")
+  val vivadoMode = args.drop(2).contains("vivado")
+  val qickMode   = args.drop(2).contains("qick")   // QICK gen_v6 drive channels (PulseTableSoc.qickGen)
 
   def int(key: String): Int = cfg(key).num.toInt
   def intOr(key: String, default: Int): Int = cfg.obj.get(key).map(_.num.toInt).getOrElse(default)
@@ -82,7 +86,8 @@ object GenPulseTableSocJson extends App {
     // specs/dsp-fmax.md converter-edge lever (C2), default off — a confirmation build turns it on in
     // its JSON so the lever state is part of the recorded build geometry (soc-fmax R5).
     adcPipe           = intOr("adc_pipe", 3),
-    vivado        = vivadoMode)
+    vivado        = vivadoMode,
+    qickGen       = if (qickMode) Some(riscq.soc.qick.QickGenParams()) else None)
 
   // vivado mode: LUT6 packing + the companion ClockInterface.v BUFG wrapper, matching GenPulseTableSocVivado.
   val spinal = SpinalConfig(mode = Verilog, targetDirectory = dir, romReuse = true)
@@ -92,5 +97,5 @@ object GenPulseTableSocJson extends App {
 
   val extra = if (vivadoMode) " + ClockInterface.v" else ""
   println(s"[GenPulseTableSocJson] emitted $dir/PulseTableSoc.v$extra " +
-    s"(${cfg("name").str}, qubitNum=$qubitNum, vivado=$vivadoMode)")
+    s"(${cfg("name").str}, qubitNum=$qubitNum, vivado=$vivadoMode, qick=$qickMode)")
 }
