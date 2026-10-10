@@ -284,14 +284,16 @@ CONFIG.DAC_Nyquist33 {0}
 CONFIG.DAC_Slice33_Enable {true}
 } $RFDC_TARGET
 
-# QICK variant: every DAC tile runs at QICK's ZCU216 gen_v6 rate, 9.58464 GS/s with a 599.04 MHz fabric
-# clock (16 samples per AXIS word, ×1 interpolation, unchanged), matching firmware/projects/
-# qick_tprocv2_216_standard (DAC0). The distribution layout stays RISC-Q's: tile 2's PLL makes the sample
-# clock and distributes it; tiles 0/1/3 take it directly (PLL off, refclk = the sample clock). The PLL
-# cannot reach 9.58464 GHz from the 500 MHz reference (9584.64 / 500 is not a usable ratio), so the board
-# dac_clk must be QICK's 245.76 MHz (× 39) — program the clock chip to match (bd-finalize.tcl times it).
-# ADC tiles are unchanged.
-if {$QICK} {
+# QICK variant at a gen rate other than the dsp rate (RISCQ_GEN_FREQ, e.g. QICK's ZCU216 gen_v6 rate,
+# 9.58464 GS/s with a 599.04 MHz fabric clock, matching firmware/projects/qick_tprocv2_216_standard DAC0):
+# every DAC tile is retuned (16 samples per AXIS word, ×1 interpolation, unchanged). At the default
+# GEN_FREQ = DSP_FREQ the native 8 GS/s tiles above are already right. The distribution layout stays
+# RISC-Q's: tile 2's PLL makes the sample clock and distributes it; tiles 0/1/3 take it directly (PLL off,
+# refclk = the sample clock, Clock_Source 6 = tile 2 — setting their Refclk_Freq alone makes Vivado reset
+# them to their own dac{t}_clk pins). The PLL cannot reach 9.58464 GHz from the 500 MHz reference
+# (9584.64 / 500 is not a usable ratio), so the board dac_clk must be QICK's 245.76 MHz (× 39) — program
+# the clock chip to match (bd-finalize.tcl times it). ADC tiles are unchanged.
+if {$QICK && $GEN_FREQ != $DSP_FREQ} {
   set _ghz [format %.5f [expr {$GEN_FREQ * 16 / 1e9}]]
   set _mhz [format %.3f [expr {$GEN_FREQ / 1e6}]]
   set _cfg [list CONFIG.DAC2_PLL_Enable {true} CONFIG.DAC2_Refclk_Freq {245.760}]

@@ -17,15 +17,18 @@ import riscq.riscv.RiscqParam
  *   mill runMain riscq.soc.GenPulseTableSocJson software/configs/zcu216-14q.json build/rtl vivado
  *
  * `qick` (with `vivado`) builds the QICK gen_v6 drive variant (`PulseTableSoc.qickGen`); its config must
- * give each gen its own DAC, e.g. software/configs/zcu216-qick-1q.json.
+ * give each gen its own DAC, e.g. software/configs/zcu216-qick-1q.json. `genFreq=<Hz>` sets the gens' DAC
+ * fabric clock (QickGenParams.genFreqHz, default the 500 MHz dsp rate); it must match the BD flow's
+ * RISCQ_GEN_FREQ.
  */
 object GenPulseTableSocJson extends App {
-  require(args.length >= 2 && args.length <= 4,
-    "usage: GenPulseTableSocJson <config.json> <targetDir> [vivado] [qick]")
+  require(args.length >= 2 && args.length <= 5,
+    "usage: GenPulseTableSocJson <config.json> <targetDir> [vivado] [qick] [genFreq=<Hz>]")
   val cfg = ujson.read(scala.io.Source.fromFile(args(0)).mkString)
   val dir = args(1)
   val vivadoMode = args.drop(2).contains("vivado")
   val qickMode   = args.drop(2).contains("qick")   // QICK gen_v6 drive channels (PulseTableSoc.qickGen)
+  val genFreqHz  = args.drop(2).collectFirst { case a if a.startsWith("genFreq=") => a.stripPrefix("genFreq=").toDouble }
 
   def int(key: String): Int = cfg(key).num.toInt
   def intOr(key: String, default: Int): Int = cfg.obj.get(key).map(_.num.toInt).getOrElse(default)
@@ -87,7 +90,8 @@ object GenPulseTableSocJson extends App {
     // its JSON so the lever state is part of the recorded build geometry (soc-fmax R5).
     adcPipe           = intOr("adc_pipe", 3),
     vivado        = vivadoMode,
-    qickGen       = if (qickMode) Some(riscq.soc.qick.QickGenParams()) else None)
+    qickGen       = if (qickMode) Some(genFreqHz.foldLeft(riscq.soc.qick.QickGenParams())((q, f) => q.copy(genFreqHz = f)))
+                    else None)
 
   // vivado mode: LUT6 packing + the companion ClockInterface.v BUFG wrapper, matching GenPulseTableSocVivado.
   val spinal = SpinalConfig(mode = Verilog, targetDirectory = dir, romReuse = true)

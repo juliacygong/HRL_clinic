@@ -69,7 +69,7 @@ case class RiscqRfWithPulseTableFiber(
     // WaveWordBridge → axis_cdcsync_v1 → sg_translator → axis_signal_gen_v6 instead of the native PulseDriveChannel; the
     // demod carrier and readout decoder stay native. None ⇒ native drive channels (RTL unchanged).
     qickGen: Option[QickGenParams] = None,
-    // QICK gen clock domain (DAC fabric clock, 599.04 MHz on the ZCU216): each QICK channel crosses into it
+    // QICK gen clock domain (DAC fabric clock, QickGenParams.genFreqHz): each QICK channel crosses into it
     // through axis_cdcsync_v1. Required when `qickGen` is set.
     genCd: ClockDomain = null
 ) extends Area {
