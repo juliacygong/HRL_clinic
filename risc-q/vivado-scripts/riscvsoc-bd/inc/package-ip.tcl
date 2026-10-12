@@ -85,7 +85,10 @@ ipx::add_bus_parameter POLARITY [ipx::get_bus_interfaces dspRst -of_objects [ipx
 set_property value ACTIVE_HIGH [ipx::get_bus_parameters POLARITY \
   -of_objects [ipx::get_bus_interfaces dspRst -of_objects [ipx::current_core]]]
 
-ipx::merge_project_changes ports [ipx::current_core]
+# Skipped for the QICK variant: with the gen's VHDL sources in the project the port re-parse picks a
+# VHDL file as the top file (IP_Flow 19-262 on synchronizer_n.vhd). package_project above already
+# inferred the ports from this same RTL, so there is nothing to merge.
+if {!$QICK} { ipx::merge_project_changes ports [ipx::current_core] }
 ipx::create_xgui_files [ipx::current_core]
 ipx::update_checksums [ipx::current_core]
 ipx::check_integrity [ipx::current_core]

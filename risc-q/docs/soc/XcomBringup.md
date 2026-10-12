@@ -159,10 +159,10 @@ that imitates a sync bug.
 
 ## Status of these changes
 
-The flow changes are **written but not yet run**: there is no Vivado on the development machine, so
-they have been checked for tcl parse-completeness only. The first `RISCQ_WITH_XCOM=1` build is the
-real test of them. The base (`RISCQ_WITH_XCOM` unset) path is untouched and its RTL generation is
-verified.
+**Synthesized (2026-10-11, Vivado 2024.1):** the `RISCQ_QICK=1` + XCOM loopback build validates and
+synthesizes with 0 errors; the XCOM wiring passed first time, after three fixes to the inherited QICK
+flow. Implementation, bitstream and the on-board probe are still to do. Results, fixes and open issues
+are in [`VivadoSynthesisNotes`](VivadoSynthesisNotes.md).
 
 ## Related
 
