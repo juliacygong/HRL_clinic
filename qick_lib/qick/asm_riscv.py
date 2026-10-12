@@ -1,13 +1,24 @@
-from .asm_v2 import QickProgramV2, AveragerProgramV2
+import os
+from collections import Counter
+from pathlib import Path
+
+import numpy as np
+
+from .asm_v2 import AcquireProgramV2, AveragerProgramV2
 from .asm_v2_riscv import (RV_MACROS, RvMacro, RvAsmInst, RvWriteReg, REF_REG, CTRL_REG, CTRL_TIME,
                            EXIT_LABEL, RF_FIRE, RF_FREQ, RF_PHASE_OFFSET, RF_SLOT_STRIDE, RF_START_TIME,
-                           rv_data_section)
+                           init_rv, rv_data_section)
 from .riscq_config import asm_text, words
 from .riscv_toolchain import build_image
 
 STACK_FRAME = 16
 LAYOUT = {'RQ_FIRE': RF_FIRE, 'RQ_FREQ': RF_FREQ, 'RQ_PHASE_OFFSET': RF_PHASE_OFFSET,
           'RQ_SLOT_STRIDE': RF_SLOT_STRIDE, 'RQ_START_TIME': RF_START_TIME}
+_written = Counter()
+
+
+class CompiledOnly(RuntimeError):
+    """Raised by acquire and run calls: the program is compiled and written, nothing is run."""
 
 
 class RvMixin:
@@ -46,6 +57,7 @@ class RvMixin:
         return ['.text', '.globl main', 'main:',
                 f'addi sp, sp, -{STACK_FRAME}', f'sw ra, {STACK_FRAME - 4}(sp)',
                 f'li {CTRL_REG}, {CTRL_TIME}', f'lw {REF_REG}, 0({CTRL_REG})',
+                *init_rv(self),
                 *self.rv_lines,
                 f'{EXIT_LABEL}:', f'lw ra, {STACK_FRAME - 4}(sp)', f'addi sp, sp, {STACK_FRAME}',
                 'li a0, 0', 'ret',
@@ -76,8 +88,43 @@ class RvMixin:
         with open(path, 'wb') as f:
             f.write(self.image.data)
 
+    def write_elf(self, path):
+        if self.binprog is None:
+            self.compile()
+        with open(path, 'wb') as f:
+            f.write(self.image.elf)
 
-class RvProgram(RvMixin, QickProgramV2):
+    def write_envelopes(self, stem):
+        """One file per gen with envelopes: (I, Q) int16 pairs from table address 0, as the gen's table loader takes them."""
+        for ch, envs in enumerate(self.envelopes):
+            if envs['envs']:
+                table = np.zeros((envs['next_addr'], 2), dtype='<i2')
+                for env in envs['envs'].values():
+                    table[env['addr']:env['addr'] + len(env['data'])] = env['data']
+                table.tofile(f'{stem}_gen{ch}.env')
+
+    def write_all(self, out):
+        out.mkdir(parents=True, exist_ok=True)
+        name = type(self).__name__
+        _written[out, name] += 1
+        stem = out / (name if _written[out, name] == 1 else f'{name}_{_written[out, name]}')
+        self.write_asm(f'{stem}.s')
+        self.write_bin(f'{stem}.bin')
+        self.write_elf(f'{stem}.elf')
+        self.write_envelopes(stem)
+        print(f'{name}: {len(self.binprog["pmem"])} words -> {stem}.[s|bin|elf]')
+
+    def config_all(self, soc, **kwargs):
+        self.write_all(Path(os.environ.get('QICK_RV_OUT', 'out')))
+
+    def acquire(self, soc, *args, **kwargs):
+        self.config_all(soc)
+        raise CompiledOnly(f'{type(self).__name__} was compiled and written, nothing is run')
+
+    acquire_decimated = run_rounds = run = acquire
+
+
+class RvProgram(RvMixin, AcquireProgramV2):
     pass
 
 

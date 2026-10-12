@@ -8,6 +8,12 @@ DREG_QTY = 16
 READOUT_CH = 2
 TRIGGER_PORT = 1
 PIN_PORT = 0
+GEN_FREQ_MHZ = 599.04      # axis_signal_gen_v6 clock (fixed by the design)
+GEN_SAMPS_PER_CLK = 16     # QICK N_DDS
+GEN_ENV_N = 12             # QICK N (QickGenParams.envN)
+REFCLK_MHZ = 245.76        # RF reference; QICK derives every DDS rate as refclk * fs_mult / fdds_div
+GEN_FS_MULT = round(GEN_SAMPS_PER_CLK * GEN_FREQ_MHZ / REFCLK_MHZ)    # 39: fs = 9584.64 MS/s
+assert abs(REFCLK_MHZ * GEN_FS_MULT - GEN_SAMPS_PER_CLK * GEN_FREQ_MHZ) < 1e-6
 
 
 def asm_text(lines, equs):
@@ -29,17 +35,22 @@ class RvConfig(QickConfig):
     def __init__(self, soc_map, v1=False):
         self.soc_map = soc_map
         self.equs = {k: int(v, 0) for k, v in re.findall(r'#define (\w+) (\w+)', soc_map.gen_header())}
-        f_clk = soc_map.params.dsp_freq_hz / 1e6
-        fs = 16 * f_clk
-        gen = {'type': 'axis_signal_gen_v6', 'fullpath': 'riscq', 'maxlen': soc_map.params.env_depth,
-               'complex_env': True, 'samps_per_clk': 16, 'maxv_scale': 1.0, 'has_dds': True, 'b_dds': 32,
-               'b_phase': 32, 'maxv': 32766, 'has_mixer': False, 'revision': 6, 'version': '1.0',
-               'dac': '00', 'fs': fs, 'fs_mult': 1, 'fs_div': 1, 'interpolation': 1,
-               'f_fabric': f_clk, 'f_dds': fs, 'fdds_div': 1}
+        f_clk = soc_map.params.dsp_freq_hz / 1e6      # core / time-counter clock
+        f_gen = GEN_FREQ_MHZ                           # axis_signal_gen_v6 fabric clock
+        fs = GEN_SAMPS_PER_CLK * f_gen
+        # axis_signal_gen_v6 as the QICK driver describes it (drivers/generator.py, AxisSignalGen), with the
+        # QickGenParams defaults for N and N_DDS: maxlen = 2**N * N_DDS
+        gen = {'type': 'axis_signal_gen_v6', 'fullpath': 'riscq', 'maxlen': 2**GEN_ENV_N * GEN_SAMPS_PER_CLK,
+               'complex_env': True, 'samps_per_clk': GEN_SAMPS_PER_CLK, 'maxv_scale': 1.0, 'has_dds': True,
+               'b_dds': 32, 'b_phase': 32, 'maxv': 32766, 'has_mixer': False, 'revision': 6, 'version': '1.0',
+               'dac': '00', 'fs': fs, 'fs_mult': GEN_FS_MULT, 'fs_div': 1, 'interpolation': 1,
+               'f_fabric': f_gen, 'f_dds': fs, 'fdds_div': 1}
+        # axis_dyn_readout_v1 as the ZCU216 standard firmware describes it (firmware/testbench/qick_testbench/soccfg.json);
+        # declare_readout() is host-side configuration and never enters the compiled program (only trigger / send_readoutconfig do)
         ro = {'avg_maxlen': 8192, 'buf_maxlen': 4096, 'has_edge_counter': False, 'has_weights': False,
               'trigger_type': 'dport', 'trigger_port': TRIGGER_PORT, 'trigger_bit': 0, 'tproc_ch': 0, 'tproc_ctrl': READOUT_CH,
-              'adc': '00', 'b_phase': 32, 'fs': fs, 'fs_mult': 1, 'fs_div': 1, 'decimation': 1,
-              'f_fabric': f_clk, 'f_dds': fs, 'fdds_div': 1, 'f_output': f_clk, 'b_dds': 32, 'iq_offset': 0.0,
+              'adc': '00', 'b_phase': 32, 'fs': 2457.6, 'fs_mult': 40, 'fs_div': 4, 'decimation': 1,
+              'f_fabric': 307.2, 'f_dds': 2457.6, 'fdds_div': 4, 'f_output': 307.2, 'b_dds': 32, 'iq_offset': 0.0,
               'has_outsel': True, 'ro_type': 'axis_dyn_readout_v1'}
         cpu = {'type': 'riscq', 'revision': 0, 'pmem_size': soc_map.mem_bytes // 4, 'dmem_size': soc_map.mem_bytes // 4,
                'wmem_size': soc_map.mem_bytes // 4, 'dreg_qty': DREG_QTY, 'f_core': f_clk, 'f_time': f_clk,
@@ -47,7 +58,7 @@ class RvConfig(QickConfig):
         if v1:
             cpu.update(type='axis_tproc64x32_x8', start_pin=None)
             ro.pop('tproc_ctrl')
-        super().__init__({'board': soc_map.params.name, 'sw_version': get_version(), 'refclk_freq': f_clk,
+        super().__init__({'board': soc_map.params.name, 'sw_version': get_version(), 'refclk_freq': REFCLK_MHZ,
                           'fw_timestamp': 'riscq', 'extra_description': [],
                           'gens': [dict(gen, tproc_ch=ch.index) for ch in soc_map.channels()],
                           'readouts': [ro], 'iqs': [], 'time_taggers': [], 'tprocs': [cpu]})

@@ -11,7 +11,7 @@ from .riscq_config import RvConfig
 
 logger = logging.getLogger(__name__)
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_SOC = ROOT / "risc-q" / "software" / "configs" / "sim-2q.json"
+DEFAULT_SOC = ROOT / "risc-q" / "software" / "configs" / "zcu216-14q.json"
 
 
 def _socmap(path):

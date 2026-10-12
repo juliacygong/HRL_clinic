@@ -19,6 +19,7 @@ RF_FREQ = 0x4
 RF_PHASE_OFFSET = 0xC
 RF_SLOT_STRIDE = 0x10
 RF_START_TIME = 0x4100
+RF_CONF = 0x4104
 
 EXIT_LABEL = "__qick_exit"
 EXT_LABEL = "__qick_ext"
@@ -107,6 +108,53 @@ def abs_time_rv(prog, t_reg) -> list[str]:
     return add_rv(T_REG, REF_REG, rv_reg(prog, t_reg))
 
 
+def bridge_nsamp(dur: int, f_dsp: float, f_gen: float) -> int:
+    """nsamp that WaveWordBridge/QickGen produces from a slot dur (dsp cycles): the same fixed-point
+    multiply as QickGen.scala (scale = round(f_gen/f_dsp * 2**16); (dur*scale + 2**15) >> 16, saturating at 0xFFFF)."""
+    if f_gen == f_dsp:
+        return dur
+    scale = round(f_gen / f_dsp * (1 << 16))
+    return min((dur * scale + (1 << 15)) >> 16, 0xFFFF)
+
+
+def gen_rates(prog):
+    return prog.soccfg.soc_map.params.dsp_freq_hz / 1e6, prog.soccfg['gens'][0]['f_fabric']
+
+
+def gen_cycles_to_dur(prog, nsamp: int) -> int:
+    """Pulse length from gen cycles (QICK's wave length, the gen_v6 nsamp) to the dsp cycles the slot's dur counts.
+    The hardware converts back, so only lengths that survive the round trip exactly can be played."""
+    f_dsp, f_gen = gen_rates(prog)
+    guess = round(nsamp * f_dsp / f_gen)
+    for dur in sorted(range(guess - 2, guess + 3), key=lambda d: abs(d - nsamp * f_dsp / f_gen)):
+        if dur > 0 and bridge_nsamp(dur, f_dsp, f_gen) == nsamp:
+            return dur
+    raise RuntimeError(f"pulse length of {nsamp} gen cycles ({nsamp / f_gen:.4f} us) cannot be played exactly: no "
+                       f"whole number of {f_dsp:g} MHz dsp cycles maps to it through the bridge ({f_gen:g} MHz gen)")
+
+
+def is_gen_length(prog, wave, field):
+    """Readout-config waves (pulses without a generator) are not played by a gen, so their length is not a gen length."""
+    return field == 'length' and not any(p.gen_chs is None and wave.name in p.get_wavenames() for p in prog.pulses.values())
+
+
+def gen_steps(prog, wave, sweep, lname):
+    """Sweep step and span of a wave parameter. A gen length steps in dsp cycles, so every step must still land on its gen length."""
+    steps = sweep.steps[lname]
+    if sweep.par != 'length' or not is_gen_length(prog, wave, 'length'):
+        return steps
+    if len(sweep.steps) > 1:
+        raise RuntimeError(f"{wave.name}: a pulse length swept over several loops cannot be stepped in dsp cycles")
+    f_dsp, f_gen = gen_rates(prog)
+    count = prog.loop_dict[lname]
+    dur, step = gen_cycles_to_dur(prog, sweep.start), round(steps['step'] * f_dsp / f_gen)
+    for k in range(count):
+        if bridge_nsamp(dur + k * step, f_dsp, f_gen) != sweep.start + k * steps['step']:
+            raise RuntimeError(f"{wave.name}: pulse length step of {steps['step']} gen cycles cannot be stepped exactly "
+                               f"in {f_dsp:g} MHz dsp cycles (step {k} lands off the gen length)")
+    return {'step': step, 'span': step * (count - 1)}
+
+
 def rv_data_section(prog, dmem_words: int = 256) -> list[str]:
     """.data block backing ReadWmem/WriteWmem and ReadDmem/WriteDmem.
     Each waveform takes WMEM_STRIDE bytes, one word per field in WMEM_FIELDS order."""
@@ -115,7 +163,11 @@ def rv_data_section(prog, dmem_words: int = 256) -> list[str]:
         for f in WMEM_FIELDS:
             val = getattr(wave, f)
             if isinstance(val, QickRawParam):
+                for lname in val.steps or ():
+                    gen_steps(prog, wave, val, lname)
                 val = val.start
+            if is_gen_length(prog, wave, f):
+                val = gen_cycles_to_dur(prog, int(val))
             lines.append(f'.word {to_int32(val)}    # {wave.name}.{f}')
     for label, nbytes in [(EXT_LABEL, 8), (DMEM_LABEL, 4*dmem_words)]:
         lines += [f'.type {label}, @object', f'.size {label}, {nbytes}', f'{label}:', f'.space {nbytes}']
@@ -213,6 +265,10 @@ def dmem_addr_rv(prog, addr) -> list[str]:
 
 class RvReadDmem(RvMacro, ReadDmem):
     def expand_rv(self, prog):
+        off = ext_off(prog, self.dst)
+        if off is not None:
+            return [*dmem_addr_rv(prog, self.addr), f'lw {CTRL_REG}, 0({T_REG})',
+                    f'la {T_REG}, {EXT_LABEL}+{off}', f'sw {CTRL_REG}, 0({T_REG})']
         dst = rv_reg(prog, self.dst)
         return [*dmem_addr_rv(prog, self.addr), f'lw {dst}, 0({T_REG})']
 
@@ -300,7 +356,7 @@ class RvCloseLoop(RvMacro, CloseLoop):
             spans_to_apply = []
             for sweep in wave.sweeps():
                 if lname in sweep.steps and sweep.steps[lname]['step']!=0:
-                    spans_to_apply.append((sweep.par, sweep.steps[lname]))
+                    spans_to_apply.append((sweep.par, gen_steps(prog, wave, sweep, lname)))
             if spans_to_apply:
                 wave_sweeps.append((wave.name, spans_to_apply))
 
@@ -386,6 +442,12 @@ def fire_rv(ch_base: str, slot: int) -> list[str]:
               [f'li {SCRATCH_REG}, {slot}', f'sw {SCRATCH_REG}, {RF_FIRE}({CTRL_REG})'])]
 
 
+def init_rv(prog) -> list[str]:
+    """Clear the virtual-Z phase offset of every declared gen, which hardware never resets."""
+    return [line for ch in prog.gen_chs
+            for line in (f'li {CTRL_REG}, {rf_base(prog, ch)}', f'sw x0, {RF_PHASE_OFFSET}({CTRL_REG})')]
+
+
 class RvPulse(RvMacro, Pulse):
     def expand_rv(self, prog):
         insts = []
@@ -408,7 +470,9 @@ class RvPulse(RvMacro, Pulse):
                       f'sw {w["phase"]}, {base}({CTRL_REG})',
                       f'sw {w["gain"]}, {base + 4}({CTRL_REG})',
                       f'sw {w["env"]}, {base + 8}({CTRL_REG})',
-                      f'sw {w["length"]}, {base + 12}({CTRL_REG})']
+                      f'sw {w["length"]}, {base + 12}({CTRL_REG})',
+                      f'li {SCRATCH_REG}, {ch_base}+{RF_CONF}',
+                      f'sw {w["conf"]}, 0({SCRATCH_REG})']
             insts += fire_rv(ch_base, slot)
         return insts
 
@@ -420,9 +484,9 @@ class RvConfigReadout(RvMacro, ConfigReadout):
         w = dict(zip(WMEM_FIELDS, WREG_RV))
         for wave in pulse.get_wavenames():
             insts += RvReadWmem(name=wave).expand_rv(prog)
+            # 32-bit codes as the standard firmware takes them; the demod uses the top 16 bits
             insts += [f'li {CTRL_REG}, {RF_DEMOD}',
-                      f'sw {w["freq"]}, {RF_FREQ}({CTRL_REG})',
-                      f'sw {w["phase"]}, {RF_PHASE_OFFSET}({CTRL_REG})']
+                      f'sw {w["freq"]}, {RF_FREQ}({CTRL_REG})', f'sw {w["phase"]}, {RF_PHASE_OFFSET}({CTRL_REG})']
         return insts
 
 

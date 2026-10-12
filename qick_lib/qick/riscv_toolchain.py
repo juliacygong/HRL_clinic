@@ -22,6 +22,7 @@ CACHE = Path(tempfile.gettempdir()) / "qick_riscv_build"
 class Image:
     data: bytes
     symbols: dict            # name -> (address, size)
+    elf: bytes
 
 
 def run(cmd, cwd):
@@ -66,4 +67,4 @@ def build_image(text, soc_map):
     data = (d / "main.bin").read_bytes()
     if len(data) > soc_map.mem_bytes:
         raise RuntimeError(f"image {len(data)} B exceeds RAM {soc_map.mem_bytes} B")
-    return Image(data, {k: tuple(v) for k, v in json.loads((d / "symbols.json").read_text()).items()})
+    return Image(data, {k: tuple(v) for k, v in json.loads((d / "symbols.json").read_text()).items()}, (d / "main.elf").read_bytes())
