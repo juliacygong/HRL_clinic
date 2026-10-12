@@ -56,7 +56,11 @@ set PRJ         [regsub -all {[^A-Za-z0-9_]} $PROJ_NAME _]
 #   RISCQ_XCOM_LOOPBACK=1  (default) tie the link's tx back to its rx IN FABRIC — no pins, no cable
 #   RISCQ_XCOM_LOOPBACK=0  bring the link out to PMOD pins (constraints-xcom-zcu216.xdc)
 #   RISCQ_XCOM_NCH         receive channels; 1 = point-to-point or loopback
-set WITH_XCOM     0
+# THIS BRANCH (comm-module-xcom) DEFAULTS XCOM ON. It is the paired test point to `comm-module`,
+# which defaults it off: the two branches differ in this one value and nothing else, so the same
+# build command on each isolates the link's effect on resources, timing and behaviour. Set
+# RISCQ_WITH_XCOM=0 here to get the comm-module build without switching branches.
+set WITH_XCOM     1
 set XCOM_LOOPBACK 1
 set XCOM_NCH      1
 set XCOM_BASEADDR 0x90000000
