@@ -24,7 +24,8 @@ ALL = [(r"^from qick\.asm_v2 import AveragerProgramV2", "from qick.asm_riscv imp
        (r"pins=\[0\], ", ""), (r"ddr4=True, mr=True, ", ""), (r", ddr4=True", "")]            # no output pins, no DDR4/MR buffers
 EDITS = {
     "00_intro": [(r"^GEN_CH = 7", "GEN_CH = 1")],                       # readout drive = RISC-Q channel 1 (one readout, 0)
-    "01_gens-and-readouts": [(r"^FSGEN_CH = 0", "FSGEN_CH = 1")],      # the only generator type RISC-Q has
+    "01_gens-and-readouts": [(r"^FSGEN_CH = 0", "FSGEN_CH = 1"),       # the only generator type RISC-Q has
+                             (r"^config\['steps'\]=100001", "config['steps']=2797")],   # gen/readout frequency-match step is ~358 Hz: 1 MHz fits 2797 steps
 }
 # cells removed: restoring a dumped tProc program, tProc instruction dicts/raw waveforms, and mux/mixer gens and std/mux readouts, which RISC-Q does not have
 DROP = {

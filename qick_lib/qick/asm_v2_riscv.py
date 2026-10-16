@@ -108,53 +108,6 @@ def abs_time_rv(prog, t_reg) -> list[str]:
     return add_rv(T_REG, REF_REG, rv_reg(prog, t_reg))
 
 
-def bridge_nsamp(dur: int, f_dsp: float, f_gen: float) -> int:
-    """nsamp that WaveWordBridge/QickGen produces from a slot dur (dsp cycles): the same fixed-point
-    multiply as QickGen.scala (scale = round(f_gen/f_dsp * 2**16); (dur*scale + 2**15) >> 16, saturating at 0xFFFF)."""
-    if f_gen == f_dsp:
-        return dur
-    scale = round(f_gen / f_dsp * (1 << 16))
-    return min((dur * scale + (1 << 15)) >> 16, 0xFFFF)
-
-
-def gen_rates(prog):
-    return prog.soccfg.soc_map.params.dsp_freq_hz / 1e6, prog.soccfg['gens'][0]['f_fabric']
-
-
-def gen_cycles_to_dur(prog, nsamp: int) -> int:
-    """Pulse length from gen cycles (QICK's wave length, the gen_v6 nsamp) to the dsp cycles the slot's dur counts.
-    The hardware converts back, so only lengths that survive the round trip exactly can be played."""
-    f_dsp, f_gen = gen_rates(prog)
-    guess = round(nsamp * f_dsp / f_gen)
-    for dur in sorted(range(guess - 2, guess + 3), key=lambda d: abs(d - nsamp * f_dsp / f_gen)):
-        if dur > 0 and bridge_nsamp(dur, f_dsp, f_gen) == nsamp:
-            return dur
-    raise RuntimeError(f"pulse length of {nsamp} gen cycles ({nsamp / f_gen:.4f} us) cannot be played exactly: no "
-                       f"whole number of {f_dsp:g} MHz dsp cycles maps to it through the bridge ({f_gen:g} MHz gen)")
-
-
-def is_gen_length(prog, wave, field):
-    """Readout-config waves (pulses without a generator) are not played by a gen, so their length is not a gen length."""
-    return field == 'length' and not any(p.gen_chs is None and wave.name in p.get_wavenames() for p in prog.pulses.values())
-
-
-def gen_steps(prog, wave, sweep, lname):
-    """Sweep step and span of a wave parameter. A gen length steps in dsp cycles, so every step must still land on its gen length."""
-    steps = sweep.steps[lname]
-    if sweep.par != 'length' or not is_gen_length(prog, wave, 'length'):
-        return steps
-    if len(sweep.steps) > 1:
-        raise RuntimeError(f"{wave.name}: a pulse length swept over several loops cannot be stepped in dsp cycles")
-    f_dsp, f_gen = gen_rates(prog)
-    count = prog.loop_dict[lname]
-    dur, step = gen_cycles_to_dur(prog, sweep.start), round(steps['step'] * f_dsp / f_gen)
-    for k in range(count):
-        if bridge_nsamp(dur + k * step, f_dsp, f_gen) != sweep.start + k * steps['step']:
-            raise RuntimeError(f"{wave.name}: pulse length step of {steps['step']} gen cycles cannot be stepped exactly "
-                               f"in {f_dsp:g} MHz dsp cycles (step {k} lands off the gen length)")
-    return {'step': step, 'span': step * (count - 1)}
-
-
 def rv_data_section(prog, dmem_words: int = 256) -> list[str]:
     """.data block backing ReadWmem/WriteWmem and ReadDmem/WriteDmem.
     Each waveform takes WMEM_STRIDE bytes, one word per field in WMEM_FIELDS order."""
@@ -163,11 +116,7 @@ def rv_data_section(prog, dmem_words: int = 256) -> list[str]:
         for f in WMEM_FIELDS:
             val = getattr(wave, f)
             if isinstance(val, QickRawParam):
-                for lname in val.steps or ():
-                    gen_steps(prog, wave, val, lname)
                 val = val.start
-            if is_gen_length(prog, wave, f):
-                val = gen_cycles_to_dur(prog, int(val))
             lines.append(f'.word {to_int32(val)}    # {wave.name}.{f}')
     for label, nbytes in [(EXT_LABEL, 8), (DMEM_LABEL, 4*dmem_words)]:
         lines += [f'.type {label}, @object', f'.size {label}, {nbytes}', f'{label}:', f'.space {nbytes}']
@@ -356,7 +305,7 @@ class RvCloseLoop(RvMacro, CloseLoop):
             spans_to_apply = []
             for sweep in wave.sweeps():
                 if lname in sweep.steps and sweep.steps[lname]['step']!=0:
-                    spans_to_apply.append((sweep.par, gen_steps(prog, wave, sweep, lname)))
+                    spans_to_apply.append((sweep.par, sweep.steps[lname]))
             if spans_to_apply:
                 wave_sweeps.append((wave.name, spans_to_apply))
 
@@ -433,6 +382,11 @@ class RvResync(RvMacro, Resync):
                 f'add {REF_REG}, {REF_REG}, {T_REG}']
 
 
+def seat16(reg: str, off: int) -> list[str]:
+    """Store a 16-bit field: the hardware reads it from data[31:16] (PulseParamBuffer bitOffset = 16)."""
+    return [f'slli {SCRATCH_REG}, {reg}, 16', f'sw {SCRATCH_REG}, {off}({CTRL_REG})']
+
+
 def fire_rv(ch_base: str, slot: int) -> list[str]:
     """Write T_REG as the start time of ch_base, then fire slot."""
     return [f'li {SCRATCH_REG}, {ch_base}+{RF_START_TIME}',
@@ -468,9 +422,9 @@ class RvPulse(RvMacro, Pulse):
             insts += [f'li {CTRL_REG}, {ch_base}',
                       f'sw {w["freq"]}, {RF_FREQ}({CTRL_REG})',
                       f'sw {w["phase"]}, {base}({CTRL_REG})',
-                      f'sw {w["gain"]}, {base + 4}({CTRL_REG})',
-                      f'sw {w["env"]}, {base + 8}({CTRL_REG})',
-                      f'sw {w["length"]}, {base + 12}({CTRL_REG})',
+                      *seat16(w["gain"], base + 4),
+                      *seat16(w["env"], base + 8),
+                      *seat16(w["length"], base + 12),
                       f'li {SCRATCH_REG}, {ch_base}+{RF_CONF}',
                       f'sw {w["conf"]}, 0({SCRATCH_REG})']
             insts += fire_rv(ch_base, slot)

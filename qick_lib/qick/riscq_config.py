@@ -1,5 +1,6 @@
 import re
 import struct
+from fractions import Fraction
 
 from qick import get_version
 from .qick_asm import QickConfig
@@ -8,12 +9,14 @@ DREG_QTY = 16
 READOUT_CH = 2
 TRIGGER_PORT = 1
 PIN_PORT = 0
-GEN_FREQ_MHZ = 599.04      # axis_signal_gen_v6 clock (fixed by the design)
+GEN_FREQ_MHZ = 500.0       # axis_signal_gen_v6 clock (= the dsp clock, fixed by the controller design)
 GEN_SAMPS_PER_CLK = 16     # QICK N_DDS
 GEN_ENV_N = 12             # QICK N (QickGenParams.envN)
 REFCLK_MHZ = 245.76        # RF reference; QICK derives every DDS rate as refclk * fs_mult / fdds_div
-GEN_FS_MULT = round(GEN_SAMPS_PER_CLK * GEN_FREQ_MHZ / REFCLK_MHZ)    # 39: fs = 9584.64 MS/s
-assert abs(REFCLK_MHZ * GEN_FS_MULT - GEN_SAMPS_PER_CLK * GEN_FREQ_MHZ) < 1e-6
+# fs = 16 * 500 = 8000 MS/s is not an integer multiple of refclk, so express it as fs_mult / fdds_div = 3125 / 96
+_FS_RATIO = Fraction(GEN_SAMPS_PER_CLK * GEN_FREQ_MHZ).limit_denominator(10**6) / Fraction(REFCLK_MHZ).limit_denominator(10**6)
+GEN_FS_MULT, GEN_FS_DIV = _FS_RATIO.numerator, _FS_RATIO.denominator
+assert abs(REFCLK_MHZ * GEN_FS_MULT / GEN_FS_DIV - GEN_SAMPS_PER_CLK * GEN_FREQ_MHZ) < 1e-6
 
 
 def asm_text(lines, equs):
@@ -43,8 +46,8 @@ class RvConfig(QickConfig):
         gen = {'type': 'axis_signal_gen_v6', 'fullpath': 'riscq', 'maxlen': 2**GEN_ENV_N * GEN_SAMPS_PER_CLK,
                'complex_env': True, 'samps_per_clk': GEN_SAMPS_PER_CLK, 'maxv_scale': 1.0, 'has_dds': True,
                'b_dds': 32, 'b_phase': 32, 'maxv': 32766, 'has_mixer': False, 'revision': 6, 'version': '1.0',
-               'dac': '00', 'fs': fs, 'fs_mult': GEN_FS_MULT, 'fs_div': 1, 'interpolation': 1,
-               'f_fabric': f_gen, 'f_dds': fs, 'fdds_div': 1}
+               'dac': '00', 'fs': fs, 'fs_mult': GEN_FS_MULT, 'fs_div': GEN_FS_DIV, 'interpolation': 1,
+               'f_fabric': f_gen, 'f_dds': fs, 'fdds_div': GEN_FS_DIV}
         # axis_dyn_readout_v1 as the ZCU216 standard firmware describes it (firmware/testbench/qick_testbench/soccfg.json);
         # declare_readout() is host-side configuration and never enters the compiled program (only trigger / send_readoutconfig do)
         ro = {'avg_maxlen': 8192, 'buf_maxlen': 4096, 'has_edge_counter': False, 'has_weights': False,
