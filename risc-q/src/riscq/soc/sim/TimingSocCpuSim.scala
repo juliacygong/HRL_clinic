@@ -32,6 +32,7 @@ import java.io.{File, PrintWriter}
  * ev_meta.csv records the final release so the analysis can separate pre-release traffic.
  *
  * Env: RISCQ_ELF (program, default sw/pulse_sched.elf), RISCQ_OUT (output dir, required),
+ *      RISCQ_WAVE   (optional, any value) also write an FST waveform: simWorkspace/PulseTableSoc/timingSocCpu.fst
  *      RISCQ_CYCLES (dsp cycles to log after the analysis window starts, default 3000),
  *      RISCQ_MODE   powerup (default): load while the cores may already run (no host hold), then pulse reset
  *                   driver: follow risc-q/software/riscq/run.py -- assert reset, load, release
@@ -68,8 +69,10 @@ object TimingSocCpuSim extends App {
   def pgOf(ch: PulseDriveChannel): PulseGenerator =
     ch.children.collectFirst { case p: PulseGenerator => p }.get
 
-  SimConfig.addSimulatorFlag("-Wno-MULTIDRIVEN")
+  // RISCQ_WAVE=1: also dump an FST waveform (simWorkspace/PulseTableSoc/timingSocCpu.fst, under risc-q/)
+  val simCfg = SimConfig.addSimulatorFlag("-Wno-MULTIDRIVEN")
     .addSimulatorFlag("--x-initial 0")
+  (if (sys.env.contains("RISCQ_WAVE")) simCfg.withFstWave else simCfg)
     .compile {
       val dut = PulseTableSoc(qubitNum, dacMap, adcMap, withTest = false)
       dut.riscqArea.time.simPublic()
