@@ -16,8 +16,8 @@ set -euo pipefail
 TIMING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$TIMING_DIR/../.." && pwd)"
 TB_DIR="$REPO/emulator/testbench"
-ART_DIR="$REPO/emulator/artifacts/timing"
-RUNS_DIR="$TIMING_DIR/runs"
+ART_DIR="${ART_DIR:-$REPO/emulator/artifacts/timing}"   # override: ART_DIR=... (e.g. emulator/artifacts/timing500)
+RUNS_DIR="${RUNS_DIR:-$TIMING_DIR/runs}"   # override: RUNS_DIR=...
 BIN="$TB_DIR/obj_dir/VQICKEmu_harness"
 
 DEFAULT=(T1:0 T2:0 T3a:0 T3b:0 T3c:0 T4:0 T5:0 T6:0 T7:0,13,37,71 T8:0 T9a:0 T9b:0 T10:0)

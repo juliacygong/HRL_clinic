@@ -100,6 +100,9 @@ VERILOG_SOURCES = \
 
 VERILATOR_TRACE_FLAG = $(if $(TRACE),--trace)
 
+# Signal-generator half period: 1.0ns = 500 MHz (RISC-Q QICK build, default), 0.834669ns = 599.04 MHz (QICK ZCU216)
+SG_CLK_HALF_PERIOD ?= 1.0ns
+
 # Flags
 # -I resolves `include "file.svh"` 
 # -y resolves missing modules dynamically
@@ -108,6 +111,7 @@ VERILATOR_FLAGS = --binary --exe --build -j 0 -Wall $(VERILATOR_TRACE_FLAG) --Wn
 	-Wno-DECLFILENAME -Wno-PINCONNECTEMPTY -Wno-VARHIDDEN \
 	-Wno-TIMESCALEMOD -Wno-EOFNEWLINE -Wno-WIDTH \
 	-Wno-PINMISSING -Wno-BADVLTPRAGMA -Wno-CONSTRAINTIGN \
+	+define+T_SG_CLK_HALF_PERIOD=$(SG_CLK_HALF_PERIOD) \
 	-I$(AXI_DIR)/include \
 	-I$(COM_VERIF_DIR)/include \
 	-I$(COMMON_CELLS_DIR)/include \

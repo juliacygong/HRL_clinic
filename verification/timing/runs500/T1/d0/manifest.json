@@ -1,0 +1,18 @@
+{
+  "test": "T1",
+  "desc": "one pulse",
+  "freq_mhz": 100.0,
+  "f_time_mhz": 430.08,
+  "test_run_ns": null,
+  "wait_before": {},
+  "pulses": [
+    {
+      "t": 0.5,
+      "length": 0.1,
+      "ch": 0,
+      "gain": 0.1,
+      "t_ticks": 215
+    }
+  ],
+  "qick_lib": "/home/amigoyith/projects/HRL_clinic/qick_lib"
+}

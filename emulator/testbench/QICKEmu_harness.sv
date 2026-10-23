@@ -46,7 +46,12 @@ typedef axi_test::axi_lite_rand_master #(
 `define T_CCLK_HALF_PERIOD         2.5ns      // Half Clock Period for tProc Core (200 MHz)
 `define T_SCLK_HALF_PERIOD         5.0ns      // Half Clock Period for PS & AXI (100 MHz)
 
-`define T_SG_CLK_HALF_PERIOD     0.834669ns      // Half Clock Period for Signal Gens (599.04 MHz)
+// Signal-generator clock. Default 500 MHz: the RISC-Q QICK build runs axis_signal_gen_v6 at the 500 MHz
+// dsp rate (8 GS/s DAC; claude-newdesign e77f1a69). QICK's own ZCU216 rate is 599.04 MHz:
+//   make verilate SG_CLK_HALF_PERIOD=0.834669ns   (and use config/qick_emu_config_599.json)
+`ifndef T_SG_CLK_HALF_PERIOD
+`define T_SG_CLK_HALF_PERIOD     1.0ns           // Half Clock Period for Signal Gens (500 MHz)
+`endif
 
 `define T_RO_CLK_HALF_PERIOD     1.627604ns      // Half Clock Period for Readout (307.2 MHz)
 
