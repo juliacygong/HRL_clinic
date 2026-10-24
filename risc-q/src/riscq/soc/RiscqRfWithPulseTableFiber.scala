@@ -225,6 +225,10 @@ case class RiscqRfWithPulseTableFiber(
   }
   val gatePulse      = if (qickGen.isEmpty) posted.gateChannel.io.pulse else qickPulse(posted.qickGate)
   val readoutPulse   = if (qickGen.isEmpty) posted.roChannel.io.pulse   else qickPulse(posted.qickRo)
+  // the readout-trace (robs) capture window: native = the readout drive pulse; qickGen = the demod
+  // carrier's scheduled window [startTime, startTime + dur) — QICK's trigger + readout length, which the
+  // compiler emits as a demod-channel fire (qickPulse(qickRo).valid is only a 1-cycle release strobe)
+  val readoutWindow  = if (qickGen.isEmpty) posted.roChannel.io.pulse.valid else posted.demodChannel.io.carrier.valid
   val demodMemPort   = posted.demodChannel.io.memPort
   val decoderRd      = posted.decoder
   // gate buffer's per-buffer startTime (sims observe it); null with qickGen (the bridge holds its own)

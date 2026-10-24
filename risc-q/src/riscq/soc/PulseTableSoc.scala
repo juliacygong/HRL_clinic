@@ -272,8 +272,8 @@ case class PulseTableSoc(
       (riscqCores(coreId).adc zip adcBufs(adcId)).foreach { case (o, i) => o.re := i; o.im := 0 }
     }
 
-    // ── readout trace into robs on any drive-pulse fire ──
-    val anyPulseValid = riscqCores.map(_.readoutPulse.valid).reduceBalancedTree(_ | _, (s, _) => RegNext(s))
+    // ── readout trace into robs over any core's readout window (RiscqRfWithPulseTableFiber.readoutWindow) ──
+    val anyPulseValid = riscqCores.map(_.readoutWindow).reduceBalancedTree(_ | _, (s, _) => RegNext(s))
     val fire   = RegNext(anyPulseValid)
     val rbAddr = Reg(UInt(log2Up(robDepth) bits))
     when(fire)(rbAddr := rbAddr + 1).otherwise(rbAddr := 0)
