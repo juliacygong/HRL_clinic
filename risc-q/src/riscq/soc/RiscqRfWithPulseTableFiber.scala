@@ -69,7 +69,7 @@ case class RiscqRfWithPulseTableFiber(
     // WaveWordBridge → axis_cdcsync_v1 → sg_translator → axis_signal_gen_v6 instead of the native PulseDriveChannel; the
     // demod carrier and readout decoder stay native. None ⇒ native drive channels (RTL unchanged).
     qickGen: Option[QickGenParams] = None,
-    // QICK gen clock domain (DAC fabric clock, 599.04 MHz on the ZCU216): each QICK channel crosses into it
+    // QICK gen clock domain (DAC fabric clock, QickGenParams.genFreqHz): each QICK channel crosses into it
     // through axis_cdcsync_v1. Required when `qickGen` is set.
     genCd: ClockDomain = null
 ) extends Area {
@@ -225,6 +225,10 @@ case class RiscqRfWithPulseTableFiber(
   }
   val gatePulse      = if (qickGen.isEmpty) posted.gateChannel.io.pulse else qickPulse(posted.qickGate)
   val readoutPulse   = if (qickGen.isEmpty) posted.roChannel.io.pulse   else qickPulse(posted.qickRo)
+  // the readout-trace (robs) capture window: native = the readout drive pulse; qickGen = the demod
+  // carrier's scheduled window [startTime, startTime + dur) — QICK's trigger + readout length, which the
+  // compiler emits as a demod-channel fire (qickPulse(qickRo).valid is only a 1-cycle release strobe)
+  val readoutWindow  = if (qickGen.isEmpty) posted.roChannel.io.pulse.valid else posted.demodChannel.io.carrier.valid
   val demodMemPort   = posted.demodChannel.io.memPort
   val decoderRd      = posted.decoder
   // gate buffer's per-buffer startTime (sims observe it); null with qickGen (the bridge holds its own)

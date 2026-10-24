@@ -1,0 +1,13 @@
+{
+  "notebook": "/home/xilinx/jupyter_notebooks/Untitled.ipynb",
+  "config": {
+    "gen_ch": 14,
+    "ro_ch": 0,
+    "freq": 500.0,
+    "mixer_freq": 0.0,
+    "gain": 0.1,
+    "trig_time": 0.4,
+    "ro_len": 1.9
+  },
+  "samples": 584
+}

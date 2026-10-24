@@ -38,7 +38,7 @@ connect_bd_intf_net [get_bd_intf_ports dac_clk]   [get_bd_intf_pins rf_data_conv
 connect_bd_intf_net [get_bd_intf_ports adc_clk]   [get_bd_intf_pins rf_data_converter/adc2_clk]
 
 # AXIS clocks (dspClk) and AXIS resets (dsp domain, active-low) over all four DAC + four ADC tiles.
-# QICK variant: the DAC tiles (s0..s3) instead run on genClk = the RFDC's own 599.04 MHz DAC fabric clock
+# QICK variant: the DAC tiles (s0..s3) instead run on genClk = the RFDC's own DAC fabric clock (GEN_FREQ)
 # (clk_dac0, as QICK's block design clocks its gen_v6), which also clocks the top's genClk, with its own
 # proc_sys_reset driving the top's genRst and the DAC tiles' AXIS resets.
 set _dsp_grps [expr {$QICK ? {m0 m1 m2 m3} : {s0 s1 s2 s3 m0 m1 m2 m3}}]

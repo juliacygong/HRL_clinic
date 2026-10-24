@@ -22,14 +22,18 @@ if {[info exists ::env(RISCQ_RUN_BITSTREAM)]} { set RUN_BITSTREAM $::env(RISCQ_R
 # Bitstream implies implementation.
 if {$RUN_BITSTREAM} { set RUN_IMPL 1 }
 
-# QICK gen_v6 variant (RTL generated with `qick`, see build-riscvsoc-bd.sh): adds the QICK IP sources, runs
-# the DAC tiles at QICK's 9.58464 GS/s (599.04 MHz fabric clock = genClk, 245.76 MHz reference), and
-# wires each QICKDAC{d}_AXIS gen stream to RFDC DAC d. QICK_FW is the repo's QICK firmware tree.
+# QICK gen_v6 variant (RTL generated with `qick`, see build-riscvsoc-bd.sh): adds the QICK IP sources and
+# wires each QICKDAC{d}_AXIS gen stream to RFDC DAC d, the gens on the DAC fabric clock (genClk). GEN_FREQ is
+# that clock: by default the dsp rate, 500 MHz (8 GS/s, the native RFDC setup), so a gen cycle is one dsp
+# batch and nsamp = dur; RISCQ_GEN_FREQ=599040000 selects QICK's own 9.58464 GS/s (245.76 MHz reference).
+# It must match the RTL's QickGenParams.genFreqHz (GenPulseTableSocJson genFreq=). QICK_FW is the repo's QICK
+# firmware tree.
 set QICK          0
-set GEN_FREQ      599040000
+set GEN_FREQ      $DSP_FREQ
 set QICK_FW       [file normalize $SCRIPT_DIR/../../../firmware]
 if {[info exists ::env(RISCQ_QICK)]}          { set QICK          $::env(RISCQ_QICK) }
 if {[info exists ::env(RISCQ_QICK_FW)]}       { set QICK_FW       $::env(RISCQ_QICK_FW) }
+if {[info exists ::env(RISCQ_GEN_FREQ)]}      { set GEN_FREQ      $::env(RISCQ_GEN_FREQ) }
 if {$QICK && ![file exists $QICK_FW/ip/axis_signal_gen_v6]} {
   error "RISCQ_QICK=1 but no QICK IP under $QICK_FW/ip — set RISCQ_QICK_FW to the QICK firmware dir"
 }

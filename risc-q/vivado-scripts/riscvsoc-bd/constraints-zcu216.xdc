@@ -1,7 +1,7 @@
 # ZCU216 physical + timing constraints for the PulseTableSoc block-design wrapper.
 # Pin assignments are taken from the RISC-Q reference (utils/constraints-zcu216.xdc), trimmed to the
 # interfaces this SoC actually exposes (no GTY / LED / clk125). The external converter clocks
-# (dac_clk / adc_clk / sysref) come from the board clock chip. The three async clock groups keep the
+# (dac_clk / adc_clk / sysref) come from the board clock chip. The clock-level max-delay bounds at the end keep the
 # 500 MHz dsp domain, the 100 MHz host domain, and the PS clock independent for timing.
 
 # 500 MHz dsp clock (LVDS)
@@ -23,5 +23,14 @@ create_clock -period 10.000 -name hostClk_clk_p [get_ports {hostClk_clk_p}]
 # variant, whose DAC PLL needs QICK's reference)
 create_clock -period 2.000 -name adc_clk_clk_p [get_ports {adc_clk_clk_p}]
 
-set_clock_groups -asynchronous -group {dspClk_clk_p}
-set_clock_groups -asynchronous -group {hostClk_clk_p}
+# The dsp and host domains are asynchronous to every other clock (PS pl_clk0, the RFDC fabric clocks —
+# including the QICK gens' clk_dac0 — and each other). Bound each crossing with a clock-level
+# `set_max_delay -datapath_only` (the faster side's period) rather than `set_clock_groups -asynchronous`:
+# clock groups outrank every max-delay and so silently override the XPM CDC / async-FIFO constraints
+# (xpm_cdc_gray, SmartConnect, the async-FIFO LUTRAM read paths) that bound pointer skew to one period
+# (TIMING-24). A clock-level max-delay is less specific than those cell-level ones, so they still win.
+# hostClk first, then dspClk, so the dsp<->host pair takes the tighter 2 ns bound.
+set_max_delay -datapath_only -from [get_clocks hostClk_clk_p] -to [get_clocks -filter {NAME != hostClk_clk_p}] 10.000
+set_max_delay -datapath_only -from [get_clocks -filter {NAME != hostClk_clk_p}] -to [get_clocks hostClk_clk_p] 10.000
+set_max_delay -datapath_only -from [get_clocks dspClk_clk_p] -to [get_clocks -filter {NAME != dspClk_clk_p}] 2.000
+set_max_delay -datapath_only -from [get_clocks -filter {NAME != dspClk_clk_p}] -to [get_clocks dspClk_clk_p] 2.000

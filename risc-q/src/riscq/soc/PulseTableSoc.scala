@@ -140,12 +140,13 @@ case class PulseTableSoc(
   val riscqReset = Bool()
   val riscqCd    = ClockDomain(dspCd.readClockWire, riscqReset)
 
-  // ── QICK gen clock (qickGen only): the DAC fabric clock the gens run on, 599.04 MHz on the ZCU216 (QICK
-  // clk_dac0). Each QICK channel crosses into it from dspCd through axis_cdcsync_v1. ──
+  // ── QICK gen clock (qickGen only): the RFDC DAC fabric clock the gens run on (clk_dac0, as in QICK's
+  // block design) at QickGenParams.genFreqHz. Each QICK channel crosses into it from dspCd through
+  // axis_cdcsync_v1 — asynchronous even at the default 500 MHz, where it matches dspCd's rate. ──
   val genClk = qickGen.nonEmpty generate (in port Bool()).setName("genClk")
   val genRst = qickGen.nonEmpty generate (in port Bool()).setName("genRst")
   val genCd  = qickGen.nonEmpty generate ClockDomain(genClk, genRst)
-  if (qickGen.nonEmpty && vivado) VivadoClkHelper.addInference(genClk, genRst, 599040000L)
+  if (qickGen.nonEmpty && vivado) VivadoClkHelper.addInference(genClk, genRst, qickGen.get.genFreqHz.toLong)
 
   /** Converter-boundary pipeline: `converterPipe` extra register stages on the long DAC/ADC nets
    *  into/out of the RFDC edge. converterPipe = 0 ⇒ identity (no behavioural change). */
@@ -271,8 +272,8 @@ case class PulseTableSoc(
       (riscqCores(coreId).adc zip adcBufs(adcId)).foreach { case (o, i) => o.re := i; o.im := 0 }
     }
 
-    // ── readout trace into robs on any drive-pulse fire ──
-    val anyPulseValid = riscqCores.map(_.readoutPulse.valid).reduceBalancedTree(_ | _, (s, _) => RegNext(s))
+    // ── readout trace into robs over any core's readout window (RiscqRfWithPulseTableFiber.readoutWindow) ──
+    val anyPulseValid = riscqCores.map(_.readoutWindow).reduceBalancedTree(_ | _, (s, _) => RegNext(s))
     val fire   = RegNext(anyPulseValid)
     val rbAddr = Reg(UInt(log2Up(robDepth) bits))
     when(fire)(rbAddr := rbAddr + 1).otherwise(rbAddr := 0)

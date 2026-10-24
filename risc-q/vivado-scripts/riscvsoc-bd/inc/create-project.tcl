@@ -6,7 +6,9 @@
 create_project $PRJ $BUILD_DIR -part $PART -force
 
 add_files $SOURCE_PATH/$TOP_MODULE.v
-foreach b [glob -nocomplain $SOURCE_PATH/*.bin] { add_files $b }
+# Typed as Memory File so ipx::package_project imports them into the user IP (an Unknown-type file is
+# "ignored by IP packager", and the IP's OOC synth run then cannot find the $readmemb data).
+foreach b [glob -nocomplain $SOURCE_PATH/*.bin] { add_files $b; set_property FILE_TYPE {Memory File} [get_files $b] }
 
 # QICK variant: the sources behind PulseTableSoc's QICK BlackBoxes (sg_translator, axis_cdcsync_v1,
 # axis_signal_gen_v6), taken from each IP's component.xml file set minus testbenches. They are packaged into

@@ -35,10 +35,12 @@
 #
 # QICK variant (RISCQ_QICK=1): the RTL is generated with `qick` (PulseTableSoc.qickGen — each core's gate /
 # readout drive = WaveWordBridge -> axis_cdcsync_v1 -> sg_translator -> axis_signal_gen_v6), the QICK IP
-# sources come from <clinic>/firmware (RISCQ_QICK_FW), and the DAC tiles run at QICK's 9.58464 GS/s with
-# the gens on the 599.04 MHz DAC fabric clock. The config must give every gen its own DAC (default
-# software/configs/zcu216-qick-1q.json). The board's dac_clk must be 245.76 MHz (QICK's reference). The
-# 14q floorplan does not apply, so it is off unless RISCQ_PBLOCK_TCL is set.
+# sources come from <clinic>/firmware (RISCQ_QICK_FW), and the gens run on the RFDC's DAC fabric clock. By
+# default that is 500 MHz (DACs at the native 8 GS/s, 500 MHz dac_clk), so a gen cycle is one dsp batch and
+# nsamp = dur; RISCQ_GEN_FREQ=599040000 selects QICK's 9.58464 GS/s instead (the board's dac_clk must then
+# be QICK's 245.76 MHz reference). The config must give every gen its own DAC (default
+# software/configs/zcu216-qick-1q.json). The 14q floorplan does not apply, so it is off unless
+# RISCQ_PBLOCK_TCL is set.
 #
 # Env: RISCQ_VIVADO_BIN, RISCQ_CONFIG (default software/configs/zcu216-14q.json), RISCQ_SKIP_GEN,
 #   RISCQ_RUN_BITSTREAM (default 1 — bitstream + xsa; set 0 for impl-only),
@@ -55,7 +57,7 @@ QICK="${RISCQ_QICK:-0}"
 if [ "$QICK" = "1" ]; then
   CONFIG="${RISCQ_CONFIG:-$REPO_DIR/software/configs/zcu216-qick-1q.json}"
   PROJ="${RISCQ_PROJ_NAME:-riscvsoc-bd-qick}"
-  GEN_ARGS="vivado qick"
+  GEN_ARGS="vivado qick${RISCQ_GEN_FREQ:+ genFreq=$RISCQ_GEN_FREQ}"
 else
   CONFIG="${RISCQ_CONFIG:-$REPO_DIR/software/configs/zcu216-14q.json}"
   PROJ="${RISCQ_PROJ_NAME:-riscvsoc-bd}"

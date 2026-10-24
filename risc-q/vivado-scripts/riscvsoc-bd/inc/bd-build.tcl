@@ -49,9 +49,23 @@ source $INC/rfdc-connect.tcl
 
 # ---- AXI SmartConnect: PS HPM0_LPD -> { top S_AXIS, rfdc s_axi [, QICK gen_v6 s_axi ...] } ----
 # QICK variant: one more manager port per gen's AXI-Lite registers (START_ADDR / WE), on hostClk like
-# S_AXIS. The gens' envelope streams (QICKGEN*_S0_AXIS) are left unconnected for now (no envelope DMA
-# yet), so the gens can play DDS-only pulses (outsel = 1) but not envelope-shaped ones.
+# S_AXIS, and one per gen's envelope stream (QICKGEN*_S0_AXIS): a TX-only AXI4-Stream FIFO the PS fills
+# word by word (TDFD) and launches by writing the byte count (TLR), the same I/Q words QICK's DMA would
+# send while the gen's WE register is set. Envelope-shaped pulses (arb / flat_top ramps) need it.
 set _qick_saxi [expr {$QICK ? [get_bd_intf_pins -quiet $TOP/QICKGEN*_S_AXI] : {}}]
+set _qick_fifos {}
+foreach _s [expr {$QICK ? [get_bd_intf_pins -quiet $TOP/QICKGEN*_S0_AXIS] : {}}] {
+  # QICKGEN0_GATE_S0_AXIS -> envfifo_qickgen0_gate
+  set _f [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_fifo_mm_s:4.3 \
+    envfifo_[string tolower [regsub {_S0_AXIS$} [lindex [split $_s /] end] {}]]]
+  set_property -dict [list CONFIG.C_USE_RX_DATA {0} CONFIG.C_USE_TX_CTRL {0} CONFIG.C_USE_TX_CUT_THROUGH {0} \
+    CONFIG.C_TX_FIFO_DEPTH {4096} CONFIG.C_TX_FIFO_PF_THRESHOLD {4000} CONFIG.C_TX_FIFO_PE_THRESHOLD {5}] $_f
+  connect_bd_intf_net [get_bd_intf_pins $_f/AXI_STR_TXD] $_s
+  connect_bd_net [get_bd_pins $CLKIFC/hostClk] [get_bd_pins $_f/s_axi_aclk]
+  connect_bd_net [get_bd_pins ps_rst/peripheral_aresetn] [get_bd_pins $_f/s_axi_aresetn]
+  lappend _qick_fifos [get_bd_intf_pins $_f/S_AXI]
+}
+set _qick_saxi [concat $_qick_saxi $_qick_fifos]
 set AXI_CONNECT [create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect]
 set_property CONFIG.NUM_SI 1 $AXI_CONNECT
 set_property CONFIG.NUM_MI [expr {2 + [llength $_qick_saxi]}] $AXI_CONNECT
