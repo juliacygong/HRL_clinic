@@ -4,7 +4,7 @@ import numpy as np
 
 from .asm_v2 import (Macro, Label, WriteLabel, End, WriteReg, IncReg, ReadWmem, WriteWmem, ReadDmem, WriteDmem,
                      ReadInput, Jump, Call, CondJump, OpenLoop, CloseLoop, Delay, Wait, Resync,
-                     Pulse, ConfigReadout, Trigger, QickRawParam)
+                     Pulse, ConfigReadout, Trigger, QickRawParam, AsmInst)
 from .riscq_config import READOUT_CH
 
 # symbols come from the .equ block built from riscq_map.h
@@ -146,6 +146,17 @@ class RvLabel(RvMacro, Label):
 class RvAsmInst(RvMacro, Macro):
     def expand_rv(self, prog):
         return [self.inst]
+
+
+class RvTprocInst(RvMacro, AsmInst):
+    """tProc v2 instruction dict from an AsmV2 snippet: only the commands with a plain RISC-V equivalent translate."""
+    TRANSLATABLE = {'NOP': 'nop', 'RET': 'ret'}
+
+    def expand_rv(self, prog):
+        cmd = self.inst.get('CMD')
+        if cmd not in self.TRANSLATABLE:
+            raise RuntimeError(f"no RISC-V translation for tProc v2 instruction {cmd}")
+        return [self.TRANSLATABLE[cmd]]
 
 
 class RvWriteLabel(RvMacro, WriteLabel):
@@ -465,7 +476,7 @@ class RvTrigger(RvMacro, Trigger):
         return [*insts, *fire_rv(RF_DEMOD, 0)]
 
 
-RV_MACROS = {Label: RvLabel, WriteLabel: RvWriteLabel, End: RvEnd,
+RV_MACROS = {AsmInst: RvTprocInst, Label: RvLabel, WriteLabel: RvWriteLabel, End: RvEnd,
              WriteReg: RvWriteReg, IncReg: RvIncReg,
              ReadWmem: RvReadWmem, WriteWmem: RvWriteWmem,
              ReadDmem: RvReadDmem, WriteDmem: RvWriteDmem,

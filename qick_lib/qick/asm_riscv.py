@@ -41,6 +41,11 @@ class RvMixin:
             macro = RV_MACROS[type(macro)](**vars(macro))
         super().append_macro(macro)
 
+    def extend_macros(self, asm):
+        # snippets (subroutines, loop exec_before/exec_after) are plain AsmV2 lists of generic macros
+        for macro in asm.macro_list:
+            self.append_macro(macro)
+
     def asm_inst(self, inst, addr_inc=1):
         self.append_macro(RvAsmInst(inst=inst))
 
