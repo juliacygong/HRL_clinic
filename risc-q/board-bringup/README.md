@@ -395,6 +395,7 @@ DONE `0xD04E0000` in < 1 ms.
 | `vivado-scripts/riscvsoc-bd/inc/bd-build.tcl` | one `axi_fifo_mm_s` (TX only, 4096 deep, AXI-Lite data port, hostClk, `ps_rst` reset) per `QICKGEN*_S0_AXIS`, as extra SmartConnect manager ports | the gens' envelope streams were unconnected, so only DDS-only pulses could play |
 | `src/riscq/soc/RiscqRfWithPulseTableFiber.scala` | new `readoutWindow`: native = readout drive pulse valid (unchanged); qickGen = demod carrier valid | in the QICK variant `readoutPulse.valid` is a 1-cycle release strobe, so `robs` captured ~4 samples; the demod window is QICK's trigger + readout length |
 | `src/riscq/soc/PulseTableSoc.scala` | `robs` write window uses `readoutWindow` | as above (test-infrastructure only: core, bridge and pulse path untouched) |
+| `src/riscq/soc/RiscqRfWithPulseTableFiber.scala` | the QICK readout channel's PulseParamBuffer has `gatePulseNum` slots, like the gate channel (was 1) | the second gen could not play flat-tops: with 1 slot, writes to slots 1, 2 were dropped and every fire played slot 0. **Needs a rebuild: the `riscvsoc-bd-qick-lb` bitstream of 2026-10-26 predates this** |
 | `software/configs/zcu216-qick-1q-loopback.json` | `dac_map [[14, 1]]`, `adc_map [8]` | gate gen and readout ADC on the bench loopback cable |
 
 ---

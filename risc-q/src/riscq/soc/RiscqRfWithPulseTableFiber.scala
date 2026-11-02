@@ -175,7 +175,9 @@ case class RiscqRfWithPulseTableFiber(
     // the native drive channel it replaces, but with QICK's 32-bit freq/phase. RfLink.pipe stages carry an
     // init'd valid, so no X beat can hit a fire address out of reset. `time` is the shared broadcast, like
     // a native channel's timeBcast (the buffer takes its own 1-cycle copy), so the QICK channels and the
-    // native demod channel schedule against the same time.
+    // native demod channel schedule against the same time. Both channels take gatePulseNum slots (unlike the
+    // native 1-slot readout drive): QICK programs use the two gens interchangeably, and the compiler lays a
+    // multi-segment pulse (flat-top = ramp, flat, ramp) over slots 0, 1, 2 of whichever channel plays it.
     def mkQickChannel(p: QickGenParams, pulseNum: Int, base: BigInt) = {
       val buf = PulseParamBufferParams(pulseNum = pulseNum, dataWidth = w, envAddrWidth = envAddrWidth,
         durWidth = durWidth, timeWidth = timeWidth, addrWidth = 16, freqWidth = 32, phaseWidth = 32)
@@ -185,7 +187,7 @@ case class RiscqRfWithPulseTableFiber(
       ch
     }
     val qickGate = qickGen.map(mkQickChannel(_, gatePulseNum, 0x0)).orNull
-    val qickRo   = qickGen.map(mkQickChannel(_, 1,            0x10000)).orNull
+    val qickRo   = qickGen.map(mkQickChannel(_, gatePulseNum, 0x10000)).orNull
 
     // demod carrier: a scheduled, envelope-shaped complex pulse (a PulseDriveChannel pointed at the
     // decoder). Its posted RF sub-window carries the same fire/freq/table/startTime map as a drive

@@ -45,12 +45,13 @@ class SgTranslator(outType: Int = 0) extends BlackBox {
 
 /** BlackBox of `firmware/ip/axis_signal_gen_v6/src/axis_signal_gen_v6.v`. `s_axi`/`s0_axis` run on
  *  `hostCd`, `s1_axis`/`m_axis` on the current (dsp) domain. Resets are active low. */
-class AxisSignalGenV6(n: Int, nDds: Int, genDds: Boolean, complexEnvelope: Boolean, hostCd: ClockDomain)
-    extends BlackBox {
+class AxisSignalGenV6(n: Int, nDds: Int, genDds: Boolean, complexEnvelope: Boolean, hostCd: ClockDomain,
+    emulator: Boolean = false) extends BlackBox {
   addGeneric("N", n)
   addGeneric("N_DDS", nDds)
   addGeneric("GEN_DDS", if (genDds) "TRUE" else "FALSE")
   addGeneric("ENVELOPE_TYPE", if (complexEnvelope) "COMPLEX" else "REAL")
+  if (emulator) addGeneric("EMULATOR", 1)
   val io = new Bundle {
     val s_axi_aclk      = in  Bool()
     val s_axi_aresetn   = in  Bool()
@@ -98,9 +99,10 @@ class AxisSignalGenV6(n: Int, nDds: Int, genDds: Boolean, complexEnvelope: Boole
  *  QICK's tProc → generator clock crossing. Only channel 0 is used (N = 1); the unused s/m channels are
  *  tied off because the IP ORs every `sN_axis_tvalid` into its FIFO write enable. `s_axis` runs on the
  *  current (dsp) domain, `m_axis` on `mCd`. Resets are active low. */
-class AxisCdcSync(b: Int, mCd: ClockDomain) extends BlackBox {
+class AxisCdcSync(b: Int, mCd: ClockDomain, emulator: Boolean = false) extends BlackBox {
   addGeneric("N", 1)
   addGeneric("B", b)
+  if (emulator) addGeneric("EMULATOR", 1)
   val s_axis_aresetn = in Bool()
   val s_axis_aclk    = in Bool()
   val m_axis_aresetn = in Bool()
@@ -141,6 +143,8 @@ case class QickGenHost() extends Bundle with IMasterSlave {
  *                `nsamp` counts gen cycles. By default both are 500 MHz (DACs at 8 GS/s), so nsamp = dur
  *                with no arithmetic; otherwise (e.g. QICK's 599.04 MHz) nsamp = round(dur × genFreqHz /
  *                dspFreqHz), a constant multiply on the fire path.
+ * @param emulator  sim only: sets the QICK IP's EMULATOR generic (behavioural FIFO, BRAM and DDS models instead of
+ *                the XPM and DDS Compiler primitives), the same models QICKEmu uses. See `riscq.soc.qick.sim`.
  */
 case class QickGenParams(
     bridge: WaveWordBridgeParams = WaveWordBridgeParams(leadTime = 32, withParamPort = true, confInit = 0x08,
@@ -150,7 +154,8 @@ case class QickGenParams(
     genDds: Boolean = true,
     complexEnvelope: Boolean = true,
     genFreqHz: Double = 500e6,
-    dspFreqHz: Double = 500e6
+    dspFreqHz: Double = 500e6,
+    emulator: Boolean = false
 ) {
   require(bridge.withParamPort, "QickGenChannel feeds the bridge from its PulseParamBuffer (withParamPort)")
 }
@@ -225,7 +230,7 @@ case class QickGenChannel(p: QickGenParams, buf: PulseParamBufferParams, hostCd:
   io.trig          := bridge.io.trig
   io.released      := bridge.io.wave.fire
 
-  val cdc = new AxisCdcSync(168, genCd)
+  val cdc = new AxisCdcSync(168, genCd, p.emulator)
   cdc.s_tdata(0)       := bridge.io.wave.payload
   cdc.s_tvalid(0)      := bridge.io.wave.valid
   bridge.io.wave.ready := cdc.s_tready(0)
@@ -239,7 +244,7 @@ case class QickGenChannel(p: QickGenParams, buf: PulseParamBufferParams, hostCd:
   translator.io.m_mux4_axis_tready    := False
   translator.io.m_readout_axis_tready := False
 
-  val gen = genCd(new AxisSignalGenV6(p.envN, p.nDds, p.genDds, p.complexEnvelope, hostCd))
+  val gen = genCd(new AxisSignalGenV6(p.envN, p.nDds, p.genDds, p.complexEnvelope, hostCd, p.emulator))
   gen.io.s1_axis_tdata  := translator.io.m_gen_v6_axis_tdata
   gen.io.s1_axis_tvalid := translator.io.m_gen_v6_axis_tvalid
   translator.io.m_gen_v6_axis_tready := gen.io.s1_axis_tready
