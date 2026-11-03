@@ -78,6 +78,10 @@ case class PulseTableSoc(
     // RAM and the B2 dcOffset MAX_FANOUT cap are baked into PulseParamBuffer; the B3 queue lean-pop into
     // TimedQueue; the C1 registered head is a TimedQueue-level option, no longer plumbed here).
     adcPipe: Int = 3,                   // C2: register stages on the ADC nets off the RFDC edge
+    // test infrastructure: extra physical ADCs recorded raw, each into its own readout buffer (robs(1), …)
+    // over the same readout window as robs(0), with no core reading them — e.g. a second loopback cable,
+    // so one run captures two generators on two DACs. Nil ⇒ one robs, RTL unchanged.
+    captureAdcs: Seq[Int] = Nil,
     // QICK signal generator in place of the native gate/readout drive channels: every core's gate and
     // readout-drive RF windows feed WaveWordBridge → sg_translator → axis_signal_gen_v6 (BlackBoxes of the
     // QICK IP). Each gen adds host-side ports `qickGen{c}_{gate,ro}_{s_axi,s0_axis}` (hostClk) for its
@@ -130,7 +134,8 @@ case class PulseTableSoc(
   riscqMemBus   at SizeMapping(map.coreMemBase,    map.regionSize) of hostBus
   riscqMemBus.setUpConnection(a = StreamPipe.FULL, d = StreamPipe.FULL)
 
-  val robs = BramFiber(1, robWidth, robDepth, hostCd, dspCd, withOutReg = true)
+  require(captureAdcs.size <= 1, "the readout-buffer region holds 2 robs: robs(0) + one captureAdcs entry")
+  val robs = BramFiber(1 + captureAdcs.size, robWidth, robDepth, hostCd, dspCd, withOutReg = true)
   val robAdapter = WidthAdapter()
   robAdapter.up at SizeMapping(map.readoutBufBase, map.regionSize) of hostBus
   robs.up at SizeMapping(0, map.regionSize) of robAdapter.down
@@ -263,7 +268,7 @@ case class PulseTableSoc(
     // ── ADC: buffer the real lanes of only the MAPPED converters, fan to the mapped cores (im = 0).
     // Unmapped physical ADCs are left untouched — no buffer registers, no contribution to the trace. ──
     val mappedAdcIds = adcMap.values.toList.distinct.sorted
-    val adcBufs = mappedAdcIds.map { adcId =>
+    val adcBufs = (mappedAdcIds ++ captureAdcs).distinct.map { adcId =>
       val a = Vec.fill(adcBatch)(SInt(w bits))
       a.assignFromBits(io.adc(adcId).payload)
       adcId -> pipe(a, adcPipe).addAttribute("max_fanout", 4)   // extra register stages off the RFDC edge
@@ -284,6 +289,15 @@ case class PulseTableSoc(
     rb0.enable := True; rb0.mask.setAllTo(True)
     rb0.address := RegNext(rbAddr); rb0.write := fire
     rb0.wdata   := Vec(adcSum).asBits
+
+    // robs(1 + i): captureAdcs(i) alone, in robs(0)'s format and latency (a one-input AdderTree), same window.
+    for ((adcId, i) <- captureAdcs.zipWithIndex) {
+      val lanes = Vec.tabulate(adcBatch)(k => RegNext(AdderTree(List(adcBufs(adcId)(k)), 32)))
+      val rb = robs.rams(1 + i).fastPort
+      rb.enable := True; rb.mask.setAllTo(True)
+      rb.address := RegNext(rbAddr); rb.write := fire
+      rb.wdata   := Vec(lanes).asBits
+    }
   }
 
   // ── QICK gen_v6 host ports (hostClk): per core, gate then readout ──

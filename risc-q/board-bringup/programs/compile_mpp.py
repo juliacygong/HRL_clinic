@@ -3,7 +3,7 @@
 Runs the notebook's own setup cells and its MultiPulseProgram cell, with optional overrides of the
 notebook-level settings (`GEN_CH = ...`, `TRIG_TIME = ...`) and of the pulses' literal `gain=` value.
 
-    compile_mpp.py <notebook> <outdir> [--set GEN_CH=0] [--set TRIG_TIME=0.40] [--gain 0.1]
+    compile_mpp.py <notebook> <outdir> [--set GEN_CH=0] [--set TRIG_TIME=0.40] [--gain 0.1] [--phrst]
 
 Run from qick_riscv_demos/tprocv2 of a `compiler` checkout with PYTHONPATH=<it>/qick_lib:<it>/risc-q/software
 and the riscv64-unknown-elf-{clang,objcopy,nm} toolchain on PATH.
@@ -19,6 +19,9 @@ ap.add_argument("out")
 ap.add_argument("--set", action="append", default=[], metavar="NAME=VALUE",
                 help="replace the notebook's top-level `NAME = ...` assignment")
 ap.add_argument("--gain", type=float, help="replace every literal gain=<x> in the MultiPulseProgram cell")
+ap.add_argument("--phrst", action="store_true",
+                help="set phrst=True on the first add_pulse: resets the gen's carrier phase at every rep, so the "
+                     "phase is the same every run (otherwise the DDS counter free-runs against the core restart)")
 a = ap.parse_args()
 os.environ["QICK_RV_OUT"] = a.out
 os.environ["MPLBACKEND"] = "Agg"
@@ -37,6 +40,9 @@ for src in cells:
         if a.gain is not None:
             src, n = re.subn(r'gain\s*=\s*[0-9.]+', f'gain={a.gain}', src)
             print(f"gain -> {a.gain} in {n} pulses")
+        if a.phrst:
+            src, n = re.subn(r'(self\.add_pulse\()', r'\1phrst=True, ', src, count=1)
+            print(f"phrst=True on the first of the add_pulse calls ({n})")
         code.append(src)
         break
     code.append(src)

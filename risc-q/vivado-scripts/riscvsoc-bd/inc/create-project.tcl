@@ -31,8 +31,8 @@ if {$QICK} {
     $_ip/axis_signal_gen_v6/src/synchronizer_n.vhd \
     $QICK_FW/hdl/bram_dp_xpm.sv \
     $QICK_FW/hdl/fifo_xpm.sv]
-  import_ip $_ip/axis_signal_gen_v6/src/dds_compiler_0/dds_compiler_0.xci
-  upgrade_ip -quiet [get_ips dds_compiler_0]
+  import_ip $_ip/axis_signal_gen_v6/src/sg_v6_dds_compiler_0/sg_v6_dds_compiler_0.xci
+  upgrade_ip -quiet [get_ips sg_v6_dds_compiler_0]
   # the gen's own CDC false paths (synchronizers, s_axi regs -> s0_axis_aclk), scoped to each gen instance
   add_files -fileset constrs_1 $_ip/axis_signal_gen_v6/src/signal_gen_v6.xdc
   set_property SCOPED_TO_REF axis_signal_gen_v6 [get_files signal_gen_v6.xdc]

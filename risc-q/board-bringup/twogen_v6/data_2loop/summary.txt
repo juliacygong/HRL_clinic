@@ -1,0 +1,11 @@
+runs averaged per ADC: 40 for both designs (QICK ran twice as many times: its raw buffer records one ADC per run)
+delay from requested time to capture: RISC-Q 132.26 ns, QICK 178.07 ns (each design's own capture window)
+gen0 flat-top      timing RISC-Q   -0.00 ± 0.11  QICK   +0.00 ± 1.04 ns | width RISC-Q  146.8  QICK  146.6 ns (requested length 300) | amplitude RISC-Q 0.500  QICK 0.503 | phase RISC-Q   +0.00 ± 0.00  QICK   +0.00 ± 0.00 deg (requested 0)
+gen0 Gaussian      timing RISC-Q   +0.04 ± 0.14  QICK   +0.14 ± 1.12 ns | width RISC-Q   47.9  QICK   47.8 ns (requested length 200) | amplitude RISC-Q 0.484  QICK 0.490 | phase RISC-Q   +0.00 ± 0.45  QICK   -0.03 ± 0.46 deg (requested 0)
+gen0 const         timing RISC-Q   +0.58 ± 0.02  QICK   +0.52 ± 1.00 ns | width RISC-Q  199.9  QICK  200.0 ns (requested length 200) | amplitude RISC-Q 0.998  QICK 0.998 | phase RISC-Q   -0.00 ± 0.31  QICK   +0.05 ± 0.46 deg (requested 0)
+gen0 flat-top 90°  timing RISC-Q   +0.07 ± 0.15  QICK   -0.16 ± 1.07 ns | width RISC-Q  146.9  QICK  146.7 ns (requested length 300) | amplitude RISC-Q 0.501  QICK 0.503 | phase RISC-Q  +89.92 ± 0.40  QICK  +90.03 ± 0.42 deg (requested 90)
+gen0 Gaussian 2    timing RISC-Q   +0.06 ± 0.13  QICK   -0.21 ± 0.98 ns | width RISC-Q   47.8  QICK   48.0 ns (requested length 200) | amplitude RISC-Q 0.485  QICK 0.489 | phase RISC-Q   -0.11 ± 0.45  QICK   +0.05 ± 0.44 deg (requested 0)
+gen1 const         timing RISC-Q   -0.42 ± 0.01  QICK   -0.07 ± 1.33 ns | width RISC-Q  499.9  QICK  501.0 ns (requested length 500) | amplitude RISC-Q 1.004  QICK 1.003 | phase RISC-Q   +0.00 ± 0.00  QICK   +0.00 ± 0.00 deg (requested 0)
+gen1 Gaussian      timing RISC-Q   +0.00 ± 0.19  QICK   -0.42 ± 1.24 ns | width RISC-Q   47.3  QICK   47.1 ns (requested length 200) | amplitude RISC-Q 0.494  QICK 0.485 | phase RISC-Q   +0.16 ± 0.51  QICK   +0.31 ± 0.42 deg (requested 0)
+gen1 against gen0 in the same run (const centers, against the requested 150 ns gap): RISC-Q -1.00 ± 0.03 ns over 40 runs, QICK -0.52 ± 0.80 ns over 80 runs (QICK from its decimated readouts)
+-> ../results/twogen_board_2loop_overlay_riscq_vs_tprocv2.png

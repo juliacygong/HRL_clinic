@@ -218,14 +218,16 @@ def load_envelope(ranges, gen, env_file, chunk=2048):
 
 
 ROBS, ROB_DEPTH, ADC_BATCH = 0x40000, 1024, 4   # SocMap.robs(); robDepth entries x adcBatch int32 lanes
+ROB_STEP = ROB_DEPTH * ADC_BATCH * 4             # robs(1) (a build's capture_adcs entry) follows robs(0)
 ADC_FS_HZ = 2.0e9                                # ADCs at 2 GS/s (rfdc-config.tcl): 4 lanes per 500 MHz cycle
 
 
-def read_robs(win):
+def read_robs(win, k=0):
     """The readout trace: raw (mapped-ADC-summed) samples over the last readout window, lane 0 first
-    within each dsp cycle, so a flat int32 array in time order. Entries past the window keep old data."""
+    within each dsp cycle, so a flat int32 array in time order. Entries past the window keep old data.
+    k = 1 reads robs(1), the build's capture_adcs ADC (same window); only builds with capture_adcs have it."""
     import numpy as np
-    raw = win.read_block(ROBS, ROB_DEPTH * ADC_BATCH * 4)
+    raw = win.read_block(ROBS + k * ROB_STEP, ROB_STEP)
     return np.frombuffer(raw, dtype="<i4").astype(np.int64)
 
 
@@ -293,6 +295,9 @@ def main():
     ap.add_argument("--capture", metavar="CSV",
                     help="after each run read the readout trace (robs: 4096 raw ADC samples at 2 GS/s over the "
                          "program's readout window) and write all runs + their mean to CSV (needs a loopback cable)")
+    ap.add_argument("--capture2", metavar="CSV",
+                    help="with --capture: also read robs(1), the build's capture_adcs ADC (e.g. a second loopback "
+                         "cable), over the same window, to this CSV (same format)")
     ap.add_argument("--settle", type=float, default=0.002,
                     help="seconds to wait after DONE before reading the trace (scheduled pulses still playing)")
     a = ap.parse_args()
@@ -341,7 +346,7 @@ def main():
             log(f"warning: ELF entry {entry:#x} != {MEM_BASE:#x} (the core boots at {MEM_BASE:#x})")
     elif a.bin:
         image = Path(a.bin).read_bytes()
-    i, traces = 0, []
+    i, traces, traces2 = 0, [], []
     try:
         while True:
             run_core(win, image, syms, a.wait or a.repeat != 1 or bool(a.capture), a.timeout)
@@ -349,6 +354,8 @@ def main():
             if a.capture and image is not None:
                 time.sleep(a.settle)                # DONE = last command issued; the queued pulses play later
                 traces.append(read_robs(win))
+                if a.capture2:
+                    traces2.append(read_robs(win, 1))
             if image is None or (a.repeat and i >= a.repeat):
                 break
             time.sleep(a.period)
@@ -356,11 +363,14 @@ def main():
         pass
     if a.repeat != 1:
         log(f"ran the program {i} times")
+    meta = {
+        "program": a.elf or a.bin, "bitstream": a.bit, "envelopes": " ".join(a.env) or "none",
+        "runs": len(traces), "adc_fs_hz": ADC_FS_HZ, "dac_nyquist": a.dac_nyquist,
+        "time": time.strftime("%Y-%m-%d %H:%M:%S")}
     if traces:
-        write_capture(a.capture, traces, {
-            "program": a.elf or a.bin, "bitstream": a.bit, "envelopes": " ".join(a.env) or "none",
-            "runs": len(traces), "adc_fs_hz": ADC_FS_HZ, "dac_nyquist": a.dac_nyquist,
-            "time": time.strftime("%Y-%m-%d %H:%M:%S")})
+        write_capture(a.capture, traces, meta)
+    if traces2:
+        write_capture(a.capture2, traces2, dict(meta, buffer="robs(1)"))
 
 
 if __name__ == "__main__":

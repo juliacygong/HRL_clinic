@@ -60,6 +60,8 @@ object GenPulseTableSocJson extends App {
       m.arr.zipWithIndex.map { case (adc, c) => c -> adc.num.toInt }.toMap
     case None => SocChannelMap.adcMap(qubitNum)
   }
+  //   "capture_adcs": extra physical ADCs recorded raw into robs(1), … (test infrastructure, no core reads them)
+  val captureAdcs: Seq[Int] = cfg.obj.get("capture_adcs").map(_.arr.map(_.num.toInt).toSeq).getOrElse(Nil)
 
   // `def` (not `val`) so the Component is constructed inside `.generate` — building it at the App's top
   // level throws `GlobalData ... null` (no elaboration context yet).
@@ -89,6 +91,7 @@ object GenPulseTableSocJson extends App {
     // specs/dsp-fmax.md converter-edge lever (C2), default off — a confirmation build turns it on in
     // its JSON so the lever state is part of the recorded build geometry (soc-fmax R5).
     adcPipe           = intOr("adc_pipe", 3),
+    captureAdcs   = captureAdcs,
     vivado        = vivadoMode,
     qickGen       = if (qickMode) Some(genFreqHz.foldLeft(riscq.soc.qick.QickGenParams())((q, f) => q.copy(genFreqHz = f)))
                     else None)

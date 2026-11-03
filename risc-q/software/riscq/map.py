@@ -122,6 +122,7 @@ class SocParams:
         dac_map = raw.pop("dac_map", None)  # optional converter maps: kept (the channel-role mapping — the
         adc_map = raw.pop("adc_map", None)  # co-sim model needs them), unlike the hardware-only knobs below
         raw.pop("queue_depth", None)        # hardware-only TimedQueue depth; software uses slot count, not depth
+        raw.pop("capture_adcs", None)       # hardware-only: extra raw ADC capture buffers (board test infrastructure)
         unknown = set(raw) - set(_FIELDS)
         if unknown:
             raise ValueError(f"unknown SocParams fields: {sorted(unknown)}")
