@@ -1,0 +1,143 @@
+import os
+from collections import Counter
+from pathlib import Path
+
+import numpy as np
+
+from .asm_v2 import AcquireProgramV2, AveragerProgramV2
+from .asm_v2_riscv import (RV_MACROS, RvMacro, RvAsmInst, RvWriteReg, REF_REG, CTRL_REG, CTRL_TIME,
+                           EXIT_LABEL, RF_FIRE, RF_FREQ, RF_PHASE_OFFSET, RF_SLOT_STRIDE, RF_START_TIME,
+                           init_rv, slot_init_rv, rv_data_section, drop_redundant_li,
+                           drop_dead_wmem_loads, optimize_rv)
+from .riscq_config import asm_text, words
+from .riscv_toolchain import build_image
+
+STACK_FRAME = 16
+LAYOUT = {'RQ_FIRE': RF_FIRE, 'RQ_FREQ': RF_FREQ, 'RQ_PHASE_OFFSET': RF_PHASE_OFFSET,
+          'RQ_SLOT_STRIDE': RF_SLOT_STRIDE, 'RQ_START_TIME': RF_START_TIME}
+_written = Counter()
+
+
+class CompiledOnly(RuntimeError):
+    """Raised by acquire and run calls: the program is compiled and written, nothing is run."""
+
+
+class RvMixin:
+    def _check_cfg(self):
+        for name, val in LAYOUT.items():
+            if self.soccfg.equs[name] != val:
+                raise RuntimeError(f"{name} is {self.soccfg.equs[name]:#x}, translator assumes {val:#x}")
+
+    def _init_instructions(self):
+        super()._init_instructions()
+        self.rv_lines = []
+        self._rv_slots = None   # wave_slots cache
+        self._rv_dyn = {}       # gen ch -> rotating cache slots (more waveforms than slots)
+        self._rv_dyn_next = {}  # gen ch -> next rotating slot
+        self._wtrack = None     # read_wmem -> write_wmem change tracking
+
+    def _add_rv(self, line):
+        self.rv_lines.append(line)
+
+    def append_macro(self, macro):
+        if not isinstance(macro, RvMacro):
+            if type(macro) not in RV_MACROS:
+                raise RuntimeError(f"no RISC-V translation for macro {type(macro).__name__}")
+            macro = RV_MACROS[type(macro)](**vars(macro))
+        super().append_macro(macro)
+
+    def extend_macros(self, asm):
+        # snippets (subroutines, loop exec_before/exec_after) are plain AsmV2 lists of generic macros
+        for macro in asm.macro_list:
+            self.append_macro(macro)
+
+    def asm_inst(self, inst, addr_inc=1):
+        self.append_macro(RvAsmInst(inst=inst))
+
+    def nop(self):
+        self.asm_inst('nop')
+
+    def ret(self):
+        self.asm_inst('ret')
+
+    def _init_reg(self, name, val):
+        RvWriteReg(dst=name, src=val).translate(self)
+
+    def _asm_lines(self):
+        code = ['.text', '.globl main', 'main:',
+                f'addi sp, sp, -{STACK_FRAME}', f'sw ra, {STACK_FRAME - 4}(sp)',
+                # one-time setup before the start time is read, so it does not use up the initial delay
+                *init_rv(self), *slot_init_rv(self),
+                f'li {CTRL_REG}, {CTRL_TIME}', f'lw {REF_REG}, 0({CTRL_REG})',
+                *self.rv_lines,
+                f'{EXIT_LABEL}:', f'lw ra, {STACK_FRAME - 4}(sp)', f'addi sp, sp, {STACK_FRAME}',
+                'li a0, 0', 'ret']
+        return [*optimize_rv(code), *rv_data_section(self)]
+
+    def _asm_text(self):
+        return asm_text(self._asm_lines(), self.soccfg.equs)
+
+    def _compile_prog(self):
+        self.image = build_image(self._asm_text(), self.soccfg.soc_map)
+        return words(self.image.data)
+
+    def _compile_waves(self):
+        return None
+
+    def asm(self):
+        if self.binprog is None:
+            self.compile()
+        return self._asm_text()
+
+    def write_asm(self, path):
+        with open(path, 'w') as f:
+            f.write(self.asm())
+
+    def write_bin(self, path):
+        if self.binprog is None:
+            self.compile()
+        with open(path, 'wb') as f:
+            f.write(self.image.data)
+
+    def write_elf(self, path):
+        if self.binprog is None:
+            self.compile()
+        with open(path, 'wb') as f:
+            f.write(self.image.elf)
+
+    def write_envelopes(self, stem):
+        """One file per gen with envelopes: (I, Q) int16 pairs from table address 0, as the gen's table loader takes them."""
+        for ch, envs in enumerate(self.envelopes):
+            if envs['envs']:
+                table = np.zeros((envs['next_addr'], 2), dtype='<i2')
+                for env in envs['envs'].values():
+                    table[env['addr']:env['addr'] + len(env['data'])] = env['data']
+                table.tofile(f'{stem}_gen{ch}.env')
+
+    def write_all(self, out):
+        out.mkdir(parents=True, exist_ok=True)
+        name = type(self).__name__
+        _written[out, name] += 1
+        stem = out / (name if _written[out, name] == 1 else f'{name}_{_written[out, name]}')
+        self.write_asm(f'{stem}.s')
+        self.write_bin(f'{stem}.bin')
+        self.write_elf(f'{stem}.elf')
+        self.write_envelopes(stem)
+        print(f'{name}: {len(self.binprog["pmem"])} words -> {stem}.[s|bin|elf]')
+
+    def config_all(self, soc, **kwargs):
+        self.write_all(Path(os.environ.get('QICK_RV_OUT', 'out')))
+
+    def acquire(self, soc, *args, **kwargs):
+        self.config_all(soc)
+        raise CompiledOnly(f'{type(self).__name__} was compiled and written, nothing is run')
+
+    acquire_decimated = run_rounds = run = acquire
+
+
+class RvProgram(RvMixin, AcquireProgramV2):
+    pass
+
+
+class RvAveragerProgram(RvMixin, AveragerProgramV2):
+    pass
