@@ -50,6 +50,13 @@ case class RiscvSoc(
     memOutReg: Boolean = true,
     useUram: Boolean = true,
     rfAddrWidth: Int = 18,
+    // RF-window stores leave the CPU on the posted-store shim's direct port (one per cycle) instead of
+    // through the data-bus fabric and RfLinkBridge (one per bus round trip, ~6 cycles)
+    rfDirect: Boolean = true,
+    // the CPU's own data-RAM loads/stores leave the posted-store shim on a direct RAM port (one register, then
+    // the RAM latency) instead of the data-bus fabric; the RAM's data port then serves only the CPU, so this
+    // excludes the test tap (which reaches the RAM over the bus)
+    ramDirect: Boolean = false,
     // test harness: add a second master into the CPU data-bus decode (a sim drives it directly).
     withTestTap: Boolean = false,
     // host-load master params (the BRAM slow-port image load). Must match what the parent's host fabric
@@ -77,7 +84,14 @@ case class RiscvSoc(
   // RiscvSoc elaborates in its parent's clock domain (the dsp clock) — that implicit `ClockDomain.current`
   // is the single clock for the BRAM, the instruction arbiter and the `iLoad` slave-IO. `riscqCd` (same
   // clock, core reset) is passed in and wraps only the CPU + control fibers below.
-  val riscqFiber = riscqCd(RiscqFiber(plugins))
+  require(!(ramDirect && withTestTap), "ramDirect gives the CPU the RAM data port alone; the test tap needs the bus path")
+  val rfBase = 0x10000
+  // CPU RAM read latency (must match the storage chosen below: Uram/HalfUram pipeNum 1 -> 3, Bram 1 + outReg)
+  val ramReadLatency = if (useUram) 3 else 1 + memOutReg.toInt
+  val riscqFiber = riscqCd(RiscqFiber(plugins,
+    rfDirect  = if (rfDirect) Some((BigInt(rfBase), BigInt(4 << 16))) else None,
+    ramDirect = if (ramDirect) Some((BigInt(0x80000000L), BigInt(memDepth) * memWidth / 8, ramReadLatency, log2Up(memDepth)))
+                else None))
   // CPU instruction/data RAM: block RAM by default, UltraRAM with `useUram`. Both expose the same two
   // true-dual-port read/write ports (port0/port1, here single-clock in the implicit dsp domain).
   // Only DEEP memories (memDepth > 4096) use a HalfUram: it packs two 32-bit words per 64-bit UltraRAM
@@ -111,8 +125,17 @@ case class RiscvSoc(
   // its Tilelink bridge), so the fabric just decodes the resulting Tilelink master.
   val dMemPortDec = riscqCd(Node())
   dMemPortDec at 0 of riscqFiber.dBus
-  val dBusFiber = riscqCd(TileLinkCpuMemFiber(memPort0, latency = memReadLatency))
-  dBusFiber.up at memOffset of dMemPortDec
+  require(ramReadLatency == memReadLatency, s"ramReadLatency $ramReadLatency != storage latency $memReadLatency")
+  val dBusFiber = if (ramDirect) null else riscqCd(TileLinkCpuMemFiber(memPort0, latency = memReadLatency))
+  if (!ramDirect) dBusFiber.up at memOffset of dMemPortDec
+  for (d <- riscqFiber.ramPortOut) {                 // ramDirect: the shim owns the RAM data port
+    memPort0.enable  := d.enable
+    memPort0.write   := d.write
+    memPort0.address := d.address.resized
+    memPort0.wdata.assignFromBits(d.wdata)
+    if (memPort0.useMask) memPort0.mask := d.mask
+    d.rdata := memPort0.rdata.asBits
+  }
 
   // optional test tap: a second master into the data-bus decode (the sim drives dTap.node.bus directly).
   val dTap = withTestTap generate riscqCd(new MasterBus(testTapM2s))
@@ -138,7 +161,7 @@ case class RiscvSoc(
   // ── posted-link bridge + core-local readout-result sink (riscqCd) ──
   val posted = riscqCd { new Composite(this, "posted") {
     val bridge = RfLinkBridge(rfAddrWidth)
-    bridge.up at SizeMapping(0x10000, 4 << 16) of dMemPortDec
+    bridge.up at SizeMapping(rfBase, 4 << 16) of dMemPortDec
     bridge.up.setUpConnection(a = StreamPipe.FULL, d = StreamPipe.FULL)
 
     val sink = ReadoutResultSink(readoutAccWidth, resAddr = 0x4200, realAddr = 0x4204, imagAddr = 0x4208)
@@ -146,7 +169,20 @@ case class RiscvSoc(
                                                     // sink mirrors the decoder's res.valid level (no arm)
   } }
 
-  cmd << posted.bridge.cmd                          // posted RF writes leave for the DSP datapath
+  // posted RF writes leave for the DSP datapath. With rfDirect the CPU's own RF stores come from the shim's
+  // direct port; the bridge stays mapped for any other data-bus master (the sim test tap) and is held off
+  // the cycle a direct write goes out, so the two never collide and each keeps its own order.
+  riscqFiber.rfDirectOut match {
+    case Some(d) => riscqCd {
+      posted.bridge.hold  := d.valid
+      cmd.valid           := d.valid || posted.bridge.cmd.valid
+      cmd.payload.address := d.valid ? (d.payload.address - rfBase).resize(rfAddrWidth) | posted.bridge.cmd.payload.address
+      cmd.payload.data    := d.valid ? d.payload.data | posted.bridge.cmd.payload.data
+    }
+    case None =>
+      posted.bridge.hold := False
+      cmd << posted.bridge.cmd
+  }
 
   // finish the control block: add the local result-sink read map, then connect the bus.
   memMapFiber.addMapping(posted.sink.mapping)        // res@0x4200 / real@0x4204 / imag@0x4208 (local)

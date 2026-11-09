@@ -42,6 +42,12 @@
 # software/configs/zcu216-qick-1q.json). The 14q floorplan does not apply, so it is off unless
 # RISCQ_PBLOCK_TCL is set.
 #
+# QICK-clock build (software/configs/zcu216-qick-1q-2loop-qickclk.json): the config's dsp_freq_hz /
+# adc_batch / gen_freq_hz keys put the converters at stock QICK tProc v2 rates — DACs 9584.64 MS/s (gens
+# on 599.04 MHz clk_dac0), ADCs 2457.6 MS/s as 8 lanes on a 307.2 MHz dspClk (QICK's readout fabric
+# clock), every RFDC PLL on QICK's 245.76 MHz reference. The board then needs
+# board-bringup/LMK04828_qickclk_307.2.txt (bringup.py --lmk), see board-bringup/gen_lmk_qickclk.py.
+#
 # Env: RISCQ_VIVADO_BIN, RISCQ_CONFIG (default software/configs/zcu216-14q.json), RISCQ_SKIP_GEN,
 #   RISCQ_RUN_BITSTREAM (default 1 — bitstream + xsa; set 0 for impl-only),
 #   RISCQ_PROJ_NAME (default riscvsoc-bd), plus the floorplan knobs read by pblocks-bd.tcl:
@@ -57,10 +63,20 @@ QICK="${RISCQ_QICK:-0}"
 if [ "$QICK" = "1" ]; then
   CONFIG="${RISCQ_CONFIG:-$REPO_DIR/software/configs/zcu216-qick-1q.json}"
   PROJ="${RISCQ_PROJ_NAME:-riscvsoc-bd-qick}"
-  GEN_ARGS="vivado qick${RISCQ_GEN_FREQ:+ genFreq=$RISCQ_GEN_FREQ}"
 else
   CONFIG="${RISCQ_CONFIG:-$REPO_DIR/software/configs/zcu216-14q.json}"
   PROJ="${RISCQ_PROJ_NAME:-riscvsoc-bd}"
+fi
+# Clock plan from the config (env wins): "dsp_freq_hz" -> RISCQ_DSP_FREQ (dspClk), "adc_batch" -> RISCQ_ADC_BATCH
+# (ADC lanes per dsp cycle; ADC rate = adc_batch x dsp), "gen_freq_hz" -> RISCQ_GEN_FREQ (QICK gens). Every
+# config before the QICK-clock one has dsp 500 MHz / 4 lanes / no gen key, i.e. the old defaults.
+_cfg() { python3 -c 'import json,sys; v=json.load(open(sys.argv[1])).get(sys.argv[2]); print("" if v is None else int(v))' "$CONFIG" "$1"; }
+_v="$(_cfg dsp_freq_hz)";  export RISCQ_DSP_FREQ="${RISCQ_DSP_FREQ:-${_v:-500000000}}"
+_v="$(_cfg adc_batch)";    export RISCQ_ADC_BATCH="${RISCQ_ADC_BATCH:-${_v:-4}}"
+_v="$(_cfg gen_freq_hz)";  [ -z "${RISCQ_GEN_FREQ:-}" ] && [ -n "$_v" ] && export RISCQ_GEN_FREQ="$_v"
+if [ "$QICK" = "1" ]; then
+  GEN_ARGS="vivado qick${RISCQ_GEN_FREQ:+ genFreq=$RISCQ_GEN_FREQ}"
+else
   GEN_ARGS="vivado"
 fi
 BUILD="$REPO_DIR/build/$PROJ"
@@ -91,6 +107,7 @@ export RISCQ_PLACE_DIRECTIVE="${RISCQ_PLACE_DIRECTIVE:-ExtraNetDelay_high}"   # 
 export RISCQ_RUN_IMPL=1
 export RISCQ_RUN_BITSTREAM="${RISCQ_RUN_BITSTREAM:-1}"   # bitstream + XSA (hardware handoff) by default; set 0 for impl-only
 
+echo "[riscvsoc-bd] clocks: dsp=${RISCQ_DSP_FREQ} Hz, adc_batch=${RISCQ_ADC_BATCH}${RISCQ_GEN_FREQ:+, gen=${RISCQ_GEN_FREQ} Hz}"
 echo "[riscvsoc-bd] building block design in $BUILD (floorplan, IP retiming, place=$RISCQ_PLACE_DIRECTIVE / route=AggressiveExplore, bitstream+xsa=$RISCQ_RUN_BITSTREAM) …"
 "$VIVADO_BIN/vivado" -nojournal -mode batch -log "$BUILD/vivado.log" -source "$BD_DIR/flow-bd.tcl"
 

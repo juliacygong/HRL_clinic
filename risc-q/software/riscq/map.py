@@ -105,6 +105,17 @@ class SocParams:
     # the core's demod ADC. Held as tuples (a frozen dataclass must stay hashable).
     dac_map: tuple | None = None
     adc_map: tuple | None = None
+    # ADC lanes per dsp cycle (4 at the default 500 MHz = 2 GS/s; 8 in the QICK-clock build, 8 x 307.2 MHz =
+    # 2457.6 MS/s) and the QICK gens' fabric clock (None = the dsp clock). Optional JSON keys "adc_batch" /
+    # "gen_freq_hz". NB the module-level ADC_BATCH (used by riscq.cal / riscq.pulses / riscq.sim) is the
+    # default-build value; only SocMap's geometry follows adc_batch.
+    adc_batch: int = ADC_BATCH
+    gen_freq_hz: float | None = None
+
+    @property
+    def readout_max_win_log2(self) -> int:
+        """Decoder no-overflow bound in batches (the RTL's readoutMaxWinLog2): 14 at 4 lanes, 13 at 8."""
+        return READOUT_MAX_WIN_LOG2 - ((self.adc_batch // ADC_BATCH).bit_length() - 1)
 
     @classmethod
     def load(cls, json_path: str | Path) -> "SocParams":
@@ -113,6 +124,12 @@ class SocParams:
     @classmethod
     def from_json(cls, text: str) -> "SocParams":
         raw = json.loads(text)
+        adc_batch = int(raw.pop("adc_batch", ADC_BATCH))   # 4 (default) or 8 (QICK-clock build)
+        if adc_batch not in (4, 8):
+            raise ValueError(f"adc_batch must be 4 or 8, got {adc_batch}")
+        gen_freq_hz = raw.pop("gen_freq_hz", None)
+        if raw.get("readout_max_win_log2", None) is not None and adc_batch != ADC_BATCH:
+            raw.pop("readout_max_win_log2")                # follows adc_batch (asserted by GenPulseTableSocJson)
         for key, value in _FIXED.items():  # fixed constants may be stated, never changed
             if key in raw and raw.pop(key) != value:
                 raise ValueError(f"{key} is fixed by architecture at {value}")
@@ -134,6 +151,9 @@ class SocParams:
             kwargs["dac_map"] = tuple(tuple(int(x) for x in row) for row in dac_map)
         if adc_map is not None:
             kwargs["adc_map"] = tuple(int(x) for x in adc_map)
+        kwargs["adc_batch"] = adc_batch
+        if gen_freq_hz is not None:
+            kwargs["gen_freq_hz"] = float(gen_freq_hz)
         return cls(**kwargs)
 
     def to_json(self) -> str:
@@ -142,6 +162,10 @@ class SocParams:
             out["dac_map"] = [list(row) for row in self.dac_map]
         if self.adc_map is not None:
             out["adc_map"] = list(self.adc_map)
+        if self.adc_batch != ADC_BATCH:
+            out["adc_batch"] = self.adc_batch
+        if self.gen_freq_hz is not None:
+            out["gen_freq_hz"] = self.gen_freq_hz
         return json.dumps(out, indent=4)
 
 
@@ -202,12 +226,18 @@ class SocMap:
     RF_PHASE_OFFSET = 0xC           # virtual-Z phase added to the generator's phase input, code at data[31:16]
     RF_SLOT_STRIDE = 0x10           # slot i at (i+1)*0x10: +0 phase, +4 amp, +8 env, +12 dur
     RF_START_TIME = 0x4100          # full 32-bit batch time (low bits)
+    RF_SLOT_CONF = 0x4200           # QICK channels: slot i's sg_translator conf at +4i
+    RF_SLOT_FREQ = 0x4300           # QICK channels: slot i's 32-bit freq at +4i
+    RF_FIRE_AT = 0x4400             # QICK channels: write start time to +4i = set it and fire slot i
+    RF_FIRE_SLOT = 0x4480           # QICK channels: write anything to +4i = fire slot i (auto-advanced start)
 
     # ── host control block (offsets from host_ctrl; PulseTableSoc hostCtrlDriver) ──
     HOST_RESET = 0x0                # write 1 = assert (power-up state), 0 = release
     HOST_FROM_HOST = 0x10           # legacy mailbox, unused by this framework
     HOST_TIME_OFF_LO = 0x40
     HOST_TIME_OFF_HI = 0x44
+    HOST_QICK_STATUS = 0x48         # QICK builds: bridge sticky flags, 3 per gen (dropOut, dropSched, late)
+    HOST_QICK_CLEAR = 0x4C          # level clear mask for HOST_QICK_STATUS (write the bits, then 0)
 
     LEAD = LEAD
 
@@ -216,16 +246,16 @@ class SocMap:
         p = params
 
         env_width = BATCH_SIZE * 2 * DATA_WIDTH            # 512-bit complex envelope line
-        demod_full = ADC_BATCH * 2 * DATA_WIDTH            # 128-bit demod-carrier line (ADC batch = 4 lanes)
+        demod_full = p.adc_batch * 2 * DATA_WIDTH          # 128-bit demod-carrier line (ADC batch = 4 lanes)
         self.gate_env_width = env_width // p.gate_interp   # bits per stored gate-envelope line
         self.ro_env_width = env_width // p.readout_interp  # bits per stored readout-envelope line
         self.demod_env_width = demod_full // p.demod_interp  # bits per stored demod-carrier line (32 at 4)
-        self.rob_width = ADC_BATCH * 32
+        self.rob_width = p.adc_batch * 32
 
         # envelope grid: stored samples per RAM line (= per batch), each held x interp at the converter
         self.gate_samples_per_line = BATCH_SIZE // p.gate_interp     # 4 at gateInterp 4
         self.ro_samples_per_line = BATCH_SIZE // p.readout_interp    # 1 at readoutInterp 16
-        self.demod_samples_per_line = ADC_BATCH // p.demod_interp    # 1 at demodInterp 4
+        self.demod_samples_per_line = p.adc_batch // p.demod_interp  # 1 at demodInterp 4 (8 at adc_batch 8)
         self.gate_line_bytes = self.gate_env_width // 8              # 16 (4 words per line)
         self.ro_line_bytes = self.ro_env_width // 8                  # 4  (1 word per line)
         self.demod_line_bytes = self.demod_env_width // 8            # 4  (1 word per line)
@@ -358,7 +388,7 @@ class SocMap:
             out.append(MapEntry(f"core{c}_ro_env", self.ro_env(c), self.ro_env_bytes, "env_ro"))
             out.append(MapEntry(f"core{c}_demod_env", self.demod_env(c), self.demod_env_bytes, "env_demod"))
         out.append(MapEntry("robs", self.robs(), self.rob_bytes, "robs_ro"))
-        out.append(MapEntry("host_ctrl", self.host_ctrl, 0x48, "ctrl_wo"))
+        out.append(MapEntry("host_ctrl", self.host_ctrl, 0x50, "ctrl_wo"))
         return out
 
     # ── generated firmware inputs ──
@@ -378,9 +408,13 @@ class SocMap:
             ("RQ_DC_OFFSET", self.RF_DC_OFFSET),
             ("RQ_PHASE_OFFSET", self.RF_PHASE_OFFSET),
             ("RQ_SLOT_STRIDE", self.RF_SLOT_STRIDE), ("RQ_START_TIME", self.RF_START_TIME),
+            # QICK drive channels: per-slot conf / freq tables (QickGenChannel), one word per slot
+            ("RQ_SLOT_CONF", self.RF_SLOT_CONF), ("RQ_SLOT_FREQ", self.RF_SLOT_FREQ),
+            # QICK drive channels: one-store fires (PulseParamBuffer fireAt / fireSlot windows)
+            ("RQ_FIRE_AT", self.RF_FIRE_AT), ("RQ_FIRE_SLOT", self.RF_FIRE_SLOT),
             ("RQ_GATE_PULSE_NUM", p.gate_pulse_num), ("RQ_ENV_DEPTH", p.env_depth),
             ("RQ_LEAD", LEAD), ("RQ_RO_LEAD", READOUT_LEAD),
-            ("RQ_RO_MAX_WIN", 1 << READOUT_MAX_WIN_LOG2),
+            ("RQ_RO_MAX_WIN", 1 << p.readout_max_win_log2),
         ]
         lines = [f"/* GENERATED from SocParams '{p.name}' by riscq.map — do not edit. */",
                  "#ifndef RISCQ_MAP_H", "#define RISCQ_MAP_H", ""]

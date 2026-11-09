@@ -24,6 +24,9 @@ case class PulseTableTerm(dataWidth: Int, envWidth: Int, durWidth: Int, phaseWid
  *   - `phaseOffset`@0xC — virtual-Z phase added to the generator's phase input downstream (16-bit field at bit 16)
  *   - `table[i]`        — entry `i` at `(i+1)*0x10`: `+0` phase, `+4` amp, `+8` env, `+12` dur
  *   - `startTime`@0x4100 — this buffer's own `startTime` register (per-buffer, posted)
+ *   - `fireAt(i)`@fireAtAddr + 4i   (optional) — one write sets `startTime` to the data AND fires entry i
+ *   - `fireSlot(i)`@fireSlotAddr + 4i (optional) — fires entry i (data ignored), like `fire` with the index in
+ *                                      the address, so a fire needs no register holding the index
  */
 case class PulseParamBufferParams(
     pulseNum: Int,
@@ -37,6 +40,8 @@ case class PulseParamBufferParams(
     dcOffsetAddr: Int = 0x8,     // per-buffer DC bias for the real output lanes (16-bit field at bit 16)
     phaseOffsetAddr: Int = 0xC,  // per-buffer virtual-Z phase added to the generator's phase input (16-bit field at bit 16)
     startTimeAddr: Int = 0x4100,
+    fireAtAddr: Int = 0,         // 0 = no fireAt window; else pulseNum words: set startTime + fire entry i
+    fireSlotAddr: Int = 0,       // 0 = no fireSlot window; else pulseNum words: fire entry i
     pulseOffset: Int = 0x10,     // 4 words per table entry; entry i at (i+1)*pulseOffset
     bitOffset: Int = 16,         // 16-bit fields packed in data[31:16]
     useMem: Boolean = true,      // table storage: true (default) = distributed-RAM Mem; false = FF Vec
@@ -59,6 +64,8 @@ case class PulseParamBufferParams(
   require(Seq(fireAddr, freqAddr, dcOffsetAddr, phaseOffsetAddr).forall(_ < pulseOffset),
     "scalar registers must sit in slot 0, below the table")
   require(startTimeAddr >= (pulseNum + 1) * pulseOffset, "startTimeAddr must sit past the table slots")
+  for (a <- Seq(fireAtAddr, fireSlotAddr) if a != 0)
+    require(a > startTimeAddr && a % (4 * pulseNum) == 0, "fireAt / fireSlot windows sit past startTime, aligned")
 }
 
 /**
@@ -88,6 +95,8 @@ case class PulseParamBuffer(p: PulseParamBufferParams) extends Component {
     val startTime = out    port UInt(timeWidth bits)     // per-buffer, cmd-written → pg.io.startTime
     val dcOffset  = out    port SInt(w bits)             // per-buffer, cmd-written → real-lane DC bias
     val phaseOffset = out  port SInt(pw bits)            // per-buffer, cmd-written → generator phase-input bias (virtual Z)
+    val firedIndex  = out  port UInt(log2Up(pulseNum) bits) // index of the entry presented on the param flows
+                                                             // (valid one cycle before they are)
   }
 
   // local low-fanout time copy: equal pipeline delay across buffers ⇒ same-startTime same-cycle rise.
@@ -128,10 +137,22 @@ case class PulseParamBuffer(p: PulseParamBufferParams) extends Component {
   val addr = cmd.payload.address
   def hit(a: Int): Bool = cmd.valid && addr === a
 
-  val outParamValid = hit(fireAddr)
-  if (pulseNum > 1) when(outParamValid) { outId := cmd.payload.data(0, log2Up(pulseNum) bits).asUInt }
+  // fire windows addressed by entry: a single range compare each, the entry index from address[k+1:2]
+  val idxBits = log2Up(pulseNum)
+  def window(base: Int): Bool = if (base == 0) False else cmd.valid && (addr >> log2Up(4 * pulseNum)) === (base >> log2Up(4 * pulseNum))
+  val fireAtHit   = window(fireAtAddr)
+  val fireSlotHit = window(fireSlotAddr)
+  val addrIdx     = if (pulseNum > 1) addr(2, idxBits bits) else U(0, 0 bits)
 
-  val explicitStartWrite = hit(startTimeAddr)   // also gates the fire auto-advance below (explicit wins)
+  val outParamValid = hit(fireAddr) || fireAtHit || fireSlotHit
+  if (pulseNum > 1) {
+    when(hit(fireAddr))            { outId := cmd.payload.data(0, idxBits bits).asUInt }
+    when(fireAtHit || fireSlotHit) { outId := addrIdx }
+  }
+  io.firedIndex := outId
+
+  // fireAt counts as an explicit startTime write: it also wins over a previous fire's auto-advance that beat
+  val explicitStartWrite = hit(startTimeAddr) || fireAtHit   // also gates the fire auto-advance below (explicit wins)
   when(explicitStartWrite)   { startTime   := cmd.payload.data(0, timeWidth bits).asUInt }
   when(hit(dcOffsetAddr))    { dcOffset    := field(w).asSInt }
   when(hit(phaseOffsetAddr)) { phaseOffset := wideField(pw).asSInt }

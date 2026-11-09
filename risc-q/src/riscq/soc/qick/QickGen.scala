@@ -1,6 +1,7 @@
 package riscq.soc.qick
 
 import spinal.core._
+import spinal.core.sim._
 import spinal.lib._
 import spinal.lib.bus.amba4.axilite.{AxiLite4, AxiLite4Config}
 import riscq.soc.link.RfCmd
@@ -147,7 +148,8 @@ case class QickGenHost() extends Bundle with IMasterSlave {
  *                the XPM and DDS Compiler primitives), the same models QICKEmu uses. See `riscq.soc.qick.sim`.
  */
 case class QickGenParams(
-    bridge: WaveWordBridgeParams = WaveWordBridgeParams(leadTime = 32, withParamPort = true, confInit = 0x08,
+    // depth 32: a program may queue many waveforms ahead (a flat-top is 3), and a full queue drops pulses
+    bridge: WaveWordBridgeParams = WaveWordBridgeParams(leadTime = 32, depth = 32, withParamPort = true, confInit = 0x08,
       confAddr = 0x4104, trigTimeAddr = 0x4108, widthAddr = 0x410c, fireTrigAddr = 0x4110),
     envN: Int = 12,
     nDds: Int = 16,
@@ -170,8 +172,17 @@ case class QickGenParams(
  *  by the bridge (io.params) and queued at the pulse's startTime:
  *    freq  = the freq register (latest write before the fire)    phase = table phase + phaseOffset
  *    gain  = amp (sign-extended)    env = addr    nsamp = dur (× genFreqHz / dspFreqHz, rounded, if they differ)
- *  dcOffset is accepted but unused (gen_v6 has no DC offset). The bridge's own cmd registers (conf,
- *  readout trigger) sit at 0x4104.. on the same window.
+ *  dcOffset is accepted but unused (gen_v6 has no DC offset). The bridge's readout-trigger registers sit at
+ *  0x4108.. on the same window.
+ *
+ *  freq and conf are kept per table slot, so a program can load every waveform of a channel once and then
+ *  play one with only a startTime write and a fire:
+ *    slotConf(i) @ confTableAddr + 4i (0x4200..)    slotFreq(i) @ freqTableAddr + 4i (0x4300..)
+ *  The single-register forms still work and write every slot at once: freq @ 0x4 and conf @ 0x4104, each
+ *  written before a fire, behave as before. With `buf.fireAtAddr` / `buf.fireSlotAddr` set (mkQickChannel:
+ *  0x4400 / 0x4480), a pulse is one store: fireAt(i) = start time + fire slot i, fireSlot(i) = fire slot i next.
+ *
+ *  `status` is the bridge's sticky flags (bit 0 dropOut, 1 dropSched, 2 late), cleared by `clear`.
  *
  *  The buffer and bridge run on the current (dsp) domain; the CDC crosses into `genCd` (the DAC fabric
  *  clock, `genFreqHz`), where the translator and the gen run, as in QICK's block design.
@@ -189,6 +200,8 @@ case class QickGenChannel(p: QickGenParams, buf: PulseParamBufferParams, hostCd:
     val released = out    port Bool()
     val trig     = out    port Bool()
     val host     = slave  port QickGenHost()
+    val status   = out    port Bits(3 bits)               // sticky: 0 dropOut, 1 dropSched, 2 late
+    val clear    = in     port Bits(3 bits)               // clear the matching status bit (level)
   }
 
   // the compiler-facing register file: same module and map as a native drive channel
@@ -196,16 +209,46 @@ case class QickGenChannel(p: QickGenParams, buf: PulseParamBufferParams, hostCd:
   params.io.cmd << io.cmd
   params.io.timeBcast := io.time
 
-  // freq is a register write of its own (not part of the fired entry): hold the latest for the next fire
-  val freq = Reg(Bits(32 bits)) init 0
-  when(params.io.freq.valid) { freq := params.io.freq.payload.asBits }
+  // per-slot freq and conf, read by the fired slot. A cmd write takes effect the next cycle; the fired entry
+  // reaches `fields` 2 cycles after its fire beat, so any write posted before the fire is seen.
+  //
+  // Storage: one distributed-RAM word per slot (LUTRAM, which comes in 32-deep blocks, so up to 32 slots cost
+  // the same as 8) plus a shared default. A single-register write (freq @ 0x4, conf @ 0x4104) sets the default
+  // and clears every slot's "own value" bit, so all slots read the default, as when it wrote every slot; a
+  // per-slot write stores that slot's word and sets its bit. Only the bit vector is flip-flops.
+  require(buf.pulseNum <= 64, "slot conf / freq windows hold 64 words")
+  val confTableAddr = 0x4200
+  val freqTableAddr = 0x4300
+  val slotBits = log2Up(buf.pulseNum)
+  val c = io.cmd
+  def hit(a: Int): Bool = c.valid && c.payload.address === a
+  def window(base: Int): Bool = c.valid && (c.payload.address >> 8) === (base >> 8) &&
+    c.payload.address(7 downto 2) < buf.pulseNum
+  val wrIdx = c.payload.address(2, slotBits bits)
+  case class SlotTable(width: Int, init: BigInt, base: Int, globalHit: Bool) extends Area {
+    val mem   = Mem(Bits(width bits), buf.pulseNum)
+    val dflt  = Reg(Bits(width bits)) init init
+    val own   = Reg(Bits(buf.pulseNum bits)) init 0
+    val wr    = window(base)
+    mem.write(wrIdx, c.payload.data(width - 1 downto 0), wr)
+    when(wr) { own(wrIdx) := True }
+    when(globalHit) { dflt := c.payload.data(width - 1 downto 0); own := 0 }
+    def read(i: UInt): Bits = own(i) ? mem.readAsync(i) | dflt
+  }
+  val confT = SlotTable(16, p.bridge.confInit, confTableAddr, hit(p.bridge.confAddr))
+  // freq @ 0x4 is the buffer's freq register (it lands via params.io.freq one cycle later; the same value)
+  val freqT = SlotTable(32, 0, freqTableAddr, hit(buf.freqAddr))
+  // the fired slot: the buffer's latched index (any fire form) is one cycle ahead of its param flows, so one
+  // register lines it up with params.io.amp.valid (back-to-back fires stay paired)
+  val outSlot = RegNext(params.io.firedIndex) init 0
 
   // pack the fired entry into the bridge's fields. One register stage (Flow.stage) after the buffer's fire
   // output keeps the field packing (and any dur → nsamp multiply) off the TimedQueue push path; startTime
   // travels with it.
   val fields = Flow(WaveFields(buf.timeWidth))
   fields.valid             := params.io.amp.valid
-  fields.payload.freq      := freq
+  fields.payload.freq      := freqT.read(outSlot)
+  fields.payload.conf      := confT.read(outSlot)
   fields.payload.phase     := (params.io.phase.payload + params.io.phaseOffset).asBits
   fields.payload.gain      := params.io.amp.payload.resize(32 bits).asBits
   fields.payload.env       := params.io.addr.payload.resize(24 bits).asBits
@@ -226,9 +269,13 @@ case class QickGenChannel(p: QickGenParams, buf: PulseParamBufferParams, hostCd:
   bridge.io.cmd    << io.cmd        // conf + readout trigger registers at 0x4104..
   bridge.io.params << fields.stage()
   bridge.io.time   := params.io.time
-  bridge.io.clear  := 0             // sticky status flags not exported yet
+  bridge.io.clear  := io.clear
+  io.status        := bridge.io.late ## bridge.io.dropSched ## bridge.io.dropOut
   io.trig          := bridge.io.trig
   io.released      := bridge.io.wave.fire
+  // sims log the words handed to the CDC (QickCpuSim RISCQ_WORDS)
+  bridge.io.wave.valid.simPublic(); bridge.io.wave.ready.simPublic(); bridge.io.wave.payload.simPublic()
+  params.io.time.simPublic()
 
   val cdc = new AxisCdcSync(168, genCd, p.emulator)
   cdc.s_tdata(0)       := bridge.io.wave.payload

@@ -39,6 +39,7 @@ object RfLinkBridgeSim extends App {
           putFull = tilelink.SizeRange(4), putPartial = tilelink.SizeRange(4))))))))
 
     val bridge = RfLinkBridge(rfAddrWidth)
+    bridge.hold := False
     bridge.up at 0 of tlBus.node
 
     // the ordered posted stream + two demuxed sub-window streams, re-exported for the sim.

@@ -23,8 +23,9 @@ import spinal.lib.bus.misc.SizeMapping
  * @param rfAddrWidth byte-address width of the RF window (the `RfCmd.address` field).
  */
 case class RfLinkBridge(rfAddrWidth: Int) extends Area {
-  val up  = Node.up()
-  val cmd = Flow(RfCmd(rfAddrWidth))   // ordered posted-write stream → far-side demux
+  val up   = Node.up()
+  val cmd  = Flow(RfCmd(rfAddrWidth))   // ordered posted-write stream → far-side demux
+  val hold = Bool()                     // owner-driven: stall the bus this cycle (another writer owns `cmd`)
 
   val logic = Fiber build new Area {
     // write-only window: advertise only single-word Put (no Get) so the fabric never routes a read here.
@@ -43,8 +44,8 @@ case class RfLinkBridge(rfAddrWidth: Int) extends Area {
     val bus = up.bus
     // local 1-cycle AccessAck (mirrors SlaveFactory's `bus.d << rspAsync.stage()`).
     val rsp = cloneOf(bus.d)
-    bus.a.ready  := rsp.ready
-    rsp.valid    := bus.a.valid
+    bus.a.ready  := rsp.ready && !hold
+    rsp.valid    := bus.a.valid && !hold
     rsp.opcode   := Opcode.D.ACCESS_ACK()
     rsp.param    := 0
     rsp.source   := bus.a.source

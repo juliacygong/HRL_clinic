@@ -91,7 +91,10 @@ case class RiscqRfWithPulseTableFiber(
   val riscvSoc = RiscvSoc(
     plugins = plugins, riscqCd = riscqCd,
     timeWidth = timeWidth, readoutAccWidth = readoutAccWidth, memDepth = memDepth, memWidth = memWidth,
-    memOutReg = memOutReg, rfAddrWidth = rfAddrWidth, withTestTap = withTestTap)
+    memOutReg = memOutReg, rfAddrWidth = rfAddrWidth, withTestTap = withTestTap,
+    // CPU data RAM on the shim's direct port: off for now (the compiler's register promotion leaves the hot
+    // loops without RAM loads, so it buys little, and it is the most timing-critical path)
+    ramDirect = false)
   riscvSoc.time     := time
 
   // re-expose the host program/data image-load entry as a fabric node (the toplevel connects host
@@ -180,7 +183,8 @@ case class RiscqRfWithPulseTableFiber(
     // multi-segment pulse (flat-top = ramp, flat, ramp) over slots 0, 1, 2 of whichever channel plays it.
     def mkQickChannel(p: QickGenParams, pulseNum: Int, base: BigInt) = {
       val buf = PulseParamBufferParams(pulseNum = pulseNum, dataWidth = w, envAddrWidth = envAddrWidth,
-        durWidth = durWidth, timeWidth = timeWidth, addrWidth = 16, freqWidth = 32, phaseWidth = 32)
+        durWidth = durWidth, timeWidth = timeWidth, addrWidth = 16, freqWidth = 32, phaseWidth = 32,
+        fireAtAddr = 0x4400, fireSlotAddr = 0x4480)   // one-store fires (the compiler's fast path)
       val ch = QickGenChannel(p, buf, hostCd, genCd)
       ch.io.cmd  << RfLink.demux(RfLink.pipe(riscvSoc.cmd, linkPipe), base, 0x10000, buf.addrWidth)
       ch.io.time := time
@@ -239,6 +243,9 @@ case class RiscqRfWithPulseTableFiber(
   val qickHost       = if (qickGen.isEmpty) Nil else List(posted.qickGate.io.host, posted.qickRo.io.host)
   // gen_v6 m_axis sample streams (genCd), gate then readout; empty without qickGen
   val qickSamples    = if (qickGen.isEmpty) Nil else List(posted.qickGate.io.samples, posted.qickRo.io.samples)
+  // bridge sticky status (bit 0 dropOut, 1 dropSched, 2 late) and its clear, gate then readout; empty without qickGen
+  val qickStatus     = if (qickGen.isEmpty) Nil else List(posted.qickGate.io.status, posted.qickRo.io.status)
+  val qickClear      = if (qickGen.isEmpty) Nil else List(posted.qickGate.io.clear, posted.qickRo.io.clear)
 
   // ── envelope-memory read ports (reconstruct the full `lanes`-lane batch from the interpolated line) ──
   def expandEnv(data: Bits, interp: Int, lanes: Int): Bits =

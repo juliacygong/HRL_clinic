@@ -52,6 +52,7 @@ object QickCpuSim extends App {
 
   cfg.compile {
     PulseTableSoc(1, Map((0, 0) -> 14, (0, 1) -> 1), Map(0 -> 8),
+      gatePulseNum = sys.env.getOrElse("RISCQ_GATE_PULSE_NUM", "8").toInt,
       qickGen = Some(QickGenParams(emulator = true)))
   }.doSim("qickCpu", seed = 42) { dut =>
     val hostCd = dut.clockDomain
@@ -105,6 +106,20 @@ object QickCpuSim extends App {
 
     var genCyc = 0L
     var logging = false
+    // optional: every wave word the gate bridge hands to the CDC (dsp time, then the fields)
+    val words = sys.env.get("RISCQ_WORDS").map(f => new PrintWriter(new File(f)))
+    words.foreach(_.println("time,freq,phase,env,gain,nsamp,conf"))
+    val gateCh = dut.riscqArea.riscqCores(0).posted.qickGate
+    dspCd.onSamplings {
+      if (logging) for (w <- words) {
+        val wv = gateCh.bridge.io.wave
+        if (wv.valid.toBoolean && wv.ready.toBoolean) {
+          val v = wv.payload.toBigInt
+          def f(lo: Int, n: Int) = (v >> lo) & ((BigInt(1) << n) - 1)
+          w.println(s"${gateCh.params.io.time.toBigInt},${f(0, 32)},${f(32, 32)},${f(64, 24)},${f(88, 32)},${f(120, 32)},${f(152, 16)}")
+        }
+      }
+    }
     val logs = dut.qickSamplePorts.indices.map(c => new PrintWriter(new File(outDir, s"dac_out_ch$c.csv")))
     logs.foreach(_.println("cycle," + (0 until 16).map(k => s"s$k").mkString(",")))
     genCd.onSamplings {
@@ -140,6 +155,13 @@ object QickCpuSim extends App {
     hostReset(false)
     dspCd.waitSampling(postCycles)
     logs.foreach { l => l.flush(); l.close() }
+    words.foreach(_.close())
+    // bridge sticky flags (host ctrl 0x48): per gen, gate then readout, bit 0 dropOut, 1 dropSched, 2 late
+    val st = axi.read(BigInt(dut.map.hostCtrlBase) + 0x48, 4).zipWithIndex.map { case (b, i) => (b.toLong & 0xFF) << (8 * i) }.sum
+    for ((name, k) <- List("gate", "ro").zipWithIndex) {
+      val f = (st >> (3 * k)) & 7
+      println(f"[QickCpuSim] $name status: dropOut=${f & 1} dropSched=${(f >> 1) & 1} late=${(f >> 2) & 1}")
+    }
     println(s"[QickCpuSim] logged $genCyc gen cycles to ${outDir.getPath}")
     simSuccess()
   }

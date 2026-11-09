@@ -11,6 +11,7 @@ import riscq.riscv.Riscq
 import riscq.riscv.fetch.FetchPlugin
 import riscq.riscv.execute.LsuPlugin
 import riscq.riscv.misc.{DataMemBus, DataMemBusParam, MemBus}
+import riscq.soc.link.RfCmd
 
 /**
  * Tilelink-izes the core's simplified [[DataMemBus]] (`cmd` Stream + `rsp` Flow) into a real Tilelink
@@ -58,8 +59,13 @@ case class DataMemBusToTilelink(p: DataMemBusParam) extends Component {
  *
  * @param plugins       the core's plugin list (e.g. `RiscqParam().plugins()`).
  * @param storeBufDepth posted-store buffer depth.
+ * @param rfDirect      optional (base, size) window whose stores bypass the bus on the shim's direct port;
+ *                      they come out on `rfDirectOut` (full CPU address), one per cycle.
+ * @param ramDirect     optional (base, size, read latency, word-address width) of the CPU's data RAM: its loads
+ *                      and stores leave on `ramPortOut` (connect it to the RAM's data port) instead of the bus.
  */
-case class RiscqFiber(plugins: Seq[Hostable], storeBufDepth: Int = 4)
+case class RiscqFiber(plugins: Seq[Hostable], storeBufDepth: Int = 4, rfDirect: Option[(BigInt, BigInt)] = None,
+                      ramDirect: Option[(BigInt, BigInt, Int, Int)] = None)
     extends Area {
   val iBus = Node.down()
   val dBus = Node.down()
@@ -71,6 +77,11 @@ case class RiscqFiber(plugins: Seq[Hostable], storeBufDepth: Int = 4)
   // implicit ClockDomain is NOT this one; the posted-store shim's registers must live here so the host
   // reset clears its buffer (otherwise it powers up with a garbage FIFO and drains a stray store).
   val coreCd = ClockDomain.current
+
+  // the direct-port stores (full 32-bit CPU address), driven by the shim in the data-bus rework below
+  val rfDirectOut = rfDirect.map(_ => Flow(RfCmd(32)))
+  // the data-RAM port the shim drives (address/wdata/enable/write/mask out, rdata in)
+  val ramPortOut = ramDirect.map(r => MemReadWritePort(Bits(32 bits), r._4, maskWidth = 4))
 
   val riscq = Riscq(plugins)
 
@@ -94,10 +105,25 @@ case class RiscqFiber(plugins: Seq[Hostable], storeBufDepth: Int = 4)
     forceMaster(dBus, MemBus.param(dMaster.p.addressWidth, dMaster.p.dataWidth, withStore = true).node.m)
     dBus.bus.component.rework {
       val bridge = DataMemBusToTilelink(dMaster.p)
-      val shim = coreCd(PostedStoreShim(dMaster.p, storeBufDepth))  // stateful ⇒ pin to the core's reset
+      val (dBase, dSize) = rfDirect.getOrElse((BigInt(0), BigInt(0)))
+      val (rBase, rSize, rLat, rAw) = ramDirect.getOrElse((BigInt(0), BigInt(0), 0, 0))
+      val shim = coreCd(PostedStoreShim(dMaster.p, storeBufDepth, dBase, dSize, rBase, rSize, rLat, rAw))  // stateful ⇒ pin to the core's reset
       shim.io.up   <> dMaster
       bridge.io.dm <> shim.io.down
       dBus.bus << bridge.io.tl
+      for (o <- ramPortOut) {
+        o.enable  := shim.io.ram.enable
+        o.write   := shim.io.ram.write
+        o.address := shim.io.ram.address
+        o.wdata   := shim.io.ram.wdata
+        o.mask    := shim.io.ram.mask
+        shim.io.ram.rdata := o.rdata
+      }
+      for (o <- rfDirectOut) {
+        o.valid           := shim.io.direct.valid
+        o.payload.address := shim.io.direct.payload.address.resized
+        o.payload.data    := shim.io.direct.payload.data
+      }
     }
 
     dBus.bus.get.simPublic() // the reference monitors dBus in sims

@@ -37,11 +37,22 @@ import xrfdc  # noqa: F401 — registers the RFdc driver so overlay.rf_data_conv
 
 HERE = Path(__file__).resolve().parent
 AXI_BASE = 0x8000_0000
-AXI_SIZE = 0x0006_0000          # everything the 1-core map uses (host_ctrl ends at 0x50048)
+AXI_SIZE = 0x0006_0000          # everything the 1-core map uses (host_ctrl ends at 0x50050)
 MEM_BASE = 0x8000_0000          # CPU address of the unified I+D RAM
 CORE_RAM, CORE_RAM_BYTES = 0x00000, 0x4000
 HOST_CTRL, HOST_RESET = 0x50000, 0x0
 HOST_TIME_OFF_LO, HOST_TIME_OFF_HI = 0x40, 0x44
+# QICK builds with bridge status (PulseTableSoc host ctrl): 3 sticky bits per gen, gate then readout
+HOST_QICK_STATUS, HOST_QICK_CLEAR = 0x48, 0x4C
+QICK_FLAGS = ("dropOut", "dropSched", "late")
+
+
+def qick_status_text(st):
+    parts = []
+    for k, gen in enumerate(("gate", "ro")):
+        bits = [n for i, n in enumerate(QICK_FLAGS) if (st >> (3 * k + i)) & 1]
+        parts.append(f"{gen}: {', '.join(bits) if bits else 'ok'}")
+    return "; ".join(parts)
 STATUS_DONE_MASK, STATUS_DONE = 0xFFFF0000, 0xD04E0000
 
 
@@ -63,7 +74,7 @@ def set_clocks(lmk_file):
     if len(lmks) != 1 or lmks[0]["compatible"] != "lmk04828":
         raise RuntimeError(f"expected one lmk04828 on the device tree, found {lmks}")
     xrfclk.xrfclk._write_LMK_regs(regs, lmks[0])
-    log(f"LMK04828 programmed from {lmk_file} ({len(regs)} registers) -> 500 MHz refclks + PL_CLK")
+    log(f"LMK04828 programmed from {lmk_file} ({len(regs)} registers)")
     time.sleep(0.1)                             # let PLL1/PLL2 lock before the RFDC tiles start
 
 
@@ -220,6 +231,15 @@ def load_envelope(ranges, gen, env_file, chunk=2048):
 ROBS, ROB_DEPTH, ADC_BATCH = 0x40000, 1024, 4   # SocMap.robs(); robDepth entries x adcBatch int32 lanes
 ROB_STEP = ROB_DEPTH * ADC_BATCH * 4             # robs(1) (a build's capture_adcs entry) follows robs(0)
 ADC_FS_HZ = 2.0e9                                # ADCs at 2 GS/s (rfdc-config.tcl): 4 lanes per 500 MHz cycle
+# The QICK-clock build (zcu216-qick-1q-2loop-qickclk.json) has 8 lanes per 307.2 MHz cycle = 2457.6 MS/s:
+# run it with --adc-batch 8 --adc-fs 2.4576e9 --lmk LMK04828_qickclk_307.2.txt (main() rebinds these three).
+
+
+def set_adc(batch, fs_hz):
+    """Rebind the robs geometry / capture time axis for a build's ADC lanes and rate (--adc-batch, --adc-fs)."""
+    global ADC_BATCH, ROB_STEP, ADC_FS_HZ
+    ADC_BATCH, ADC_FS_HZ = batch, fs_hz
+    ROB_STEP = ROB_DEPTH * ADC_BATCH * 4
 
 
 def read_robs(win, k=0):
@@ -276,7 +296,13 @@ def run_core(win, image, syms, wait, timeout_s):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--bit", default=str(HERE / "PulseTableSoc.bit"))
-    ap.add_argument("--lmk", default=str(HERE / "LMK04828_500.0.txt"))
+    ap.add_argument("--lmk", default=str(HERE / "LMK04828_500.0.txt"),
+                    help="LMK04828 register file: LMK04828_500.0.txt (500 MHz builds) or LMK04828_qickclk_307.2.txt "
+                         "(QICK-clock build: 245.76 MHz RF refs, 307.2 MHz PL_CLK)")
+    ap.add_argument("--adc-batch", type=int, default=ADC_BATCH,
+                    help="ADC lanes per dsp cycle in the build (robs entry width): 4, or 8 for the QICK-clock build")
+    ap.add_argument("--adc-fs", type=float, default=ADC_FS_HZ,
+                    help="ADC sample rate for the capture time axis: 2e9, or 2.4576e9 for the QICK-clock build")
     ap.add_argument("--skip-clocks", action="store_true", help="clocks already programmed this power cycle")
     ap.add_argument("--no-download", action="store_true", help="attach to the loaded overlay, don't reprogram the PL")
     ap.add_argument("--no-mts", action="store_true")
@@ -293,14 +319,18 @@ def main():
                     "--period seconds apart — for a scope")
     ap.add_argument("--period", type=float, default=0.01)
     ap.add_argument("--capture", metavar="CSV",
-                    help="after each run read the readout trace (robs: 4096 raw ADC samples at 2 GS/s over the "
+                    help="after each run read the readout trace (robs: 1024 x --adc-batch raw ADC samples at --adc-fs over the "
                          "program's readout window) and write all runs + their mean to CSV (needs a loopback cable)")
     ap.add_argument("--capture2", metavar="CSV",
                     help="with --capture: also read robs(1), the build's capture_adcs ADC (e.g. a second loopback "
                          "cable), over the same window, to this CSV (same format)")
+    ap.add_argument("--qick-status", action="store_true",
+                    help="QICK builds with bridge status: clear the flags before each run, read them after, and report "
+                         "any late or dropped pulse (only for bitstreams that have the status register)")
     ap.add_argument("--settle", type=float, default=0.002,
                     help="seconds to wait after DONE before reading the trace (scheduled pulses still playing)")
     a = ap.parse_args()
+    set_adc(a.adc_batch, a.adc_fs)
 
     if os.geteuid() != 0:
         sys.exit("run as root: sudo -E /usr/local/share/pynq-venv/bin/python3 bringup.py ...")
@@ -347,10 +377,21 @@ def main():
     elif a.bin:
         image = Path(a.bin).read_bytes()
     i, traces, traces2 = 0, [], []
+    status_runs, status_any = 0, 0
     try:
         while True:
+            if a.qick_status:
+                win.write32(HOST_CTRL + HOST_QICK_CLEAR, 0x3F)
+                win.write32(HOST_CTRL + HOST_QICK_CLEAR, 0)
             run_core(win, image, syms, a.wait or a.repeat != 1 or bool(a.capture), a.timeout)
             i += 1
+            if a.qick_status and image is not None:
+                time.sleep(a.settle)
+                st = win.read32(HOST_CTRL + HOST_QICK_STATUS) & 0x3F
+                status_any |= st
+                status_runs += st != 0
+                if st:
+                    log(f"run {i}: pulse status {qick_status_text(st)}")
             if a.capture and image is not None:
                 time.sleep(a.settle)                # DONE = last command issued; the queued pulses play later
                 traces.append(read_robs(win))
@@ -363,10 +404,14 @@ def main():
         pass
     if a.repeat != 1:
         log(f"ran the program {i} times")
+    if a.qick_status:
+        log(f"pulse status over {i} runs: {status_runs} with a flag set ({qick_status_text(status_any)})")
     meta = {
         "program": a.elf or a.bin, "bitstream": a.bit, "envelopes": " ".join(a.env) or "none",
         "runs": len(traces), "adc_fs_hz": ADC_FS_HZ, "dac_nyquist": a.dac_nyquist,
         "time": time.strftime("%Y-%m-%d %H:%M:%S")}
+    if a.qick_status:
+        meta["pulse_status"] = f"{status_runs} of {i} runs flagged ({qick_status_text(status_any)})"
     if traces:
         write_capture(a.capture, traces, meta)
     if traces2:

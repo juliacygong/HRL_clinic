@@ -22,6 +22,7 @@ pulse and carrier phase against the generator's first pulse; plus gen 1 against 
 RISC-Q from its two raw captures, QICK from its two decimated readouts, which both record every run).
 """
 import glob
+import os
 import sys
 from pathlib import Path
 
@@ -36,6 +37,7 @@ from plot_compare import read_riscq
 
 D, out = sys.argv[1:3]
 NRUNS = int(sys.argv[3]) if len(sys.argv) > 3 else 10**9   # optional: plot only the first N runs per ADC
+IQ = os.environ.get("IQ") == "1"   # plot |IQ| (downconverted magnitude) instead of the raw signal
 runs = lambda n: "1 run" if n == 1 else f"average of {n} runs"
 RQ, TP = "tab:blue", "tab:orange"
 FS_MR = 2457.6   # MS/s, QICK readout's full rate (fs, decimation 1)
@@ -155,7 +157,7 @@ lines = [f"runs averaged per ADC: {nR[0]} for both designs (QICK ran twice as ma
 
 # ---- overlay: one average per design per ADC ----
 fig = plt.figure(figsize=(15, 11))
-gs = GridSpec(4, 3, height_ratios=[1.4, 1, 1.4, 1], hspace=.55, wspace=.14, left=.055, right=.985, top=.87, bottom=.055)
+gs = GridSpec(4, 3, height_ratios=[1.4, 1, 1.4, 1], hspace=.55, wspace=.14, left=.055, right=.985, top=.855 if IQ else .87, bottom=.055)
 for row, g in enumerate(GENS):
     s, L = g["const"]; t, tq = R[row][0], Q[row][0]
     tr, tp = t - dr, tq - dq
@@ -163,22 +165,24 @@ for row, g in enumerate(GENS):
     yr = avR[row][0] / np.median(envR[row][plat(tr)])
     yq = avQ[row][0] / np.median(envQ[row][plat(tp)])
     w = plat(tp); yq = yq * np.sign(np.sum(yq[w] * np.interp(tp[w], tr, yr)))   # QICK's x vs -x, against RISC-Q
+    if IQ:
+        yr = envR[row] / np.median(envR[row][plat(tr)]); yq = envQ[row] / np.median(envQ[row][plat(tp)])
     a = fig.add_subplot(gs[2 * row, :])
     for k, lo, _ in g["zooms"]:
         a.axvspan(lo / 1000, (lo + W) / 1000, color="0.85", lw=0, zorder=0)
         a.text((lo + W / 2) / 1000, 1.17, k, ha="center", va="center", fontsize=10.5, fontweight="bold")
     a.plot(tr / 1000, yr, color=RQ, lw=.9, label=f"RISC-Q (raw ADC, 2 GS/s), {runs(nR[row])}")
     a.plot(tp / 1000, yq, color=TP, lw=.6, label=f"QICK tProc v2 (raw MR buffer, 2.46 GS/s), {runs(nQ[row])}")
-    a.set_xlim(-.05, 1.9); a.set_ylim(-1.15, 1.3); a.set_xticks(np.arange(0, 1.91, .25))
+    a.set_xlim(-.05, 1.9); a.set_ylim((-.05, 1.3) if IQ else (-1.15, 1.3)); a.set_xticks(np.arange(0, 1.91, .25))
     a.set_title(g["title"], loc="left", fontsize=12.5)
-    a.set_ylabel("signal (normalized to const)"); a.set_xlabel("program time (us)")
+    a.set_ylabel("|IQ| (normalized to const)" if IQ else "signal (normalized to const)"); a.set_xlabel("program time (us)")
     a.legend(loc="upper right" if row == 0 else "lower right", bbox_to_anchor=None if row == 0 else (1, 1), ncol=1 if row == 0 else 2, framealpha=.95, fontsize=9 if row == 0 else 8.5)
     for j, (k, lo, nm) in enumerate(g["zooms"]):
         z = fig.add_subplot(gs[2 * row + 1, j])
         z.plot(tr, yr, color=RQ, lw=2.2); z.plot(tp, yq, color=TP, lw=1.1)
-        z.set_xlim(lo, lo + W); z.set_ylim(-1.15, 1.15); z.set_title(f"{k}: {nm}", loc="left", fontsize=11)
+        z.set_xlim(lo, lo + W); z.set_ylim((-.05, 1.15) if IQ else (-1.15, 1.15)); z.set_title(f"{k}: {nm}", loc="left", fontsize=11)
         z.set_xlabel("program time (ns)")
-        if j == 0: z.set_ylabel("signal (normalized)")
+        if j == 0: z.set_ylabel("|IQ| (normalized)" if IQ else "signal (normalized)")
         else: z.set_yticklabels([])
 jr, jq = max(v[1] for v in avR), max(v[1] for v in avQ)
 fig.suptitle("Two-generator MultiPulseProgram on the ZCU216 board: RISC-Q vs QICK tProc v2, both generators in every run",
@@ -192,7 +196,7 @@ fig.text(.055, .955, va="top", fontsize=10, color="0.3", s=
          f"(its raw buffer records one ADC per run,\nso QICK ran {2 * nQ[0]} times, alternating ADCs). No phase fitted. "
          f"Each run is shifted onto its own const start before averaging; the run-to-run spread of the const start was\nRISC-Q {jr:.2f} ns, "
          f"QICK {jq:.1f} ns. Each design shifted by its own measured delay (RISC-Q {dr:.1f} ns, QICK {dq:.1f} ns), DC offset removed, "
-         f"and normalized to its const pulse.")
+         f"and normalized to its const pulse." + ("\nShown as |IQ|: each average downconverted at its generator's frequency (two one-carrier-period boxcar filters), magnitude only." if IQ else ""))
 fig.savefig(out, dpi=170); plt.close(fig)
 
 # ---- printed summary, per pulse, per run ----

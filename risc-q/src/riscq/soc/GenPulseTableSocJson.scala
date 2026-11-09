@@ -18,8 +18,10 @@ import riscq.riscv.RiscqParam
  *
  * `qick` (with `vivado`) builds the QICK gen_v6 drive variant (`PulseTableSoc.qickGen`); its config must
  * give each gen its own DAC, e.g. software/configs/zcu216-qick-1q.json. `genFreq=<Hz>` sets the gens' DAC
- * fabric clock (QickGenParams.genFreqHz, default the 500 MHz dsp rate); it must match the BD flow's
- * RISCQ_GEN_FREQ.
+ * fabric clock (QickGenParams.genFreqHz, default the config's dsp rate); it must match the BD flow's
+ * RISCQ_GEN_FREQ. Optional config keys "adc_batch" (4 or 8, default 4) and "dsp_freq_hz" (default 500 MHz) set the
+ * ADC lanes per dsp cycle and the dsp clock (FREQ_HZ of dspClk, QICK nsamp scaling); build-riscvsoc-bd.sh reads
+ * the same keys (plus "gen_freq_hz") for the block design.
  */
 object GenPulseTableSocJson extends App {
   require(args.length >= 2 && args.length <= 5,
@@ -35,10 +37,18 @@ object GenPulseTableSocJson extends App {
   def boolOr(key: String, default: Boolean): Boolean = cfg.obj.get(key).map(_.bool).getOrElse(default)
 
   // Fixed by architecture — the JSON may state them, but they are asserted, never plumbed.
-  val fixed = Map("batch_size" -> 16, "adc_batch" -> 4, "data_width" -> 16,
-    "readout_max_win_log2" -> 14, "readout_acc_width" -> 32)
+  val fixed = Map("batch_size" -> 16, "data_width" -> 16, "readout_acc_width" -> 32)
   for ((key, value) <- fixed if cfg.obj.contains(key))
     require(int(key) == value, s"$key is fixed by architecture at $value, got ${int(key)}")
+
+  // ADC lanes per dsp cycle and the dsp clock: 4 at 500 MHz (2 GS/s) unless the config says otherwise — the
+  // QICK-clock build (zcu216-qick-1q-2loop-qickclk.json) takes 8 at 307.2 MHz (QICK's 2457.6 MS/s ADC).
+  // The decoder window bound follows adc_batch (14 at 4, 13 at 8), so a stated readout_max_win_log2 must match.
+  val adcBatch  = intOr("adc_batch", 4)
+  val dspFreqHz = cfg.obj.get("dsp_freq_hz").map(_.num).getOrElse(500e6)
+  if (cfg.obj.contains("readout_max_win_log2"))
+    require(int("readout_max_win_log2") == 14 - (log2Up(adcBatch) - 2),
+      s"readout_max_win_log2 follows adc_batch ($adcBatch): expected ${14 - (log2Up(adcBatch) - 2)}")
 
   val qubitNum = int("qubit_num")
 
@@ -92,9 +102,22 @@ object GenPulseTableSocJson extends App {
     // its JSON so the lever state is part of the recorded build geometry (soc-fmax R5).
     adcPipe           = intOr("adc_pipe", 3),
     captureAdcs   = captureAdcs,
+    adcBatch      = adcBatch,
+    dspFreqHz     = dspFreqHz,
     vivado        = vivadoMode,
-    qickGen       = if (qickMode) Some(genFreqHz.foldLeft(riscq.soc.qick.QickGenParams())((q, f) => q.copy(genFreqHz = f)))
-                    else None)
+    qickGen       = if (qickMode) Some(qickParams) else None)
+
+  // QICK gens: genFreq= (else the dsp clock) and the config's dsp clock, so nsamp = round(dur × gen/dsp). When
+  // the two differ, the bridge's leadTime (gen_v6's 32-cycle accept → output latency, counted in dsp cycles)
+  // is rescaled to the same wall-clock time: round(32 × dsp/gen) (16 at 307.2 / 599.04 MHz), so a pulse still
+  // leaves the DAC at its startTime instead of ~50 ns early. At the default (gen = dsp = 500 MHz) both are as before.
+  def qickParams = {
+    val q0  = riscq.soc.qick.QickGenParams()
+    val gen = genFreqHz.getOrElse(dspFreqHz)
+    if (gen == dspFreqHz) q0.copy(genFreqHz = gen, dspFreqHz = dspFreqHz)
+    else q0.copy(genFreqHz = gen, dspFreqHz = dspFreqHz,
+      bridge = q0.bridge.copy(leadTime = scala.math.round(q0.bridge.leadTime * dspFreqHz / gen).toInt))
+  }
 
   // vivado mode: LUT6 packing + the companion ClockInterface.v BUFG wrapper, matching GenPulseTableSocVivado.
   val spinal = SpinalConfig(mode = Verilog, targetDirectory = dir, romReuse = true)

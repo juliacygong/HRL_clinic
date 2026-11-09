@@ -34,6 +34,12 @@ set QICK_FW       [file normalize $SCRIPT_DIR/../../../firmware]
 if {[info exists ::env(RISCQ_QICK)]}          { set QICK          $::env(RISCQ_QICK) }
 if {[info exists ::env(RISCQ_QICK_FW)]}       { set QICK_FW       $::env(RISCQ_QICK_FW) }
 if {[info exists ::env(RISCQ_GEN_FREQ)]}      { set GEN_FREQ      $::env(RISCQ_GEN_FREQ) }
+# ADC lanes per dsp cycle (RFDC ADC samples per AXIS word, = the RTL's adcBatch): the ADCs sample at
+# ADC_BATCH x DSP_FREQ. Default 4 x 500 MHz = 2 GS/s; the QICK-clock build takes 8 x 307.2 MHz = 2457.6 MS/s
+# (rfdc-config.tcl then retunes the ADC tiles to QICK's 245.76 MHz reference).
+set ADC_BATCH     4
+if {[info exists ::env(RISCQ_ADC_BATCH)]}     { set ADC_BATCH     $::env(RISCQ_ADC_BATCH) }
+set ADC_FS        [expr {$ADC_BATCH * $DSP_FREQ}]
 if {$QICK && ![file exists $QICK_FW/ip/axis_signal_gen_v6]} {
   error "RISCQ_QICK=1 but no QICK IP under $QICK_FW/ip — set RISCQ_QICK_FW to the QICK firmware dir"
 }
@@ -55,6 +61,7 @@ set PRJ         [regsub -all {[^A-Za-z0-9_]} $PROJ_NAME _]
 
 puts "\[config\] top=$TOP_MODULE part=$PART dsp=${DSP_FREQ}Hz host=${HOST_FREQ}Hz  synth=$RUN_SYNTH impl=$RUN_IMPL bit=$RUN_BITSTREAM"
 if {$QICK} { puts "\[config\] QICK gen_v6 variant: gen=${GEN_FREQ}Hz  qick_fw=$QICK_FW" }
+puts "\[config\] ADCs: ${ADC_BATCH} lanes x ${DSP_FREQ}Hz = ${ADC_FS} S/s"
 puts "\[config\] rtl=$SOURCE_PATH  build=$BUILD_DIR"
 
 if {![file exists $SOURCE_PATH/$TOP_MODULE.v]} {

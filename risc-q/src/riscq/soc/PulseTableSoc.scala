@@ -82,15 +82,25 @@ case class PulseTableSoc(
     // over the same readout window as robs(0), with no core reading them — e.g. a second loopback cable,
     // so one run captures two generators on two DACs. Nil ⇒ one robs, RTL unchanged.
     captureAdcs: Seq[Int] = Nil,
+    // ADC samples per dsp cycle (the RFDC ADC AXIS word, real lanes) and the dsp clock. Defaults: 4 lanes at
+    // 500 MHz = 2 GS/s. The QICK-clock build (software/configs/zcu216-qick-1q-2loop-qickclk.json) takes 8
+    // lanes at 307.2 MHz = QICK's 2457.6 MS/s ADC, the dsp domain = QICK's readout fabric clock. Must be a
+    // power of two (demod carrier / decoder); the decoder's no-overflow window shrinks to keep
+    // 2^readoutMaxWinLog2 × adcBatch samples within the 32-bit accumulator.
+    adcBatch: Int = 4,
+    dspFreqHz: Double = 500e6,
     // QICK signal generator in place of the native gate/readout drive channels: every core's gate and
     // readout-drive RF windows feed WaveWordBridge → sg_translator → axis_signal_gen_v6 (BlackBoxes of the
     // QICK IP). Each gen adds host-side ports `qickGen{c}_{gate,ro}_{s_axi,s0_axis}` (hostClk) for its
     // envelope table. None ⇒ native channels and no extra ports (RTL unchanged).
     qickGen: Option[QickGenParams] = None,
-) extends Zcu216Top(dacNum = dacNum, adcNum = adcNum, dacBatch = 16, adcBatch = 4, dataWidth = 16, vivado = vivado) {
+) extends Zcu216Top(dacNum = dacNum, adcNum = adcNum, dacBatch = 16, adcBatch = adcBatch, dataWidth = 16,
+    vivado = vivado, dspFreqHz = dspFreqHz.toLong) {
+  require(isPow2(adcBatch) && adcBatch >= 4 && adcBatch <= 8, s"adcBatch must be 4 or 8, got $adcBatch")
   val N        = 16    // DAC drive batch
-  val adcBatch = 4
   val w        = 16
+  // decoder no-overflow bound in batches: 2^14 at adcBatch 4, 2^13 at 8 (same 2^16-sample bound)
+  val readoutMaxWinLog2 = 14 - (log2Up(adcBatch) - 2)
   val envWidth = N * 2 * w           // 512-bit complex pulse-envelope line
   val demodEnvFull = adcBatch * 2 * w             // full demod-carrier envelope line (128 at adcBatch 4)
   val readoutEnvWidth = envWidth / readoutInterp  // interpolated readout-drive envelope line (32 at 16)
@@ -187,7 +197,7 @@ case class PulseTableSoc(
     val riscqCores = List.tabulate(qubitNum)(i =>
       RiscqRfWithPulseTableFiber(
         plugins = cp.plugins(), dspCd = dspCd, hostCd = hostCd, riscqCd = riscqCd,
-        time = coreTimes(i), batchSize = N, dataWidth = w, adcBatch = adcBatch,
+        time = coreTimes(i), batchSize = N, dataWidth = w, adcBatch = adcBatch, readoutMaxWinLog2 = readoutMaxWinLog2,
         envDepth = envDepth, readoutInterp = readoutInterp, gateInterp = gateInterp, demodInterp = demodInterp,
         linkPipe = linkPipe, withTestTap = withTest, memDepth = memDepth, gatePulseNum = gatePulseNum,
         queueDepth = queueDepth, qickGen = qickGen, genCd = genCd))
@@ -341,10 +351,28 @@ case class PulseTableSoc(
   val timeOffset = Reg(UInt(64 bit)) init 0
   riscqArea.timeOffset := dspCd(BufferCC(timeOffset))
 
+  // QICK bridge status: 3 sticky bits per gen (0 dropOut, 1 dropSched, 2 late), gate then readout per core, so
+  // core c's gate flags sit at bits 6c..6c+2 and its readout flags at 6c+3..6c+5 (the first 5 cores fit). The host
+  // reads them at 0x48 and clears them with a level mask at 0x4C (write the bits, then write 0). Slow sticky
+  // levels, so a plain synchronizer per bit is enough in each direction.
+  val qickStatusBits = riscqArea.riscqCores.flatMap(_.qickStatus).take(10)
+  val qickStatusHost = Bits(32 bits)
+  val qickClearHost  = Reg(Bits(32 bits)) init 0
+  qickStatusHost := 0
+  if (qickStatusBits.nonEmpty) {
+    val cat = Cat(qickStatusBits)   // Cat: first element at the LSB
+    qickStatusHost(0, cat.getWidth bits) := BufferCC(cat, init = B(0, cat.getWidth bits))
+    val clearDsp = dspCd(BufferCC(qickClearHost, init = B(0, 32 bits)))
+    for ((clr, i) <- riscqArea.riscqCores.flatMap(_.qickClear).take(10).zipWithIndex) clr := clearDsp(3 * i, 3 bits)
+  }
+  for (clr <- riscqArea.riscqCores.flatMap(_.qickClear).drop(10)) clr := 0
+
   val hostCtrlDriver = MemMapDriverFiber(addressWidth = 10, dataWidth = 32, driveProc = { factory =>
     factory.drive(riscqResetHostCd, 0)
     factory.write(timeOffset(0, 32 bits), 64)
     factory.write(timeOffset(32, 32 bits), 68)
+    factory.read(qickStatusHost, 0x48)
+    factory.write(qickClearHost, 0x4C)
   })
   hostCtrlDriver.up.setUpConnection(a = StreamPipe.FULL, d = StreamPipe.FULL)
   hostCtrlDriver.up at SizeMapping(map.hostCtrlBase, map.regionSize) of hostBus

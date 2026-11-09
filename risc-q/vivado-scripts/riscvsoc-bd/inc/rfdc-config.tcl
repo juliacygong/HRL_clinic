@@ -303,3 +303,25 @@ if {$QICK && $GEN_FREQ != $DSP_FREQ} {
   }
   set_property -dict $_cfg $RFDC_TARGET
 }
+
+# ADCs at a rate other than the native 2 GS/s (ADC_FS = ADC_BATCH x DSP_FREQ, config.tcl) — the QICK-clock
+# build: 8 lanes x 307.2 MHz = 2457.6 MS/s, QICK's ZCU216 ADC rate (firmware/projects/qick_tprocv2_216_standard
+# ADC2: 2.4576 GS/s, 8 samples per 307.2 MHz word, PLL from 245.76 MHz). Every ADC tile is retuned, keeping
+# RISC-Q's distribution layout (tile 2's PLL makes the sample clock and distributes it; tiles 0/1/3 take it
+# directly, PLL off, refclk = the sample clock). The PLL reference is QICK's 245.76 MHz, which the board's
+# adc_clk must then carry (bd-finalize.tcl times it; board-bringup/LMK04828_qickclk_*.txt sets ADC_REFCLK).
+# The ADC AXIS words (ADC_BATCH samples) stay on dspClk, so the fabric clock is DSP_FREQ, synchronous with the
+# dsp domain as before. At the default 4 x 500 MHz the tiles above are already right.
+if {$ADC_FS != 2000000000} {
+  set _ghz [format %.5f [expr {$ADC_FS / 1e9}]]
+  set _cfg [list CONFIG.ADC2_PLL_Enable {true} CONFIG.ADC2_Refclk_Freq {245.760} CONFIG.ADC2_Sampling_Rate $_ghz]
+  foreach t {0 1 3} {
+    lappend _cfg CONFIG.ADC${t}_Sampling_Rate $_ghz CONFIG.ADC${t}_Refclk_Freq [format %.3f [expr {$ADC_FS / 1e6}]] \
+      CONFIG.ADC${t}_Clock_Source {2}
+  }
+  for {set t 0} {$t < 4} {incr t} {
+    for {set s 0} {$s < 4} {incr s} { lappend _cfg CONFIG.ADC_Data_Width${t}${s} $ADC_BATCH }
+  }
+  set_property -dict $_cfg $RFDC_TARGET
+  puts "\[rfdc-config\] ADCs retuned: ${_ghz} GS/s, ${ADC_BATCH} samples/word, fabric [get_property CONFIG.ADC2_Fabric_Freq $RFDC_TARGET] MHz, ref 245.76 MHz"
+}
