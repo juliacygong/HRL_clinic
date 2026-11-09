@@ -201,6 +201,10 @@ class SocMap:
     RF_PHASE_OFFSET = 0xC           # virtual-Z phase added to the generator's phase input, code at data[31:16]
     RF_SLOT_STRIDE = 0x10           # slot i at (i+1)*0x10: +0 phase, +4 amp, +8 env, +12 dur
     RF_START_TIME = 0x4100          # full 32-bit batch time (low bits)
+    RF_SLOT_CONF = 0x4200           # QICK channels: slot i's sg_translator conf at +4i
+    RF_SLOT_FREQ = 0x4300           # QICK channels: slot i's 32-bit freq at +4i
+    RF_FIRE_AT = 0x4400             # QICK channels: write start time to +4i = set it and fire slot i
+    RF_FIRE_SLOT = 0x4480           # QICK channels: write anything to +4i = fire slot i (auto-advanced start)
 
     # ── host control block (offsets from host_ctrl; PulseTableSoc hostCtrlDriver) ──
     HOST_RESET = 0x0                # write 1 = assert (power-up state), 0 = release
@@ -377,6 +381,10 @@ class SocMap:
             ("RQ_DC_OFFSET", self.RF_DC_OFFSET),
             ("RQ_PHASE_OFFSET", self.RF_PHASE_OFFSET),
             ("RQ_SLOT_STRIDE", self.RF_SLOT_STRIDE), ("RQ_START_TIME", self.RF_START_TIME),
+            # QICK drive channels: per-slot conf / freq tables (QickGenChannel), one word per slot
+            ("RQ_SLOT_CONF", self.RF_SLOT_CONF), ("RQ_SLOT_FREQ", self.RF_SLOT_FREQ),
+            # QICK drive channels: one-store fires (PulseParamBuffer fireAt / fireSlot windows)
+            ("RQ_FIRE_AT", self.RF_FIRE_AT), ("RQ_FIRE_SLOT", self.RF_FIRE_SLOT),
             ("RQ_GATE_PULSE_NUM", p.gate_pulse_num), ("RQ_ENV_DEPTH", p.env_depth),
             ("RQ_LEAD", LEAD), ("RQ_RO_LEAD", READOUT_LEAD),
             ("RQ_RO_MAX_WIN", 1 << READOUT_MAX_WIN_LOG2),

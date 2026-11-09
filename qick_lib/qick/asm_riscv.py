@@ -7,7 +7,8 @@ import numpy as np
 from .asm_v2 import AcquireProgramV2, AveragerProgramV2
 from .asm_v2_riscv import (RV_MACROS, RvMacro, RvAsmInst, RvWriteReg, REF_REG, CTRL_REG, CTRL_TIME,
                            EXIT_LABEL, RF_FIRE, RF_FREQ, RF_PHASE_OFFSET, RF_SLOT_STRIDE, RF_START_TIME,
-                           init_rv, rv_data_section)
+                           init_rv, slot_init_rv, rv_data_section, drop_redundant_li,
+                           drop_dead_wmem_loads, optimize_rv)
 from .riscq_config import asm_text, words
 from .riscv_toolchain import build_image
 
@@ -30,6 +31,10 @@ class RvMixin:
     def _init_instructions(self):
         super()._init_instructions()
         self.rv_lines = []
+        self._rv_slots = None   # wave_slots cache
+        self._rv_dyn = {}       # gen ch -> rotating cache slots (more waveforms than slots)
+        self._rv_dyn_next = {}  # gen ch -> next rotating slot
+        self._wtrack = None     # read_wmem -> write_wmem change tracking
 
     def _add_rv(self, line):
         self.rv_lines.append(line)
@@ -59,14 +64,15 @@ class RvMixin:
         RvWriteReg(dst=name, src=val).translate(self)
 
     def _asm_lines(self):
-        return ['.text', '.globl main', 'main:',
+        code = ['.text', '.globl main', 'main:',
                 f'addi sp, sp, -{STACK_FRAME}', f'sw ra, {STACK_FRAME - 4}(sp)',
+                # one-time setup before the start time is read, so it does not use up the initial delay
+                *init_rv(self), *slot_init_rv(self),
                 f'li {CTRL_REG}, {CTRL_TIME}', f'lw {REF_REG}, 0({CTRL_REG})',
-                *init_rv(self),
                 *self.rv_lines,
                 f'{EXIT_LABEL}:', f'lw ra, {STACK_FRAME - 4}(sp)', f'addi sp, sp, {STACK_FRAME}',
-                'li a0, 0', 'ret',
-                *rv_data_section(self)]
+                'li a0, 0', 'ret']
+        return [*optimize_rv(code), *rv_data_section(self)]
 
     def _asm_text(self):
         return asm_text(self._asm_lines(), self.soccfg.equs)
